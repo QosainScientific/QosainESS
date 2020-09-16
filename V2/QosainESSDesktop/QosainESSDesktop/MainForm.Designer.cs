@@ -37,26 +37,7 @@ namespace QosainESSDesktop
             this.windowedModeB = new MagneticPendulum.Button2();
             this.closeB = new MagneticPendulum.Button2();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label18 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label26 = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
-            this.label19 = new System.Windows.Forms.Label();
-            this.label23 = new System.Windows.Forms.Label();
-            this.label14 = new System.Windows.Forms.Label();
-            this.label15 = new System.Windows.Forms.Label();
-            this.enableVolumeLimitB = new FivePointNine.Windows.Controls.FlatCheckBox();
-            this.label22 = new System.Windows.Forms.Label();
-            this.label16 = new System.Windows.Forms.Label();
-            this.enableTimeLimit = new FivePointNine.Windows.Controls.FlatCheckBox();
-            this.label27 = new System.Windows.Forms.Label();
-            this.label20 = new System.Windows.Forms.Label();
-            this.label21 = new System.Windows.Forms.Label();
-            this.label30 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.spManualP = new System.Windows.Forms.Panel();
             this.label7 = new System.Windows.Forms.Label();
             this.spUpB = new System.Windows.Forms.Button();
@@ -64,16 +45,47 @@ namespace QosainESSDesktop
             this.spDownDownB = new System.Windows.Forms.Button();
             this.spTopB = new System.Windows.Forms.Button();
             this.spUpUpB = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.panel4 = new System.Windows.Forms.Panel();
-            this.label2 = new System.Windows.Forms.Label();
-            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.panel7 = new System.Windows.Forms.Panel();
             this.panel6 = new System.Windows.Forms.Panel();
+            this.rasterPad = new QosainESSDesktop._8DirectionButtonSet();
+            this.plainProgressBar1 = new QosainESSDesktop.PlainProgressBar();
+            this.rasterView1 = new QosainESSDesktop.RasterView();
             this.yCoordL = new System.Windows.Forms.Label();
             this.label28 = new System.Windows.Forms.Label();
             this.xCoordL = new System.Windows.Forms.Label();
             this.label29 = new System.Windows.Forms.Label();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.panel7 = new System.Windows.Forms.Panel();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.flowrateUS = new QosainESSDesktop.UnitChanger();
+            this.timeus = new QosainESSDesktop.UnitChanger();
+            this.volumeus = new QosainESSDesktop.UnitChanger();
+            this.speedus = new QosainESSDesktop.UnitChanger();
+            this.stepSizeUs = new QosainESSDesktop.UnitChanger();
+            this.heightus = new QosainESSDesktop.UnitChanger();
+            this.widthus = new QosainESSDesktop.UnitChanger();
+            this.syringeDiaUnitChanger = new QosainESSDesktop.UnitChanger();
+            this.rasterEnabledCB = new FivePointNine.Windows.Controls.FlatCheckBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.rasterSpeedTB = new QosainESSDesktop.ValueSavingQuantityBox();
+            this.syringeFlowRateTB = new QosainESSDesktop.ValueSavingQuantityBox();
+            this.syringeVolumeLimitTB = new QosainESSDesktop.ValueSavingQuantityBox();
+            this.rasterStepSizeTB = new QosainESSDesktop.ValueSavingQuantityBox();
+            this.syringeTimeLimitTB = new QosainESSDesktop.ValueSavingQuantityBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.syringeDiaTB = new QosainESSDesktop.ValueSavingQuantityBox();
+            this.rasterWidthTB = new QosainESSDesktop.ValueSavingQuantityBox();
+            this.rasterCoatsTB = new QosainESSDesktop.ValueSavingQuantityBox();
+            this.enableVolumeLimitB = new FivePointNine.Windows.Controls.FlatCheckBox();
+            this.label22 = new System.Windows.Forms.Label();
+            this.rasterHeightTB = new QosainESSDesktop.ValueSavingQuantityBox();
+            this.enableTimeLimit = new FivePointNine.Windows.Controls.FlatCheckBox();
+            this.label27 = new System.Windows.Forms.Label();
+            this.label20 = new System.Windows.Forms.Label();
+            this.label30 = new System.Windows.Forms.Label();
             this.xyStageStatusL = new System.Windows.Forms.Label();
             this.pumpStatusL = new System.Windows.Forms.Label();
             this.abortB = new System.Windows.Forms.Button();
@@ -81,33 +93,21 @@ namespace QosainESSDesktop
             this.coatB = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.minimizeB = new MagneticPendulum.Button2();
-            this.rasterEnabledCB = new FivePointNine.Windows.Controls.FlatCheckBox();
-            this.rasterPad = new QosainESSDesktop._8DirectionButtonSet();
-            this.plainProgressBar1 = new QosainESSDesktop.PlainProgressBar();
-            this.rasterView1 = new QosainESSDesktop.RasterView();
-            this.rasterSpeedTB = new QosainESSDesktop.TextSavingTextBox();
-            this.syringeFlowRateTB = new QosainESSDesktop.TextSavingTextBox();
-            this.syringeVolumeLimitTB = new QosainESSDesktop.TextSavingTextBox();
-            this.rasterStepSizeTB = new QosainESSDesktop.TextSavingTextBox();
-            this.syringeTimeLimitTB = new QosainESSDesktop.TextSavingTextBox();
-            this.syringeDiaTB = new QosainESSDesktop.TextSavingTextBox();
-            this.rasterWidthTB = new QosainESSDesktop.TextSavingTextBox();
-            this.rasterCoatsTB = new QosainESSDesktop.TextSavingTextBox();
-            this.rasterHeightTB = new QosainESSDesktop.TextSavingTextBox();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.spManualP.SuspendLayout();
+            this.panel6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
             this.panel7.SuspendLayout();
-            this.panel6.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel2
@@ -200,286 +200,34 @@ namespace QosainESSDesktop
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(150)))), ((int)(((byte)(155)))), ((int)(((byte)(160)))));
+            this.splitContainer1.Panel1.Controls.Add(this.label2);
             this.splitContainer1.Panel1.Controls.Add(this.spManualP);
             this.splitContainer1.Panel1.Controls.Add(this.panel6);
             this.splitContainer1.Panel1.Controls.Add(this.panel4);
-            this.splitContainer1.Panel1.Controls.Add(this.label1);
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(172)))), ((int)(((byte)(164)))), ((int)(((byte)(164)))));
-            this.splitContainer1.Panel2.Controls.Add(this.label2);
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
+            this.splitContainer1.Panel2.Controls.Add(this.label1);
             this.splitContainer1.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer1_Panel2_Paint);
             this.splitContainer1.Size = new System.Drawing.Size(1101, 759);
-            this.splitContainer1.SplitterDistance = 475;
+            this.splitContainer1.SplitterDistance = 474;
             this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 24;
             // 
-            // panel1
+            // label2
             // 
-            this.panel1.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.panel1.Controls.Add(this.rasterEnabledCB);
-            this.panel1.Controls.Add(this.label11);
-            this.panel1.Controls.Add(this.label4);
-            this.panel1.Controls.Add(this.label18);
-            this.panel1.Controls.Add(this.label9);
-            this.panel1.Controls.Add(this.rasterSpeedTB);
-            this.panel1.Controls.Add(this.syringeFlowRateTB);
-            this.panel1.Controls.Add(this.label10);
-            this.panel1.Controls.Add(this.syringeVolumeLimitTB);
-            this.panel1.Controls.Add(this.rasterStepSizeTB);
-            this.panel1.Controls.Add(this.syringeTimeLimitTB);
-            this.panel1.Controls.Add(this.label26);
-            this.panel1.Controls.Add(this.label13);
-            this.panel1.Controls.Add(this.label19);
-            this.panel1.Controls.Add(this.syringeDiaTB);
-            this.panel1.Controls.Add(this.label23);
-            this.panel1.Controls.Add(this.label14);
-            this.panel1.Controls.Add(this.rasterWidthTB);
-            this.panel1.Controls.Add(this.label15);
-            this.panel1.Controls.Add(this.rasterCoatsTB);
-            this.panel1.Controls.Add(this.enableVolumeLimitB);
-            this.panel1.Controls.Add(this.label22);
-            this.panel1.Controls.Add(this.label16);
-            this.panel1.Controls.Add(this.rasterHeightTB);
-            this.panel1.Controls.Add(this.enableTimeLimit);
-            this.panel1.Controls.Add(this.label27);
-            this.panel1.Controls.Add(this.label20);
-            this.panel1.Controls.Add(this.label21);
-            this.panel1.Controls.Add(this.label30);
-            this.panel1.Location = new System.Drawing.Point(3, -3);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(594, 465);
-            this.panel1.TabIndex = 4;
-            // 
-            // label11
-            // 
-            this.label11.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label11.Location = new System.Drawing.Point(97, 45);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(85, 54);
-            this.label11.TabIndex = 0;
-            this.label11.Text = "Syringe Pump";
-            this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label4
-            // 
-            this.label4.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(71, 189);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(137, 68);
-            this.label4.TabIndex = 0;
-            this.label4.Text = "Raster Movement";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label18
-            // 
-            this.label18.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label18.AutoSize = true;
-            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.Location = new System.Drawing.Point(311, 167);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(50, 20);
-            this.label18.TabIndex = 0;
-            this.label18.Text = "Width";
-            this.label18.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label9
-            // 
-            this.label9.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label9.AutoSize = true;
-            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(230, 79);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(131, 20);
-            this.label9.TabIndex = 0;
-            this.label9.Text = "Syringe Diameter";
-            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label10
-            // 
-            this.label10.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label10.AutoSize = true;
-            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label10.Location = new System.Drawing.Point(421, 80);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(35, 20);
-            this.label10.TabIndex = 0;
-            this.label10.Text = "mm";
-            this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label26
-            // 
-            this.label26.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label26.AutoSize = true;
-            this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label26.Location = new System.Drawing.Point(421, 285);
-            this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(47, 20);
-            this.label26.TabIndex = 0;
-            this.label26.Text = "mm/s";
-            this.label26.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label13
-            // 
-            this.label13.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label13.AutoSize = true;
-            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label13.Location = new System.Drawing.Point(280, 49);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(81, 20);
-            this.label13.TabIndex = 0;
-            this.label13.Text = "Flow Rate";
-            this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label19
-            // 
-            this.label19.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label19.AutoSize = true;
-            this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.Location = new System.Drawing.Point(421, 167);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(35, 20);
-            this.label19.TabIndex = 0;
-            this.label19.Text = "mm";
-            this.label19.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label23
-            // 
-            this.label23.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label23.AutoSize = true;
-            this.label23.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label23.Location = new System.Drawing.Point(421, 257);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(35, 20);
-            this.label23.TabIndex = 0;
-            this.label23.Text = "mm";
-            this.label23.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label14
-            // 
-            this.label14.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label14.AutoSize = true;
-            this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label14.Location = new System.Drawing.Point(421, 50);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(54, 20);
-            this.label14.TabIndex = 0;
-            this.label14.Text = "ml/min";
-            this.label14.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label15
-            // 
-            this.label15.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label15.AutoSize = true;
-            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label15.Location = new System.Drawing.Point(421, 387);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(65, 20);
-            this.label15.TabIndex = 0;
-            this.label15.Text = "minutes";
-            this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // enableVolumeLimitB
-            // 
-            this.enableVolumeLimitB.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.enableVolumeLimitB.CheckedColor = System.Drawing.Color.Black;
-            this.enableVolumeLimitB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.enableVolumeLimitB.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.enableVolumeLimitB.Location = new System.Drawing.Point(238, 356);
-            this.enableVolumeLimitB.Name = "enableVolumeLimitB";
-            this.enableVolumeLimitB.Size = new System.Drawing.Size(123, 24);
-            this.enableVolumeLimitB.TabIndex = 8;
-            this.enableVolumeLimitB.Text = "Volume Limit";
-            this.enableVolumeLimitB.UncheckedColor = System.Drawing.Color.DimGray;
-            // 
-            // label22
-            // 
-            this.label22.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label22.AutoSize = true;
-            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label22.Location = new System.Drawing.Point(283, 257);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(78, 20);
-            this.label22.TabIndex = 0;
-            this.label22.Text = "Step Size";
-            this.label22.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label16
-            // 
-            this.label16.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label16.AutoSize = true;
-            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label16.Location = new System.Drawing.Point(421, 357);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(25, 20);
-            this.label16.TabIndex = 0;
-            this.label16.Text = "ml";
-            this.label16.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // enableTimeLimit
-            // 
-            this.enableTimeLimit.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.enableTimeLimit.CheckedColor = System.Drawing.Color.Black;
-            this.enableTimeLimit.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.enableTimeLimit.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.enableTimeLimit.Location = new System.Drawing.Point(257, 386);
-            this.enableTimeLimit.Name = "enableTimeLimit";
-            this.enableTimeLimit.Size = new System.Drawing.Size(104, 24);
-            this.enableTimeLimit.TabIndex = 10;
-            this.enableTimeLimit.Text = "Time Limit";
-            this.enableTimeLimit.UncheckedColor = System.Drawing.Color.DimGray;
-            // 
-            // label27
-            // 
-            this.label27.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label27.AutoSize = true;
-            this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label27.Location = new System.Drawing.Point(305, 287);
-            this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(56, 20);
-            this.label27.TabIndex = 0;
-            this.label27.Text = "Speed";
-            this.label27.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label20
-            // 
-            this.label20.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label20.AutoSize = true;
-            this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label20.Location = new System.Drawing.Point(305, 197);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(56, 20);
-            this.label20.TabIndex = 0;
-            this.label20.Text = "Height";
-            this.label20.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label21
-            // 
-            this.label21.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label21.AutoSize = true;
-            this.label21.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label21.Location = new System.Drawing.Point(421, 197);
-            this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(35, 20);
-            this.label21.TabIndex = 0;
-            this.label21.Text = "mm";
-            this.label21.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label30
-            // 
-            this.label30.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label30.AutoSize = true;
-            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label30.Location = new System.Drawing.Point(235, 227);
-            this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(126, 20);
-            this.label30.TabIndex = 0;
-            this.label30.Text = "Number of coats";
-            this.label30.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(0, 23);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(473, 35);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "Manual Control";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // spManualP
             // 
@@ -591,80 +339,6 @@ namespace QosainESSDesktop
             this.spUpUpB.UseVisualStyleBackColor = false;
             this.spUpUpB.Click += new System.EventHandler(this.spUpUpB_Click);
             // 
-            // label1
-            // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(3, 23);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(464, 35);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Process Parameters";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // panel4
-            // 
-            this.panel4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(164)))));
-            this.panel4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.panel4.Location = new System.Drawing.Point(5, 686);
-            this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(469, 61);
-            this.panel4.TabIndex = 9;
-            this.panel4.Paint += new System.Windows.Forms.PaintEventHandler(this.panel4_Paint);
-            // 
-            // label2
-            // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(122, 14);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(405, 35);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "Manual Control";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.label2.Click += new System.EventHandler(this.label2_Click);
-            // 
-            // splitContainer2
-            // 
-            this.splitContainer2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer2.Location = new System.Drawing.Point(9, 62);
-            this.splitContainer2.Name = "splitContainer2";
-            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer2.Panel1
-            // 
-            this.splitContainer2.Panel1.Controls.Add(this.panel7);
-            // 
-            // splitContainer2.Panel2
-            // 
-            this.splitContainer2.Panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(187)))), ((int)(((byte)(186)))), ((int)(((byte)(169)))));
-            this.splitContainer2.Panel2.Controls.Add(this.xyStageStatusL);
-            this.splitContainer2.Panel2.Controls.Add(this.pumpStatusL);
-            this.splitContainer2.Panel2.Controls.Add(this.abortB);
-            this.splitContainer2.Panel2.Controls.Add(this.label24);
-            this.splitContainer2.Panel2.Controls.Add(this.coatB);
-            this.splitContainer2.Panel2.Controls.Add(this.label3);
-            this.splitContainer2.Panel2.Controls.Add(this.label17);
-            this.splitContainer2.Size = new System.Drawing.Size(600, 694);
-            this.splitContainer2.SplitterDistance = 462;
-            this.splitContainer2.SplitterWidth = 8;
-            this.splitContainer2.TabIndex = 8;
-            // 
-            // panel7
-            // 
-            this.panel7.Controls.Add(this.panel1);
-            this.panel7.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel7.Location = new System.Drawing.Point(0, 0);
-            this.panel7.Name = "panel7";
-            this.panel7.Size = new System.Drawing.Size(600, 462);
-            this.panel7.TabIndex = 8;
-            // 
             // panel6
             // 
             this.panel6.Anchor = System.Windows.Forms.AnchorStyles.None;
@@ -679,6 +353,34 @@ namespace QosainESSDesktop
             this.panel6.Name = "panel6";
             this.panel6.Size = new System.Drawing.Size(459, 332);
             this.panel6.TabIndex = 7;
+            // 
+            // rasterPad
+            // 
+            this.rasterPad.Location = new System.Drawing.Point(5, 5);
+            this.rasterPad.Name = "rasterPad";
+            this.rasterPad.Size = new System.Drawing.Size(200, 200);
+            this.rasterPad.TabIndex = 1;
+            this.rasterPad.OnButtonClick += new QosainESSDesktop._8DirectionButtonSet.ButtonClickHandler(this._8DirectionButtonSet1_OnButtonClick);
+            // 
+            // plainProgressBar1
+            // 
+            this.plainProgressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.plainProgressBar1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.plainProgressBar1.Location = new System.Drawing.Point(2, 251);
+            this.plainProgressBar1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.plainProgressBar1.Name = "plainProgressBar1";
+            this.plainProgressBar1.Size = new System.Drawing.Size(448, 76);
+            this.plainProgressBar1.TabIndex = 6;
+            this.plainProgressBar1.Visible = false;
+            // 
+            // rasterView1
+            // 
+            this.rasterView1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(162)))), ((int)(((byte)(154)))), ((int)(((byte)(154)))));
+            this.rasterView1.Location = new System.Drawing.Point(210, 5);
+            this.rasterView1.Name = "rasterView1";
+            this.rasterView1.Size = new System.Drawing.Size(240, 240);
+            this.rasterView1.TabIndex = 5;
             // 
             // yCoordL
             // 
@@ -724,12 +426,494 @@ namespace QosainESSDesktop
             this.label29.Text = "Y";
             this.label29.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // panel4
+            // 
+            this.panel4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(164)))));
+            this.panel4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.panel4.Location = new System.Drawing.Point(5, 686);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(468, 61);
+            this.panel4.TabIndex = 9;
+            this.panel4.Paint += new System.Windows.Forms.PaintEventHandler(this.panel4_Paint);
+            // 
+            // splitContainer2
+            // 
+            this.splitContainer2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer2.Location = new System.Drawing.Point(9, 62);
+            this.splitContainer2.Name = "splitContainer2";
+            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer2.Panel1
+            // 
+            this.splitContainer2.Panel1.Controls.Add(this.panel7);
+            // 
+            // splitContainer2.Panel2
+            // 
+            this.splitContainer2.Panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(187)))), ((int)(((byte)(186)))), ((int)(((byte)(169)))));
+            this.splitContainer2.Panel2.Controls.Add(this.xyStageStatusL);
+            this.splitContainer2.Panel2.Controls.Add(this.pumpStatusL);
+            this.splitContainer2.Panel2.Controls.Add(this.abortB);
+            this.splitContainer2.Panel2.Controls.Add(this.label24);
+            this.splitContainer2.Panel2.Controls.Add(this.coatB);
+            this.splitContainer2.Panel2.Controls.Add(this.label3);
+            this.splitContainer2.Panel2.Controls.Add(this.label17);
+            this.splitContainer2.Size = new System.Drawing.Size(599, 694);
+            this.splitContainer2.SplitterDistance = 461;
+            this.splitContainer2.SplitterWidth = 8;
+            this.splitContainer2.TabIndex = 8;
+            // 
+            // panel7
+            // 
+            this.panel7.Controls.Add(this.panel1);
+            this.panel7.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel7.Location = new System.Drawing.Point(0, 0);
+            this.panel7.Name = "panel7";
+            this.panel7.Size = new System.Drawing.Size(599, 461);
+            this.panel7.TabIndex = 8;
+            // 
+            // panel1
+            // 
+            this.panel1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.panel1.Controls.Add(this.flowrateUS);
+            this.panel1.Controls.Add(this.timeus);
+            this.panel1.Controls.Add(this.volumeus);
+            this.panel1.Controls.Add(this.speedus);
+            this.panel1.Controls.Add(this.stepSizeUs);
+            this.panel1.Controls.Add(this.heightus);
+            this.panel1.Controls.Add(this.widthus);
+            this.panel1.Controls.Add(this.syringeDiaUnitChanger);
+            this.panel1.Controls.Add(this.rasterEnabledCB);
+            this.panel1.Controls.Add(this.label11);
+            this.panel1.Controls.Add(this.label4);
+            this.panel1.Controls.Add(this.label18);
+            this.panel1.Controls.Add(this.label9);
+            this.panel1.Controls.Add(this.rasterSpeedTB);
+            this.panel1.Controls.Add(this.syringeFlowRateTB);
+            this.panel1.Controls.Add(this.syringeVolumeLimitTB);
+            this.panel1.Controls.Add(this.rasterStepSizeTB);
+            this.panel1.Controls.Add(this.syringeTimeLimitTB);
+            this.panel1.Controls.Add(this.label13);
+            this.panel1.Controls.Add(this.syringeDiaTB);
+            this.panel1.Controls.Add(this.rasterWidthTB);
+            this.panel1.Controls.Add(this.rasterCoatsTB);
+            this.panel1.Controls.Add(this.enableVolumeLimitB);
+            this.panel1.Controls.Add(this.label22);
+            this.panel1.Controls.Add(this.rasterHeightTB);
+            this.panel1.Controls.Add(this.enableTimeLimit);
+            this.panel1.Controls.Add(this.label27);
+            this.panel1.Controls.Add(this.label20);
+            this.panel1.Controls.Add(this.label30);
+            this.panel1.Location = new System.Drawing.Point(2, -4);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(594, 465);
+            this.panel1.TabIndex = 4;
+            // 
+            // flowrateUS
+            // 
+            this.flowrateUS.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.flowrateUS.FlatAppearance.BorderSize = 0;
+            this.flowrateUS.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.flowrateUS.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.flowrateUS.Location = new System.Drawing.Point(417, 45);
+            this.flowrateUS.Margin = new System.Windows.Forms.Padding(0);
+            this.flowrateUS.Name = "flowrateUS";
+            this.flowrateUS.Size = new System.Drawing.Size(75, 28);
+            this.flowrateUS.TabIndex = 11;
+            this.flowrateUS.TargetControl = null;
+            this.flowrateUS.Text = "--";
+            this.flowrateUS.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.flowrateUS.UseVisualStyleBackColor = true;
+            // 
+            // timeus
+            // 
+            this.timeus.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.timeus.FlatAppearance.BorderSize = 0;
+            this.timeus.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.timeus.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.timeus.Location = new System.Drawing.Point(418, 383);
+            this.timeus.Margin = new System.Windows.Forms.Padding(0);
+            this.timeus.Name = "timeus";
+            this.timeus.Size = new System.Drawing.Size(75, 28);
+            this.timeus.TabIndex = 11;
+            this.timeus.TargetControl = null;
+            this.timeus.Text = "--";
+            this.timeus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.timeus.UseVisualStyleBackColor = true;
+            // 
+            // volumeus
+            // 
+            this.volumeus.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.volumeus.FlatAppearance.BorderSize = 0;
+            this.volumeus.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.volumeus.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.volumeus.Location = new System.Drawing.Point(417, 353);
+            this.volumeus.Margin = new System.Windows.Forms.Padding(0);
+            this.volumeus.Name = "volumeus";
+            this.volumeus.Size = new System.Drawing.Size(75, 28);
+            this.volumeus.TabIndex = 11;
+            this.volumeus.TargetControl = null;
+            this.volumeus.Text = "--";
+            this.volumeus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.volumeus.UseVisualStyleBackColor = true;
+            // 
+            // speedus
+            // 
+            this.speedus.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.speedus.FlatAppearance.BorderSize = 0;
+            this.speedus.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.speedus.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.speedus.Location = new System.Drawing.Point(417, 283);
+            this.speedus.Margin = new System.Windows.Forms.Padding(0);
+            this.speedus.Name = "speedus";
+            this.speedus.Size = new System.Drawing.Size(75, 28);
+            this.speedus.TabIndex = 11;
+            this.speedus.TargetControl = null;
+            this.speedus.Text = "--";
+            this.speedus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.speedus.UseVisualStyleBackColor = true;
+            // 
+            // stepSizeUs
+            // 
+            this.stepSizeUs.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.stepSizeUs.FlatAppearance.BorderSize = 0;
+            this.stepSizeUs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.stepSizeUs.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.stepSizeUs.Location = new System.Drawing.Point(417, 253);
+            this.stepSizeUs.Margin = new System.Windows.Forms.Padding(0);
+            this.stepSizeUs.Name = "stepSizeUs";
+            this.stepSizeUs.Size = new System.Drawing.Size(75, 28);
+            this.stepSizeUs.TabIndex = 11;
+            this.stepSizeUs.TargetControl = null;
+            this.stepSizeUs.Text = "--";
+            this.stepSizeUs.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.stepSizeUs.UseVisualStyleBackColor = true;
+            // 
+            // heightus
+            // 
+            this.heightus.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.heightus.FlatAppearance.BorderSize = 0;
+            this.heightus.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.heightus.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.heightus.Location = new System.Drawing.Point(417, 193);
+            this.heightus.Margin = new System.Windows.Forms.Padding(0);
+            this.heightus.Name = "heightus";
+            this.heightus.Size = new System.Drawing.Size(75, 28);
+            this.heightus.TabIndex = 11;
+            this.heightus.TargetControl = null;
+            this.heightus.Text = "--";
+            this.heightus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.heightus.UseVisualStyleBackColor = true;
+            // 
+            // widthus
+            // 
+            this.widthus.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.widthus.FlatAppearance.BorderSize = 0;
+            this.widthus.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.widthus.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.widthus.Location = new System.Drawing.Point(417, 163);
+            this.widthus.Margin = new System.Windows.Forms.Padding(0);
+            this.widthus.Name = "widthus";
+            this.widthus.Size = new System.Drawing.Size(75, 28);
+            this.widthus.TabIndex = 11;
+            this.widthus.TargetControl = null;
+            this.widthus.Text = "--";
+            this.widthus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.widthus.UseVisualStyleBackColor = true;
+            // 
+            // syringeDiaUnitChanger
+            // 
+            this.syringeDiaUnitChanger.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.syringeDiaUnitChanger.FlatAppearance.BorderSize = 0;
+            this.syringeDiaUnitChanger.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.syringeDiaUnitChanger.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.syringeDiaUnitChanger.Location = new System.Drawing.Point(416, 75);
+            this.syringeDiaUnitChanger.Margin = new System.Windows.Forms.Padding(0);
+            this.syringeDiaUnitChanger.Name = "syringeDiaUnitChanger";
+            this.syringeDiaUnitChanger.Size = new System.Drawing.Size(75, 28);
+            this.syringeDiaUnitChanger.TabIndex = 11;
+            this.syringeDiaUnitChanger.TargetControl = null;
+            this.syringeDiaUnitChanger.Text = "--";
+            this.syringeDiaUnitChanger.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.syringeDiaUnitChanger.UseVisualStyleBackColor = true;
+            // 
+            // rasterEnabledCB
+            // 
+            this.rasterEnabledCB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.rasterEnabledCB.CheckedColor = System.Drawing.Color.Black;
+            this.rasterEnabledCB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rasterEnabledCB.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.rasterEnabledCB.Location = new System.Drawing.Point(345, 136);
+            this.rasterEnabledCB.Name = "rasterEnabledCB";
+            this.rasterEnabledCB.Size = new System.Drawing.Size(100, 24);
+            this.rasterEnabledCB.TabIndex = 10;
+            this.rasterEnabledCB.Text = "Enabled";
+            this.rasterEnabledCB.UncheckedColor = System.Drawing.Color.DimGray;
+            this.rasterEnabledCB.CheckedChanged += new System.EventHandler(this.rasterEnabledCB_CheckedChanged);
+            // 
+            // label11
+            // 
+            this.label11.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label11.Location = new System.Drawing.Point(96, 45);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(85, 54);
+            this.label11.TabIndex = 0;
+            this.label11.Text = "Syringe Pump";
+            this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label4
+            // 
+            this.label4.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(70, 189);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(137, 68);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "Raster Movement";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label18
+            // 
+            this.label18.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label18.AutoSize = true;
+            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label18.Location = new System.Drawing.Point(292, 167);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(50, 20);
+            this.label18.TabIndex = 0;
+            this.label18.Text = "Width";
+            this.label18.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label9
+            // 
+            this.label9.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.Location = new System.Drawing.Point(212, 79);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(131, 20);
+            this.label9.TabIndex = 0;
+            this.label9.Text = "Syringe Diameter";
+            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // rasterSpeedTB
+            // 
+            this.rasterSpeedTB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.rasterSpeedTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
+            this.rasterSpeedTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rasterSpeedTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rasterSpeedTB.Location = new System.Drawing.Point(344, 287);
+            this.rasterSpeedTB.Name = "rasterSpeedTB";
+            this.rasterSpeedTB.Size = new System.Drawing.Size(70, 19);
+            this.rasterSpeedTB.TabIndex = 6;
+            this.rasterSpeedTB.Text = "0";
+            this.rasterSpeedTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.rasterSpeedTB.TextChanged += new System.EventHandler(this.rasterParamTB_TextChanged);
+            // 
+            // syringeFlowRateTB
+            // 
+            this.syringeFlowRateTB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.syringeFlowRateTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
+            this.syringeFlowRateTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.syringeFlowRateTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.syringeFlowRateTB.Location = new System.Drawing.Point(344, 50);
+            this.syringeFlowRateTB.Name = "syringeFlowRateTB";
+            this.syringeFlowRateTB.Size = new System.Drawing.Size(70, 19);
+            this.syringeFlowRateTB.TabIndex = 0;
+            this.syringeFlowRateTB.Text = "0";
+            this.syringeFlowRateTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // syringeVolumeLimitTB
+            // 
+            this.syringeVolumeLimitTB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.syringeVolumeLimitTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
+            this.syringeVolumeLimitTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.syringeVolumeLimitTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.syringeVolumeLimitTB.Location = new System.Drawing.Point(344, 357);
+            this.syringeVolumeLimitTB.Name = "syringeVolumeLimitTB";
+            this.syringeVolumeLimitTB.Size = new System.Drawing.Size(70, 19);
+            this.syringeVolumeLimitTB.TabIndex = 7;
+            this.syringeVolumeLimitTB.Text = "0";
+            this.syringeVolumeLimitTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // rasterStepSizeTB
+            // 
+            this.rasterStepSizeTB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.rasterStepSizeTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
+            this.rasterStepSizeTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rasterStepSizeTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rasterStepSizeTB.Location = new System.Drawing.Point(344, 257);
+            this.rasterStepSizeTB.Name = "rasterStepSizeTB";
+            this.rasterStepSizeTB.Size = new System.Drawing.Size(70, 19);
+            this.rasterStepSizeTB.TabIndex = 5;
+            this.rasterStepSizeTB.Text = "0";
+            this.rasterStepSizeTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.rasterStepSizeTB.TextChanged += new System.EventHandler(this.rasterParamTB_TextChanged);
+            // 
+            // syringeTimeLimitTB
+            // 
+            this.syringeTimeLimitTB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.syringeTimeLimitTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
+            this.syringeTimeLimitTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.syringeTimeLimitTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.syringeTimeLimitTB.Location = new System.Drawing.Point(345, 387);
+            this.syringeTimeLimitTB.Name = "syringeTimeLimitTB";
+            this.syringeTimeLimitTB.Size = new System.Drawing.Size(70, 19);
+            this.syringeTimeLimitTB.TabIndex = 9;
+            this.syringeTimeLimitTB.Text = "0";
+            this.syringeTimeLimitTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // label13
+            // 
+            this.label13.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label13.AutoSize = true;
+            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label13.Location = new System.Drawing.Point(262, 49);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(81, 20);
+            this.label13.TabIndex = 0;
+            this.label13.Text = "Flow Rate";
+            this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // syringeDiaTB
+            // 
+            this.syringeDiaTB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.syringeDiaTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
+            this.syringeDiaTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.syringeDiaTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.syringeDiaTB.Location = new System.Drawing.Point(344, 80);
+            this.syringeDiaTB.Name = "syringeDiaTB";
+            this.syringeDiaTB.Size = new System.Drawing.Size(70, 19);
+            this.syringeDiaTB.TabIndex = 1;
+            this.syringeDiaTB.Text = "0";
+            this.syringeDiaTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // rasterWidthTB
+            // 
+            this.rasterWidthTB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.rasterWidthTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
+            this.rasterWidthTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rasterWidthTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rasterWidthTB.Location = new System.Drawing.Point(344, 167);
+            this.rasterWidthTB.Name = "rasterWidthTB";
+            this.rasterWidthTB.Size = new System.Drawing.Size(70, 19);
+            this.rasterWidthTB.TabIndex = 2;
+            this.rasterWidthTB.Text = "0";
+            this.rasterWidthTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.rasterWidthTB.TextChanged += new System.EventHandler(this.rasterParamTB_TextChanged);
+            // 
+            // rasterCoatsTB
+            // 
+            this.rasterCoatsTB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.rasterCoatsTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
+            this.rasterCoatsTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rasterCoatsTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rasterCoatsTB.Location = new System.Drawing.Point(344, 227);
+            this.rasterCoatsTB.Name = "rasterCoatsTB";
+            this.rasterCoatsTB.Size = new System.Drawing.Size(70, 19);
+            this.rasterCoatsTB.TabIndex = 4;
+            this.rasterCoatsTB.Text = "0";
+            this.rasterCoatsTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.rasterCoatsTB.TextChanged += new System.EventHandler(this.rasterParamTB_TextChanged);
+            // 
+            // enableVolumeLimitB
+            // 
+            this.enableVolumeLimitB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.enableVolumeLimitB.CheckedColor = System.Drawing.Color.Black;
+            this.enableVolumeLimitB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.enableVolumeLimitB.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.enableVolumeLimitB.Location = new System.Drawing.Point(219, 356);
+            this.enableVolumeLimitB.Name = "enableVolumeLimitB";
+            this.enableVolumeLimitB.Size = new System.Drawing.Size(123, 24);
+            this.enableVolumeLimitB.TabIndex = 8;
+            this.enableVolumeLimitB.Text = "Volume Limit";
+            this.enableVolumeLimitB.UncheckedColor = System.Drawing.Color.DimGray;
+            // 
+            // label22
+            // 
+            this.label22.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label22.AutoSize = true;
+            this.label22.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label22.Location = new System.Drawing.Point(264, 257);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(78, 20);
+            this.label22.TabIndex = 0;
+            this.label22.Text = "Step Size";
+            this.label22.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // rasterHeightTB
+            // 
+            this.rasterHeightTB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.rasterHeightTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
+            this.rasterHeightTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rasterHeightTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rasterHeightTB.Location = new System.Drawing.Point(344, 197);
+            this.rasterHeightTB.Name = "rasterHeightTB";
+            this.rasterHeightTB.Size = new System.Drawing.Size(70, 19);
+            this.rasterHeightTB.TabIndex = 3;
+            this.rasterHeightTB.Text = "0";
+            this.rasterHeightTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.rasterHeightTB.TextChanged += new System.EventHandler(this.rasterParamTB_TextChanged);
+            // 
+            // enableTimeLimit
+            // 
+            this.enableTimeLimit.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.enableTimeLimit.CheckedColor = System.Drawing.Color.Black;
+            this.enableTimeLimit.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.enableTimeLimit.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.enableTimeLimit.Location = new System.Drawing.Point(239, 386);
+            this.enableTimeLimit.Name = "enableTimeLimit";
+            this.enableTimeLimit.Size = new System.Drawing.Size(104, 24);
+            this.enableTimeLimit.TabIndex = 10;
+            this.enableTimeLimit.Text = "Time Limit";
+            this.enableTimeLimit.UncheckedColor = System.Drawing.Color.DimGray;
+            // 
+            // label27
+            // 
+            this.label27.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label27.AutoSize = true;
+            this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label27.Location = new System.Drawing.Point(286, 287);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(56, 20);
+            this.label27.TabIndex = 0;
+            this.label27.Text = "Speed";
+            this.label27.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label20
+            // 
+            this.label20.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label20.AutoSize = true;
+            this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label20.Location = new System.Drawing.Point(286, 197);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(56, 20);
+            this.label20.TabIndex = 0;
+            this.label20.Text = "Height";
+            this.label20.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label30
+            // 
+            this.label30.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label30.AutoSize = true;
+            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label30.Location = new System.Drawing.Point(216, 227);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(126, 20);
+            this.label30.TabIndex = 0;
+            this.label30.Text = "Number of coats";
+            this.label30.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // xyStageStatusL
             // 
             this.xyStageStatusL.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.xyStageStatusL.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(90)))));
             this.xyStageStatusL.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.xyStageStatusL.Location = new System.Drawing.Point(274, 93);
+            this.xyStageStatusL.Location = new System.Drawing.Point(273, 89);
             this.xyStageStatusL.Name = "xyStageStatusL";
             this.xyStageStatusL.Size = new System.Drawing.Size(114, 24);
             this.xyStageStatusL.TabIndex = 0;
@@ -741,7 +925,7 @@ namespace QosainESSDesktop
             this.pumpStatusL.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.pumpStatusL.BackColor = System.Drawing.Color.DimGray;
             this.pumpStatusL.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.pumpStatusL.Location = new System.Drawing.Point(274, 60);
+            this.pumpStatusL.Location = new System.Drawing.Point(273, 56);
             this.pumpStatusL.Name = "pumpStatusL";
             this.pumpStatusL.Size = new System.Drawing.Size(114, 24);
             this.pumpStatusL.TabIndex = 0;
@@ -758,7 +942,7 @@ namespace QosainESSDesktop
             this.abortB.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.abortB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
             this.abortB.ForeColor = System.Drawing.Color.White;
-            this.abortB.Location = new System.Drawing.Point(200, 178);
+            this.abortB.Location = new System.Drawing.Point(199, 174);
             this.abortB.Name = "abortB";
             this.abortB.Size = new System.Drawing.Size(190, 30);
             this.abortB.TabIndex = 1;
@@ -772,7 +956,7 @@ namespace QosainESSDesktop
             this.label24.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label24.AutoSize = true;
             this.label24.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label24.Location = new System.Drawing.Point(183, 93);
+            this.label24.Location = new System.Drawing.Point(182, 89);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(89, 24);
             this.label24.TabIndex = 0;
@@ -789,7 +973,7 @@ namespace QosainESSDesktop
             this.coatB.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.coatB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
             this.coatB.ForeColor = System.Drawing.Color.White;
-            this.coatB.Location = new System.Drawing.Point(200, 127);
+            this.coatB.Location = new System.Drawing.Point(199, 123);
             this.coatB.Name = "coatB";
             this.coatB.Size = new System.Drawing.Size(190, 45);
             this.coatB.TabIndex = 1;
@@ -803,7 +987,7 @@ namespace QosainESSDesktop
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(208, 60);
+            this.label3.Location = new System.Drawing.Point(207, 56);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(60, 24);
             this.label3.TabIndex = 0;
@@ -817,11 +1001,23 @@ namespace QosainESSDesktop
             this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label17.Location = new System.Drawing.Point(1, 12);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(576, 35);
+            this.label17.Size = new System.Drawing.Size(575, 35);
             this.label17.TabIndex = 0;
             this.label17.Text = "System";
             this.label17.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.label17.Click += new System.EventHandler(this.label2_Click);
+            // 
+            // label1
+            // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(0, 18);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(620, 35);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Process Parameters";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // minimizeB
             // 
@@ -836,161 +1032,6 @@ namespace QosainESSDesktop
             this.minimizeB.TabIndex = 17;
             this.minimizeB.UseVisualStyleBackColor = true;
             this.minimizeB.Click += new System.EventHandler(this.minimizeB_Click);
-            // 
-            // rasterEnabledCB
-            // 
-            this.rasterEnabledCB.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.rasterEnabledCB.CheckedColor = System.Drawing.Color.Black;
-            this.rasterEnabledCB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rasterEnabledCB.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.rasterEnabledCB.Location = new System.Drawing.Point(367, 137);
-            this.rasterEnabledCB.Name = "rasterEnabledCB";
-            this.rasterEnabledCB.Size = new System.Drawing.Size(100, 24);
-            this.rasterEnabledCB.TabIndex = 10;
-            this.rasterEnabledCB.Text = "Enabled";
-            this.rasterEnabledCB.UncheckedColor = System.Drawing.Color.DimGray;
-            this.rasterEnabledCB.CheckedChanged += new System.EventHandler(this.rasterEnabledCB_CheckedChanged);
-            // 
-            // rasterPad
-            // 
-            this.rasterPad.Location = new System.Drawing.Point(5, 5);
-            this.rasterPad.Name = "rasterPad";
-            this.rasterPad.Size = new System.Drawing.Size(200, 200);
-            this.rasterPad.TabIndex = 1;
-            this.rasterPad.OnButtonClick += new QosainESSDesktop._8DirectionButtonSet.ButtonClickHandler(this._8DirectionButtonSet1_OnButtonClick);
-            // 
-            // plainProgressBar1
-            // 
-            this.plainProgressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.plainProgressBar1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.plainProgressBar1.Location = new System.Drawing.Point(2, 251);
-            this.plainProgressBar1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.plainProgressBar1.Name = "plainProgressBar1";
-            this.plainProgressBar1.Size = new System.Drawing.Size(448, 76);
-            this.plainProgressBar1.TabIndex = 6;
-            this.plainProgressBar1.Visible = false;
-            // 
-            // rasterView1
-            // 
-            this.rasterView1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(162)))), ((int)(((byte)(154)))), ((int)(((byte)(154)))));
-            this.rasterView1.Location = new System.Drawing.Point(210, 5);
-            this.rasterView1.Name = "rasterView1";
-            this.rasterView1.Size = new System.Drawing.Size(240, 240);
-            this.rasterView1.TabIndex = 5;
-            // 
-            // rasterSpeedTB
-            // 
-            this.rasterSpeedTB.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.rasterSpeedTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
-            this.rasterSpeedTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rasterSpeedTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rasterSpeedTB.Location = new System.Drawing.Point(367, 287);
-            this.rasterSpeedTB.Name = "rasterSpeedTB";
-            this.rasterSpeedTB.Size = new System.Drawing.Size(48, 19);
-            this.rasterSpeedTB.TabIndex = 6;
-            this.rasterSpeedTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.rasterSpeedTB.TextChanged += new System.EventHandler(this.rasterParamTB_TextChanged);
-            // 
-            // syringeFlowRateTB
-            // 
-            this.syringeFlowRateTB.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.syringeFlowRateTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
-            this.syringeFlowRateTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.syringeFlowRateTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.syringeFlowRateTB.Location = new System.Drawing.Point(367, 50);
-            this.syringeFlowRateTB.Name = "syringeFlowRateTB";
-            this.syringeFlowRateTB.Size = new System.Drawing.Size(48, 19);
-            this.syringeFlowRateTB.TabIndex = 0;
-            this.syringeFlowRateTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // syringeVolumeLimitTB
-            // 
-            this.syringeVolumeLimitTB.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.syringeVolumeLimitTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
-            this.syringeVolumeLimitTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.syringeVolumeLimitTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.syringeVolumeLimitTB.Location = new System.Drawing.Point(367, 357);
-            this.syringeVolumeLimitTB.Name = "syringeVolumeLimitTB";
-            this.syringeVolumeLimitTB.Size = new System.Drawing.Size(48, 19);
-            this.syringeVolumeLimitTB.TabIndex = 7;
-            this.syringeVolumeLimitTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // rasterStepSizeTB
-            // 
-            this.rasterStepSizeTB.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.rasterStepSizeTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
-            this.rasterStepSizeTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rasterStepSizeTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rasterStepSizeTB.Location = new System.Drawing.Point(367, 257);
-            this.rasterStepSizeTB.Name = "rasterStepSizeTB";
-            this.rasterStepSizeTB.Size = new System.Drawing.Size(48, 19);
-            this.rasterStepSizeTB.TabIndex = 5;
-            this.rasterStepSizeTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.rasterStepSizeTB.TextChanged += new System.EventHandler(this.rasterParamTB_TextChanged);
-            // 
-            // syringeTimeLimitTB
-            // 
-            this.syringeTimeLimitTB.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.syringeTimeLimitTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
-            this.syringeTimeLimitTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.syringeTimeLimitTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.syringeTimeLimitTB.Location = new System.Drawing.Point(367, 387);
-            this.syringeTimeLimitTB.Name = "syringeTimeLimitTB";
-            this.syringeTimeLimitTB.Size = new System.Drawing.Size(48, 19);
-            this.syringeTimeLimitTB.TabIndex = 9;
-            this.syringeTimeLimitTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // syringeDiaTB
-            // 
-            this.syringeDiaTB.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.syringeDiaTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
-            this.syringeDiaTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.syringeDiaTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.syringeDiaTB.Location = new System.Drawing.Point(367, 80);
-            this.syringeDiaTB.Name = "syringeDiaTB";
-            this.syringeDiaTB.Size = new System.Drawing.Size(48, 19);
-            this.syringeDiaTB.TabIndex = 1;
-            this.syringeDiaTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // rasterWidthTB
-            // 
-            this.rasterWidthTB.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.rasterWidthTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
-            this.rasterWidthTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rasterWidthTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rasterWidthTB.Location = new System.Drawing.Point(367, 167);
-            this.rasterWidthTB.Name = "rasterWidthTB";
-            this.rasterWidthTB.Size = new System.Drawing.Size(48, 19);
-            this.rasterWidthTB.TabIndex = 2;
-            this.rasterWidthTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.rasterWidthTB.TextChanged += new System.EventHandler(this.rasterParamTB_TextChanged);
-            // 
-            // rasterCoatsTB
-            // 
-            this.rasterCoatsTB.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.rasterCoatsTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
-            this.rasterCoatsTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rasterCoatsTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rasterCoatsTB.Location = new System.Drawing.Point(367, 227);
-            this.rasterCoatsTB.Name = "rasterCoatsTB";
-            this.rasterCoatsTB.Size = new System.Drawing.Size(48, 19);
-            this.rasterCoatsTB.TabIndex = 4;
-            this.rasterCoatsTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.rasterCoatsTB.TextChanged += new System.EventHandler(this.rasterParamTB_TextChanged);
-            // 
-            // rasterHeightTB
-            // 
-            this.rasterHeightTB.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.rasterHeightTB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(180)))), ((int)(((byte)(180)))), ((int)(((byte)(180)))));
-            this.rasterHeightTB.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rasterHeightTB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rasterHeightTB.Location = new System.Drawing.Point(367, 197);
-            this.rasterHeightTB.Name = "rasterHeightTB";
-            this.rasterHeightTB.Size = new System.Drawing.Size(48, 19);
-            this.rasterHeightTB.TabIndex = 3;
-            this.rasterHeightTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.rasterHeightTB.TextChanged += new System.EventHandler(this.rasterParamTB_TextChanged);
             // 
             // MainForm
             // 
@@ -1017,17 +1058,17 @@ namespace QosainESSDesktop
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.spManualP.ResumeLayout(false);
+            this.panel6.ResumeLayout(false);
+            this.panel6.PerformLayout();
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.Panel2.ResumeLayout(false);
             this.splitContainer2.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
             this.panel7.ResumeLayout(false);
-            this.panel6.ResumeLayout(false);
-            this.panel6.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1046,11 +1087,9 @@ namespace QosainESSDesktop
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private TextSavingTextBox syringeFlowRateTB;
-        private TextSavingTextBox syringeDiaTB;
-        private System.Windows.Forms.Label label14;
+        private ValueSavingQuantityBox syringeFlowRateTB;
+        private ValueSavingQuantityBox syringeDiaTB;
         private System.Windows.Forms.Label label13;
-        private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button spDownB;
         private System.Windows.Forms.Button spTopB;
@@ -1059,10 +1098,8 @@ namespace QosainESSDesktop
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button spUpB;
         private FivePointNine.Windows.Controls.FlatCheckBox enableTimeLimit;
-        private TextSavingTextBox syringeVolumeLimitTB;
-        private TextSavingTextBox syringeTimeLimitTB;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.Label label15;
+        private ValueSavingQuantityBox syringeVolumeLimitTB;
+        private ValueSavingQuantityBox syringeTimeLimitTB;
         private FivePointNine.Windows.Controls.FlatCheckBox enableVolumeLimitB;
         private _8DirectionButtonSet rasterPad;
         private System.Windows.Forms.Panel panel1;
@@ -1071,17 +1108,13 @@ namespace QosainESSDesktop
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.Button coatB;
         private System.Windows.Forms.Label label18;
-        private TextSavingTextBox rasterStepSizeTB;
-        private System.Windows.Forms.Label label19;
-        private TextSavingTextBox rasterHeightTB;
+        private ValueSavingQuantityBox rasterStepSizeTB;
+        private ValueSavingQuantityBox rasterHeightTB;
         private System.Windows.Forms.Label label20;
-        private System.Windows.Forms.Label label21;
         private System.Windows.Forms.Label label22;
-        private TextSavingTextBox rasterWidthTB;
-        private System.Windows.Forms.Label label23;
-        private TextSavingTextBox rasterSpeedTB;
+        private ValueSavingQuantityBox rasterWidthTB;
+        private ValueSavingQuantityBox rasterSpeedTB;
         private System.Windows.Forms.Label label27;
-        private System.Windows.Forms.Label label26;
         private System.Windows.Forms.Label yCoordL;
         private System.Windows.Forms.Label xCoordL;
         private System.Windows.Forms.Label label29;
@@ -1091,7 +1124,7 @@ namespace QosainESSDesktop
         private PlainProgressBar plainProgressBar1;
         private System.Windows.Forms.Panel panel6;
         private System.Windows.Forms.Panel panel7;
-        private TextSavingTextBox rasterCoatsTB;
+        private ValueSavingQuantityBox rasterCoatsTB;
         private System.Windows.Forms.Label label30;
         private System.Windows.Forms.Button abortB;
         private System.Windows.Forms.SplitContainer splitContainer2;
@@ -1099,6 +1132,14 @@ namespace QosainESSDesktop
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Panel panel4;
         private FivePointNine.Windows.Controls.FlatCheckBox rasterEnabledCB;
+        private UnitChanger syringeDiaUnitChanger;
+        private UnitChanger flowrateUS;
+        private UnitChanger stepSizeUs;
+        private UnitChanger heightus;
+        private UnitChanger widthus;
+        private UnitChanger speedus;
+        private UnitChanger timeus;
+        private UnitChanger volumeus;
     }
 }
 

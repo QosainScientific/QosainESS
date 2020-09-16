@@ -87,6 +87,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Quantity.cs" />
     <Compile Include="RasterView.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -96,7 +97,7 @@
     <Compile Include="SerialInstrumentFinder.designer.cs">
       <DependentUpon>SerialInstrumentFinder.cs</DependentUpon>
     </Compile>
-    <Compile Include="TextSavingTextBox.cs">
+    <Compile Include="ValueSavingQuantityBox.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="_8DirectionButtonSet.cs">
@@ -250,6 +251,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="LoadingAnim\Spinner-1s-200px-30.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="textBoxTexts_defaults.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

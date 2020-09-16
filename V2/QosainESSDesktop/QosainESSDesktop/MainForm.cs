@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
+using System.IO;
 
 namespace QosainESSDesktop
 {
@@ -17,6 +18,8 @@ namespace QosainESSDesktop
     {
         public MainForm()
         {
+            if (!File.Exists("textBoxTexts.txt") && File.Exists("textBoxTexts_defaults.txt"))
+                File.Copy("textBoxTexts_defaults.txt", "textBoxTexts.txt");
             InitializeComponent(); 
             this.panel4.BackgroundImage = QosainESSDesktop.Properties.Resources.QosainLogoTransparent;
             this.windowedModeB.BackgroundImage = QosainESSDesktop.Properties.Resources.NormalDim;
@@ -29,6 +32,14 @@ namespace QosainESSDesktop
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            flowrateUS.Initialize(syringeFlowRateTB, new Units.mlPerMinute(), new Units.mlPerSecond(), new Units.ccPerMinutes(), new Units.ulPerMinutes(), new Units.ulPerSecond());
+            syringeDiaUnitChanger.Initialize(syringeDiaTB, new Units.mm(), new Units.um(), new Units.Inch());
+            widthus.Initialize(rasterWidthTB, new Units.mm(), new Units.um(), new Units.Inch());
+            heightus.Initialize(rasterHeightTB, new Units.mm(), new Units.um(), new Units.Inch());
+            stepSizeUs.Initialize(rasterStepSizeTB, new Units.mm(), new Units.um(), new Units.Inch());
+            speedus.Initialize(rasterSpeedTB, new Units.mmPerSecond(), new Units.mmPerMinute(), new Units.inchesPerSecond(), new Units.inchesPerMinute());
+            timeus.Initialize(syringeTimeLimitTB, new Units.seconds(), new Units.minutes(), new Units.hours());
+            volumeus.Initialize(syringeVolumeLimitTB, new Units.ml(), new Units.ul(), new Units.cc());
             rasterParamTB_TextChanged(null, null);
             var device = SerialInstrumentFinder.GetDevice("Qosain ESS");
             if (device != null)
@@ -43,9 +54,9 @@ namespace QosainESSDesktop
             //    Environment.Exit(1);
             //}
             //else
-            //{
+            {
                 new Thread(() => { Thread.Sleep(300); Invoke(new MethodInvoker(() => { dataPort_Connected(); })); }).Start();
-            //}
+            }
         }
         
         private void closeB_Click(object sender, EventArgs e)
@@ -301,9 +312,9 @@ namespace QosainESSDesktop
         {
             new System.Threading.Thread(() =>
             {
-                Channel.Close();
-                //System.Threading.Thread.Sleep(5000);
-                //Environment.Exit(1);
+                Channel?.Close();
+                System.Threading.Thread.Sleep(1000);
+                Environment.Exit(1);
             }).Start();
         }                      
         private void dataPort_DevicesRefreshed(object sender, EventArgs e)
@@ -434,6 +445,7 @@ namespace QosainESSDesktop
             syringeTimeLimitTB.Enabled = false;
             syringeVolumeLimitTB.Enabled = false;
 
+            rasterEnabledCB.Enabled = false;
             enableTimeLimit.Enabled = false;
             enableVolumeLimitB.Enabled = false;
             spManualP.Enabled = false;
@@ -446,72 +458,12 @@ namespace QosainESSDesktop
             syringeTimeLimitTB.Enabled = true;
             syringeVolumeLimitTB.Enabled = true;
 
+            rasterEnabledCB.Enabled = true;
             enableTimeLimit.Enabled = true;
             enableVolumeLimitB.Enabled = true;
 
             spManualP.Enabled = true;
         }
-        bool beginPumping()
-        {
-            try
-            {
-
-                SendCom("pst:" +
-                    "r=" + Convert.ToSingle(syringeFlowRateTB.Text) * 1000 * 60 / 3600.0F / (Math.Pow(Convert.ToSingle(syringeDiaTB.Text) / 2, 2) * (float)Math.PI) +
-                    ",mxt=" + (enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Text) * 60000 : -1) +
-                    ",mxd=" + (enableVolumeLimitB.Checked ? Convert.ToDouble(syringeVolumeLimitTB.Text) * 1000 / (Math.Pow(Convert.ToSingle(syringeDiaTB.Text) / 2, 2) * (float)Math.PI) : -1)
-                    );
-                var resp = waitForResponse("pump resp", 2000);
-                if (resp == "")
-                    MessageBox.Show("The pump could not be started. (E05)");
-                else
-                {
-                    if (getArgs(resp)["answer"] == "yes")
-                    {
-                        pumpStarted();
-                        return true;
-                    }
-                    else
-                        MessageBox.Show(getArgs(resp)["message"] + " (E06)");
-                }
-            }
-            catch
-            { }
-            return false;
-        }
-        void endPumping()
-        {
-            SendCom("pump stop");
-            var resp = waitForResponse("pump stop resp", 2000);
-            if (resp != "")
-            {
-                if (getArgs(resp)["answer"] == "stopped")
-                    pumpEnded();
-            }
-        }
-        private void pumpBeginB_Click(object sender, EventArgs e)
-        {
-            if (inPumpStart)
-                return;
-            inPumpStart = true;
-            while (inTick)
-            {
-                System.Threading.Thread.Sleep(30);
-                Application.DoEvents();
-            }
-            inTick = true;
-            if (((Button)sender).Text == "Begin")
-            {
-                beginPumping();
-            }
-            else
-            {
-                endPumping();
-            }
-            inTick = false;
-            inPumpStart = false;
-        }
-
         private void spUpB_Click(object sender, EventArgs e)
         {
             SendCom("z+");
@@ -574,27 +526,27 @@ namespace QosainESSDesktop
             {
                 if (rasterEnabledCB.Checked)
                 {
-                    if (Convert.ToDouble(rasterWidthTB.Text) <= 0)
+                    if (rasterWidthTB.Value.StandardValue <= 0)
                         throw new Exception("Raster area width can only be a valid positive number.");
-                    if (Convert.ToDouble(rasterHeightTB.Text) <= 0)
+                    if (rasterHeightTB.Value.StandardValue <= 0)
                         throw new Exception("Raster area height can only be a valid positive number.");
-                    if (Convert.ToDouble(rasterStepSizeTB.Text) <= 0)
+                    if (rasterStepSizeTB.Value.StandardValue <= 0)
                         throw new Exception("Raster step size can only be a valid positive number.");
-                    if (Convert.ToDouble(syringeFlowRateTB.Text) <= 0)
+                    if (syringeFlowRateTB.Value.StandardValue <= 0)
                         throw new Exception("Syringe flow rate can only be a valid positive number.");
-                    if (Convert.ToDouble(rasterSpeedTB.Text) <= 0 || Convert.ToDouble(rasterSpeedTB.Text) > 25)
-                        throw new Exception("The travel speed you entered is not within the possible hardware range, (0, 25] mm/s");
+                    if (rasterSpeedTB.Value.StandardValue <= 0)
+                        throw new Exception("Travel speed can only be a valid positive number.");
                 }
-                double mxd = Convert.ToDouble(syringeVolumeLimitTB.Text) * 1000 / (Math.Pow(Convert.ToSingle(syringeDiaTB.Text) / 2, 2) * (float)Math.PI);
-                double q = Convert.ToSingle(syringeFlowRateTB.Text) * 1000 / 60.0F / (Math.Pow(Convert.ToSingle(syringeDiaTB.Text) / 2, 2) * (float)Math.PI);
+                double mxd = Convert.ToDouble(syringeVolumeLimitTB.Value.As(new Units.ml())) * 1000 / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.mm())) / 2, 2) * (float)Math.PI);
+                double q = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.ml())) / 2, 2) * (float)Math.PI);
                 SendCom("set coat:" +
-                    "lenX=" + Convert.ToSingle(rasterWidthTB.Text) +
-                    ",lenY=" + Convert.ToSingle(rasterHeightTB.Text) +
-                    ",stepY=" + Convert.ToSingle(rasterStepSizeTB.Text) +
+                    "lenX=" + Convert.ToSingle(rasterWidthTB.Value.As(new Units.ml())) +
+                    ",lenY=" + Convert.ToSingle(rasterHeightTB.Value.As(new Units.ml())) +
+                    ",stepY=" + Convert.ToSingle(rasterStepSizeTB.Value.As(new Units.ml())) +
                     ",coats=" + Convert.ToSingle(rasterCoatsTB.Text) +
-                    ",speed=" + Convert.ToSingle(rasterSpeedTB.Text) +
+                    ",speed=" + Convert.ToSingle(rasterSpeedTB.Value.As(new Units.mmPerSecond())) +
                     ",Q=" + q +
-                    ",mxt=" + (enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Text) * 60 : -1) +
+                    ",mxt=" + (enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Value.As(new Units.seconds())) * 60 : -1) +
                     ",mxd=" + (enableVolumeLimitB.Checked ? mxd : -1) + 
                     ",rstr=" + (rasterEnabledCB.Checked ? "1" : "0")
                     ); 
@@ -648,13 +600,13 @@ namespace QosainESSDesktop
 
             try
             {
-                rasterView1.UpdateViewRaster(Convert.ToSingle(rasterWidthTB.Text), Convert.ToSingle(rasterHeightTB.Text), Convert.ToSingle(rasterStepSizeTB.Text));
+                rasterView1.UpdateViewRaster(Convert.ToSingle(rasterWidthTB.Value.As(new Units.mm())), Convert.ToSingle(rasterHeightTB.Value.As(new Units.mm())), Convert.ToSingle(rasterStepSizeTB.Value.As(new Units.mm())));
 
                 float dist = 0;
-                float rWidth = Convert.ToSingle(rasterWidthTB.Text);
-                float rHeight = Convert.ToSingle(rasterHeightTB.Text);
-                float step = Convert.ToSingle(rasterStepSizeTB.Text);
-                float speed = Convert.ToSingle(rasterSpeedTB.Text);
+                float rWidth = Convert.ToSingle(rasterWidthTB.Value.As(new Units.mm()));
+                float rHeight = Convert.ToSingle(rasterHeightTB.Value.As(new Units.mm()));
+                float step = Convert.ToSingle(rasterStepSizeTB.Value.As(new Units.mm()));
+                float speed = Convert.ToSingle(rasterSpeedTB.Value.As(new Units.mmPerSecond()));
                 if (step == 0)
                     throw new Exception();
                 for (float y = 0; y < rHeight; y += step * 2)

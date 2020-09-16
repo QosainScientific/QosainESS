@@ -9,13 +9,14 @@ using System.Windows.Forms;
 
 namespace QosainESSDesktop
 {
-    public class TextSavingTextBox : TextBox
+    public class ValueSavingQuantityBox : TextBox
     {
-        public TextSavingTextBox()
+        public ValueSavingQuantityBox()
         {
             TextChanged += TextSavingTextBox_TextChanged;
             ParentChanged += TextSavingTextBox_ParentChanged;
         }
+        public Quantity Value { get; set; } 
 
         private void TextSavingTextBox_ParentChanged(object sender, EventArgs e)
         {
@@ -23,48 +24,59 @@ namespace QosainESSDesktop
             {
                 try
                 {
-                    Text = getText(Name);
+                    getText(Name, Value);
+                    Text = Value.ScaledValue;
                 }
                 catch { }
             }
         }
 
         bool created = false;
-        private string getText(string name)
+        private static void getText(string name, Quantity quantity)
         {
             try
             {
                 if (name == "")
-                    return "";
+                    return;
                 if (!File.Exists("textBoxTexts.txt"))
                     File.WriteAllText("textBoxTexts.txt", "");
                 var pairs = File.ReadAllLines("textBoxTexts.txt")
                     .Select(line => line.Split(new char[] { '=' }, 2).Select(part => part.Replace("{equal}", "=").Replace("{bsr}", "\r").Replace("{bsn}", "\n")).ToArray()
                     ).ToList();
+                string ans = "";
                 if (pairs.Find(pair => pair[0] == name) != null)
-                    return pairs.Find(pair => pair[0] == name)[1];
+                    ans = pairs.Find(pair => pair[0] == name)[1];
+                string v = ans.Split(new char[] { ';' })[0];
+                string unit = ans.Split(new char[] { ';' }, 2)[1];
+                var allUnits = new IUnit[] { new Units.none(), new Units.cc(), new Units.ccPerMinutes(), new Units.hours(), new Units.Inch(), new Units.inchesPerMinute(), new Units.inchesPerSecond(), new Units.mills(), new Units.minutes(), new Units.ml(), new Units.mlPerMinute(), new Units.mlPerSecond(), new Units.mm(), new Units.mmPerMinute(), new Units.mmPerSecond(), new Units.seconds(), new Units.ul(), new Units.ulPerMinutes(), new Units.ulPerSecond(), new Units.um() };
+                quantity.CurrentUnit = allUnits.ToList().Find(u => u.Suffix == unit);
+                if (quantity.CurrentUnit.IsStandard)
+                    quantity.StandardValue = double.Parse(v);
+                else
+                    quantity.StandardValue = double.Parse(quantity.CurrentUnit.F_(v));
+
             }
             catch { }
-            return "";
         }
 
         public void SaveText()
         {
             if (!created)
                 return;
-            saveText(Name, Text);
+            saveText(Name, Value);
         }
 
-        private void saveText(string name, string text)
+        private static void saveText(string name, Quantity q)
         {
             try
             {
+                string toSave = q.ScaledValue.ToString() + ";" + q.CurrentUnit.Suffix;
                 if (!File.Exists("textBoxTexts.txt"))
                     File.WriteAllText("textBoxTexts.txt", "");
                 var pairs = File.ReadAllLines("textBoxTexts.txt").Select(line => line.Split(new char[] { '=' })).ToList();
                 if (pairs.Find(pair => pair[0] == name) != null)
                     pairs.Remove(pairs.Find(pair => pair[0] == name));
-                pairs.Add(new string[] { name, text });
+                pairs.Add(new string[] { name, toSave });
                 File.WriteAllLines("textBoxTexts.txt", pairs.Select(
                     pair => string.Join("=", pair.Select(part => part.Replace("=", "{equal}").Replace("\r", "{bsr}").Replace("\n", "{bsn}")).ToArray())
                     ));
@@ -73,7 +85,11 @@ namespace QosainESSDesktop
         }
         protected override void OnCreateControl()
         {
-            Text = getText(Name);
+            Value = new Quantity(0, new Units.none());
+            getText(Name, Value);
+            if (Value.CurrentUnit == null)
+                ;
+            Text = Value.ScaledValue;
             created = true;
         }
 

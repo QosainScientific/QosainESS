@@ -1,0 +1,9 @@
+syringeFlowRateTB=0.01
+syringeDiaTB=12.8
+rasterWidthTB=25
+rasterHeightTB=25
+rasterCoatsTB=2
+rasterStepSizeTB=3
+rasterSpeedTB=1
+syringeVolumeLimitTB=10
+syringeTimeLimitTB=10
