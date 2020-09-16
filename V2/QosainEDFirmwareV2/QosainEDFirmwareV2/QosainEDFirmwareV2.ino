@@ -895,6 +895,7 @@ float coatX = 0, coatY = 0, coatWidth = 0, coatHeight = 0, pumpMax = 0, Q = 0, c
 float lengthTravelled = 0;
 float totalLength = 0;
 // Need to design a new scheme
+float pumpStart = 0;
 int coatMove = 0;
 float targetXAtPause = 0;
 float targetYAtPause = 0;
@@ -954,20 +955,7 @@ void loop()
 		if (!abortBegun)
 		{
 			abortBegun = true;
-			if (coatStatus != 0) // running or paused
-			{
-				coatStatus = 1;
-				currentXyStatus = F("Moving");
-				currentPumpStatus = F("Idle");
-				SendStatus();
-				if (coatMove < 4)
-				{
-					//Serial.println(F("coat move 4"));
-					coatMove = 4; // go to x zero
-					SetCourseForXY(0, -(currentPositions[0] - coatX) / mmPerStep[0], abs((currentPositions[0] - coatX)) / 4, false);
-				}
-			}
-			else
+			if (coatMove == 6) // pump only
 			{
 				stopCoatFlag = false;
 				abortBegun = false;
@@ -976,6 +964,34 @@ void loop()
 				currentProgress = -1000;
 				currentXyStatus = F("Idle");
 				currentPumpStatus = F("Idle");
+				Serial.println("coat end");
+			}
+			else
+			{
+				if (coatStatus != 0) // running or paused
+				{
+					coatStatus = 1;
+					currentXyStatus = F("Moving");
+					currentPumpStatus = F("Idle");
+					SendStatus();
+					if (coatMove < 4)
+					{
+						//Serial.println(F("coat move 4"));
+						coatMove = 4; // go to x zero
+						SetCourseForXY(0, -(currentPositions[0] - coatX) / mmPerStep[0], abs((currentPositions[0] - coatX)) / 4, false);
+					}
+				}
+				else
+				{
+					stopCoatFlag = false;
+					abortBegun = false;
+					coatStatus = 0;
+					coatMove = 0;
+					currentProgress = -1000;
+					currentXyStatus = F("Idle");
+					currentPumpStatus = F("Idle");
+					Serial.println("coat end");
+				}
 			}
 		}
 	}
@@ -999,7 +1015,7 @@ void loop()
 				{
 					//Serial.println(F("coat move 5"));
 					coatMove = 5;
-					SetCourseForXY(1, -(currentPositions[1] - coatY) / mmPerStep[1], abs(currentPositions[1] - coatY) / 4, false);
+					SetCourseForXY(1, -(currentPositions[1] - coatY) / mmPerStep[1], abs(currentPositions[1] - coatY) / 3, false);
 				}
 				else
 				{
@@ -1073,9 +1089,15 @@ void loop()
 			{
 				if (millis() - lastStatusSend > 50)
 				{
-					currentXyStatus = F("Coating");
+					if (coatMove < 6)
+						currentXyStatus = F("Coating");
+					else
+						currentXyStatus = F("Idle");
 					currentPumpStatus = F("Pumping");
-					currentProgress = lengthTravelled / totalLength * 100.0F;
+					if (coatMove == 6)
+						currentProgress = abs(currentPositions[2] - pumpStart) / abs(pumpMax - pumpStart) * 100;
+					else
+						currentProgress = lengthTravelled / totalLength * 100.0F;
 					SendStatus();
 					lastStatusSend = millis();
 				}
@@ -1128,7 +1150,7 @@ void loop()
 						//Serial.println(F("coat move 5"));
 						coatMove = 5;
 						coatsCompleted++;
-						SetCourseForXY(1, -coatHeight / mmPerStep[1], 2, false);
+						SetCourseForXY(1, -(currentPositions[1] - coatY) / mmPerStep[1], abs(currentPositions[1] - coatY) / 3, false);
 						//Serial.println(F("BP3"));
 					}
 					else
@@ -1266,6 +1288,7 @@ void loop()
 				pumpMax = 0;
 			else
 				pumpMax = currentPositions[2] - maxDist;
+			pumpStart = currentPositions[2];
 
 			float timeToPump = Args.Get(F("mxt")).toFloat(); // seconds
 			if (timeToPump < 0)

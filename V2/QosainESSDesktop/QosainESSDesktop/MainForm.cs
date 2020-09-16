@@ -538,15 +538,15 @@ namespace QosainESSDesktop
                         throw new Exception("Travel speed can only be a valid positive number.");
                 }
                 double mxd = Convert.ToDouble(syringeVolumeLimitTB.Value.As(new Units.ml())) * 1000 / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.mm())) / 2, 2) * (float)Math.PI);
-                double q = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.ml())) / 2, 2) * (float)Math.PI);
+                double q = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.mm())) / 2, 2) * (float)Math.PI);
                 SendCom("set coat:" +
-                    "lenX=" + Convert.ToSingle(rasterWidthTB.Value.As(new Units.ml())) +
-                    ",lenY=" + Convert.ToSingle(rasterHeightTB.Value.As(new Units.ml())) +
-                    ",stepY=" + Convert.ToSingle(rasterStepSizeTB.Value.As(new Units.ml())) +
+                    "lenX=" + Convert.ToSingle(rasterWidthTB.Value.As(new Units.mm())) +
+                    ",lenY=" + Convert.ToSingle(rasterHeightTB.Value.As(new Units.mm())) +
+                    ",stepY=" + Convert.ToSingle(rasterStepSizeTB.Value.As(new Units.mm())) +
                     ",coats=" + Convert.ToSingle(rasterCoatsTB.Text) +
                     ",speed=" + Convert.ToSingle(rasterSpeedTB.Value.As(new Units.mmPerSecond())) +
                     ",Q=" + q +
-                    ",mxt=" + (enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Value.As(new Units.seconds())) * 60 : -1) +
+                    ",mxt=" + (enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Value.As(new Units.minutes())) * 60 : -1) +
                     ",mxd=" + (enableVolumeLimitB.Checked ? mxd : -1) + 
                     ",rstr=" + (rasterEnabledCB.Checked ? "1" : "0")
                     ); 

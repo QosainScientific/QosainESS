@@ -461,7 +461,7 @@ namespace QosainESSDesktop
             this.splitContainer2.Panel2.Controls.Add(this.coatB);
             this.splitContainer2.Panel2.Controls.Add(this.label3);
             this.splitContainer2.Panel2.Controls.Add(this.label17);
-            this.splitContainer2.Size = new System.Drawing.Size(599, 694);
+            this.splitContainer2.Size = new System.Drawing.Size(598, 694);
             this.splitContainer2.SplitterDistance = 461;
             this.splitContainer2.SplitterWidth = 8;
             this.splitContainer2.TabIndex = 8;
@@ -472,7 +472,7 @@ namespace QosainESSDesktop
             this.panel7.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel7.Location = new System.Drawing.Point(0, 0);
             this.panel7.Name = "panel7";
-            this.panel7.Size = new System.Drawing.Size(599, 461);
+            this.panel7.Size = new System.Drawing.Size(598, 461);
             this.panel7.TabIndex = 8;
             // 
             // panel1
@@ -643,7 +643,9 @@ namespace QosainESSDesktop
             // rasterEnabledCB
             // 
             this.rasterEnabledCB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.rasterEnabledCB.Checked = true;
             this.rasterEnabledCB.CheckedColor = System.Drawing.Color.Black;
+            this.rasterEnabledCB.CheckState = System.Windows.Forms.CheckState.Checked;
             this.rasterEnabledCB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rasterEnabledCB.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
             this.rasterEnabledCB.Location = new System.Drawing.Point(345, 136);
@@ -913,7 +915,7 @@ namespace QosainESSDesktop
             this.xyStageStatusL.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.xyStageStatusL.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(90)))));
             this.xyStageStatusL.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.xyStageStatusL.Location = new System.Drawing.Point(273, 89);
+            this.xyStageStatusL.Location = new System.Drawing.Point(273, 87);
             this.xyStageStatusL.Name = "xyStageStatusL";
             this.xyStageStatusL.Size = new System.Drawing.Size(114, 24);
             this.xyStageStatusL.TabIndex = 0;
@@ -925,7 +927,7 @@ namespace QosainESSDesktop
             this.pumpStatusL.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.pumpStatusL.BackColor = System.Drawing.Color.DimGray;
             this.pumpStatusL.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.pumpStatusL.Location = new System.Drawing.Point(273, 56);
+            this.pumpStatusL.Location = new System.Drawing.Point(273, 54);
             this.pumpStatusL.Name = "pumpStatusL";
             this.pumpStatusL.Size = new System.Drawing.Size(114, 24);
             this.pumpStatusL.TabIndex = 0;
@@ -942,7 +944,7 @@ namespace QosainESSDesktop
             this.abortB.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.abortB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
             this.abortB.ForeColor = System.Drawing.Color.White;
-            this.abortB.Location = new System.Drawing.Point(199, 174);
+            this.abortB.Location = new System.Drawing.Point(199, 172);
             this.abortB.Name = "abortB";
             this.abortB.Size = new System.Drawing.Size(190, 30);
             this.abortB.TabIndex = 1;
@@ -956,7 +958,7 @@ namespace QosainESSDesktop
             this.label24.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label24.AutoSize = true;
             this.label24.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label24.Location = new System.Drawing.Point(182, 89);
+            this.label24.Location = new System.Drawing.Point(182, 87);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(89, 24);
             this.label24.TabIndex = 0;
@@ -973,7 +975,7 @@ namespace QosainESSDesktop
             this.coatB.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.coatB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
             this.coatB.ForeColor = System.Drawing.Color.White;
-            this.coatB.Location = new System.Drawing.Point(199, 123);
+            this.coatB.Location = new System.Drawing.Point(199, 121);
             this.coatB.Name = "coatB";
             this.coatB.Size = new System.Drawing.Size(190, 45);
             this.coatB.TabIndex = 1;
@@ -987,7 +989,7 @@ namespace QosainESSDesktop
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(207, 56);
+            this.label3.Location = new System.Drawing.Point(207, 54);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(60, 24);
             this.label3.TabIndex = 0;
@@ -1001,7 +1003,7 @@ namespace QosainESSDesktop
             this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label17.Location = new System.Drawing.Point(1, 12);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(575, 35);
+            this.label17.Size = new System.Drawing.Size(574, 35);
             this.label17.TabIndex = 0;
             this.label17.Text = "System";
             this.label17.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1014,7 +1016,7 @@ namespace QosainESSDesktop
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(0, 18);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(620, 35);
+            this.label1.Size = new System.Drawing.Size(619, 35);
             this.label1.TabIndex = 0;
             this.label1.Text = "Process Parameters";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
