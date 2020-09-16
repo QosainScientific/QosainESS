@@ -55,7 +55,7 @@ namespace QosainESSDesktop
         {
             Value.CurrentUnit = Units[(Units.ToList().FindIndex(u => u.Suffix == Value.CurrentUnit.Suffix) + 1) % Units.Length];
             TargetControl.TextChanged -= TargetControl_TextChanged;
-            TargetControl.Text = Value.ScaledValue + "0"; // force value change
+            //TargetControl.Text = Value.ScaledValue + "0"; // force value change
             TargetControl.Text = Value.ScaledValue;
             TargetControl.TextChanged += TargetControl_TextChanged;
             Text = Value.CurrentUnit.Suffix;
@@ -326,6 +326,22 @@ namespace QosainESSDesktop
             public string F_(string v)
             {
                 return (double.Parse(v) / 1000).ToString();
+            }
+        }
+        public class cm : IUnit
+        {
+            public string Suffix { get { return "cm"; } }
+
+            public bool IsStandard => false;
+
+            public string F(string v)
+            {
+                return (double.Parse(v) * 100).ToString();
+            }
+
+            public string F_(string v)
+            {
+                return (double.Parse(v) / 100).ToString();
             }
         }
         public class Inch : IUnit

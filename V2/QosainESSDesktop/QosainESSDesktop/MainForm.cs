@@ -33,10 +33,10 @@ namespace QosainESSDesktop
         private void Form1_Load(object sender, EventArgs e)
         {
             flowrateUS.Initialize(syringeFlowRateTB, new Units.mlPerMinute(), new Units.mlPerSecond(), new Units.ccPerMinutes(), new Units.ulPerMinutes(), new Units.ulPerSecond());
-            syringeDiaUnitChanger.Initialize(syringeDiaTB, new Units.mm(), new Units.um(), new Units.Inch());
-            widthus.Initialize(rasterWidthTB, new Units.mm(), new Units.um(), new Units.Inch());
-            heightus.Initialize(rasterHeightTB, new Units.mm(), new Units.um(), new Units.Inch());
-            stepSizeUs.Initialize(rasterStepSizeTB, new Units.mm(), new Units.um(), new Units.Inch());
+            syringeDiaUnitChanger.Initialize(syringeDiaTB, new Units.mm(), new Units.cm(), new Units.um(), new Units.Inch());
+            widthus.Initialize(rasterWidthTB, new Units.mm(), new Units.cm(), new Units.um(), new Units.Inch());
+            heightus.Initialize(rasterHeightTB, new Units.mm(), new Units.cm(), new Units.um(), new Units.Inch());
+            stepSizeUs.Initialize(rasterStepSizeTB, new Units.mm(), new Units.cm(), new Units.um(), new Units.Inch());
             speedus.Initialize(rasterSpeedTB, new Units.mmPerSecond(), new Units.mmPerMinute(), new Units.inchesPerSecond(), new Units.inchesPerMinute());
             timeus.Initialize(syringeTimeLimitTB, new Units.seconds(), new Units.minutes(), new Units.hours());
             volumeus.Initialize(syringeVolumeLimitTB, new Units.ml(), new Units.ul(), new Units.cc());

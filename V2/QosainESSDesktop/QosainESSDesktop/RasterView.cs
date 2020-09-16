@@ -14,8 +14,8 @@ namespace QosainESSDesktop
         float patternOffsetX = 0, patternOffsetY = 0; 
         float X, Y, rWidth = 40, rHeight = 30, step = 5;
         // !!!!!!!!!!!!!!!
-        float maxX = 55;
-        float maxY = 55;
+        float maxX = 130;
+        float maxY = 130;
         bool noRaster = false;
         public RasterView()
         {
