@@ -160,7 +160,10 @@ namespace QosainESSDesktop
                             foreach (var port in SerialPort.GetPortNames())
                             {
                                 if (fullName.ToLower().Contains(port.ToLower()))
-                                    usbDeviceNames.Add(fullName, port);
+                                {
+                                    if (!usbDeviceNames.ContainsKey(fullName))
+                                        usbDeviceNames.Add(fullName, port);
+                                }
                             }
                         }
 

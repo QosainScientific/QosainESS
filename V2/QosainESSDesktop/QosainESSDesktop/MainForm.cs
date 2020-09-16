@@ -30,7 +30,6 @@ namespace QosainESSDesktop
         private void Form1_Load(object sender, EventArgs e)
         {
             rasterParamTB_TextChanged(null, null);
-            spAutoB_Click(null, null);
             var device = SerialInstrumentFinder.GetDevice("Qosain ESS");
             if (device != null)
             {
@@ -38,15 +37,15 @@ namespace QosainESSDesktop
                 if (device.SerialPort == null)
                     device = null;
             }
-            if (device == null)
-            {
-                MessageBox.Show("The application cannot run without a device and will now exit.");
-                Environment.Exit(1);
-            }
-            else
-            {
-                //new Thread(() => { Thread.Sleep(300); Invoke(new MethodInvoker(() => { dataPort_Connected(); })); }).Start();
-            }
+            //if (device == null)
+            //{
+            //    MessageBox.Show("The application cannot run without a device and will now exit. (E01)");
+            //    Environment.Exit(1);
+            //}
+            //else
+            //{
+                new Thread(() => { Thread.Sleep(300); Invoke(new MethodInvoker(() => { dataPort_Connected(); })); }).Start();
+            //}
         }
         
         private void closeB_Click(object sender, EventArgs e)
@@ -54,6 +53,7 @@ namespace QosainESSDesktop
             Close();
         }
 
+        public string ProcessString { get { return rasterEnabledCB.Checked ? "Process" : "Pumping"; } }
         private void minimizeB_Click(object sender, EventArgs e)
         {
             WindowState = FormWindowState.Minimized;
@@ -71,7 +71,7 @@ namespace QosainESSDesktop
         {
             if (Channel == null)
             {
-                MessageBox.Show("Kindly connect to the hardware first");
+                MessageBox.Show("Kindly connect to the hardware first (E02)");
                 return;
             }
             Channel.Write(new UTF8Encoding().GetBytes(com + "\n"), 0, com.Length + 1);
@@ -125,7 +125,7 @@ namespace QosainESSDesktop
                 return "";
             if (!Channel.IsOpen)
             {
-                MessageBox.Show("The connection to the device was broken abnormally. The system must exit now.");
+                MessageBox.Show("The connection to the device was broken abnormally. The system must exit now. (E03)");
                 Environment.Exit(1);
                 return "";
             }
@@ -137,7 +137,7 @@ namespace QosainESSDesktop
 
                 if (!Channel.IsOpen)
                 {
-                    MessageBox.Show("The connection to the device was broken abnormally. The system must exit now.");
+                    MessageBox.Show("The connection to the device was broken abnormally. The system must exit now. (E04)");
                     Environment.Exit(1);
                     return "";
                 }
@@ -275,9 +275,9 @@ namespace QosainESSDesktop
                     else if (name == "coat end")
                     {
                         rasterEnded();
-                        coatB.Text = "Begin Coating";
+                        coatB.Text = "Begin " + ProcessString;
 
-                        MessageBox.Show("Coating finished successfully", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(ProcessString + " finished successfully", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else if (name != "")
                     {
@@ -397,22 +397,6 @@ namespace QosainESSDesktop
             SendCom(comTable[id]);
         }
 
-        private void RasterParamTB_TextChanged(object sender, System.EventArgs e)
-        {
-        }
-        private void spAutoB_Click(object sender, EventArgs e)
-        {
-            int inc = 220;
-            for (int i = spModesSC.SplitterDistance; i < spModesSC.Height - spManualB.Top - spManualB.Height; i+=inc)
-            {
-                System.Threading.Thread.Sleep(20);
-                spModesSC.SplitterDistance = i;
-                Application.DoEvents();
-                inc = (int)Math.Round(inc * 0.79F) + 1;
-            }
-            spModesSC.SplitterDistance = spModesSC.Height - spManualB.Top - spManualB.Height;
-        }
-
         public string getCommand(string CommandRaw)
         {
             if (CommandRaw == "")
@@ -435,20 +419,6 @@ namespace QosainESSDesktop
             }
             return Args;
         }
-        private void spManualB_Click(object sender, EventArgs e)
-        {
-            int inc = 250;
-            for (int i = spModesSC.SplitterDistance; i >= spAutoB.Top + spAutoB.Height; i -= inc)
-            {
-
-                System.Threading.Thread.Sleep(20);
-                spModesSC.SplitterDistance = i;
-                Application.DoEvents();
-                inc = (int)Math.Round(inc * 0.78F) + 1;
-            }
-            spModesSC.SplitterDistance = spAutoB.Top + spAutoB.Height;
-        }
-
         private void label2_Click(object sender, EventArgs e)
         {
 
@@ -466,7 +436,7 @@ namespace QosainESSDesktop
 
             enableTimeLimit.Enabled = false;
             enableVolumeLimitB.Enabled = false;
-            spManualB.Enabled = false;
+            spManualP.Enabled = false;
         }
         void pumpEnded()
         {
@@ -479,7 +449,7 @@ namespace QosainESSDesktop
             enableTimeLimit.Enabled = true;
             enableVolumeLimitB.Enabled = true;
 
-            spManualB.Enabled = true;
+            spManualP.Enabled = true;
         }
         bool beginPumping()
         {
@@ -493,7 +463,7 @@ namespace QosainESSDesktop
                     );
                 var resp = waitForResponse("pump resp", 2000);
                 if (resp == "")
-                    MessageBox.Show("The pump could not be started");
+                    MessageBox.Show("The pump could not be started. (E05)");
                 else
                 {
                     if (getArgs(resp)["answer"] == "yes")
@@ -502,7 +472,7 @@ namespace QosainESSDesktop
                         return true;
                     }
                     else
-                        MessageBox.Show(getArgs(resp)["message"]);
+                        MessageBox.Show(getArgs(resp)["message"] + " (E06)");
                 }
             }
             catch
@@ -602,16 +572,19 @@ namespace QosainESSDesktop
         {
             try
             {
-                if (Convert.ToDouble(rasterWidthTB.Text) <= 0)
-                    throw new Exception("Coating area width can only be a valid positive number.");
-                if (Convert.ToDouble(rasterHeightTB.Text) <= 0)
-                    throw new Exception("Coating area height can only be a valid positive number.");
-                if (Convert.ToDouble(rasterStepSizeTB.Text) <= 0)
-                    throw new Exception("Raster step size can only be a valid positive number.");
-                if (Convert.ToDouble(syringeFlowRateTB.Text) <= 0)
-                    throw new Exception("Syringe flow rate can only be a valid positive number.");
-                if (Convert.ToDouble(rasterSpeedTB.Text) <= 0 || Convert.ToDouble(rasterSpeedTB.Text) > 25)
-                    throw new Exception("The travel speed you entered is not within the possible hardware range, (0, 25] mm/s");
+                if (rasterEnabledCB.Checked)
+                {
+                    if (Convert.ToDouble(rasterWidthTB.Text) <= 0)
+                        throw new Exception("Raster area width can only be a valid positive number.");
+                    if (Convert.ToDouble(rasterHeightTB.Text) <= 0)
+                        throw new Exception("Raster area height can only be a valid positive number.");
+                    if (Convert.ToDouble(rasterStepSizeTB.Text) <= 0)
+                        throw new Exception("Raster step size can only be a valid positive number.");
+                    if (Convert.ToDouble(syringeFlowRateTB.Text) <= 0)
+                        throw new Exception("Syringe flow rate can only be a valid positive number.");
+                    if (Convert.ToDouble(rasterSpeedTB.Text) <= 0 || Convert.ToDouble(rasterSpeedTB.Text) > 25)
+                        throw new Exception("The travel speed you entered is not within the possible hardware range, (0, 25] mm/s");
+                }
                 double mxd = Convert.ToDouble(syringeVolumeLimitTB.Text) * 1000 / (Math.Pow(Convert.ToSingle(syringeDiaTB.Text) / 2, 2) * (float)Math.PI);
                 double q = Convert.ToSingle(syringeFlowRateTB.Text) * 1000 / 60.0F / (Math.Pow(Convert.ToSingle(syringeDiaTB.Text) / 2, 2) * (float)Math.PI);
                 SendCom("set coat:" +
@@ -621,16 +594,17 @@ namespace QosainESSDesktop
                     ",coats=" + Convert.ToSingle(rasterCoatsTB.Text) +
                     ",speed=" + Convert.ToSingle(rasterSpeedTB.Text) +
                     ",Q=" + q +
-                    ",mxt=" + (enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Text) * 60 : -1) +                    
-                    ",mxd=" + (enableVolumeLimitB.Checked ? mxd : -1)
+                    ",mxt=" + (enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Text) * 60 : -1) +
+                    ",mxd=" + (enableVolumeLimitB.Checked ? mxd : -1) + 
+                    ",rstr=" + (rasterEnabledCB.Checked ? "1" : "0")
                     ); 
                 var resp = waitForResponse("coat resp", 2000);
                 if (resp == "")
-                    MessageBox.Show("Coating process could not be started");
+                    MessageBox.Show(ProcessString + " could not be started. (E07)");
                 else
                 {
                     if (getArgs(resp)["answer"] == "no")
-                        MessageBox.Show(getArgs(resp)["message"]);
+                        MessageBox.Show(getArgs(resp)["message"] + " (E08)");
                     else
                     {
                         rasterView1.beginRaster();
@@ -660,8 +634,8 @@ namespace QosainESSDesktop
 
         private void abortB_Click(object sender, EventArgs e)
         {
-            endRaster();   
-            coatB.Text = "Begin Coating";
+            endRaster();
+            coatB.Text = "Begin " + ProcessString;
         }
 
         private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
@@ -720,6 +694,15 @@ namespace QosainESSDesktop
         private void panel4_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void rasterEnabledCB_CheckedChanged(object sender, EventArgs e)
+        {
+            new Thread(() => { Thread.Sleep(30); Invoke(new MethodInvoker(() => {
+                rasterEnabledCB.Text = rasterEnabledCB.Checked ? "Enabled" : "Disabled";
+                if (coatB.Text.StartsWith("Begin"))
+                    coatB.Text = "Begin " + ProcessString;
+            })); }).Start();
         }
     }
 }
