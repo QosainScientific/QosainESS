@@ -203,6 +203,7 @@ namespace QosainESSDesktop
         bool inTick = false;
         int firstHomingStatus = -1; // -1 is undefined, 0 is no, 1 is done
         SerialPort Channel;
+        float[] backupXYZ = new float[3];
         private void Poller_Tick(object sender, EventArgs e)
         {
             if (inTick)
@@ -222,6 +223,13 @@ namespace QosainESSDesktop
                 {
                     if (name == "status")
                     {
+                        try
+                        {
+                            backupXYZ[0] = float.Parse(args["x"]);
+                            backupXYZ[1] = float.Parse(args["y"]);
+                            backupXYZ[2] = float.Parse(args["z"]);
+                        }
+                        catch { }
                         xCoordL.Text = args["x"];
                         yCoordL.Text = args["y"];
                         if (args["xy stage"] != "{last}")
@@ -520,7 +528,7 @@ namespace QosainESSDesktop
             rasterPad.Enabled = true;
             rasterCoatsTB.Enabled = true;
         }
-        bool beginCoating()
+        bool beginCoating(int retries)
         {
             try
             {
@@ -552,7 +560,14 @@ namespace QosainESSDesktop
                     ); 
                 var resp = waitForResponse("coat resp", 2000);
                 if (resp == "")
-                    MessageBox.Show(ProcessString + " could not be started. (E07)");
+                {
+                    InPlaceReset();
+                    if (retries > 0)
+                        return beginCoating(retries - 1);
+                    MessageBox.Show(ProcessString + " could not be started, kindly try again. (E07)");
+                    return false;
+                }
+
                 else
                 {
                     if (getArgs(resp)["answer"] == "no")
@@ -570,6 +585,16 @@ namespace QosainESSDesktop
                 MessageBox.Show(ex.Message);
             }
             return false;
+        }
+        void InPlaceReset()
+        {
+            Channel.Close();
+            Channel = new SerialPort(Channel.PortName, Channel.BaudRate);
+            Channel.DtrEnable = true;
+            Channel.Open();
+            Thread.Sleep(1500);
+            SendCom("sw resume: x=" + backupXYZ[0] + ",y=" + backupXYZ[1] + ",z=" + backupXYZ[2]);
+            var resp = waitForResponse("sw resume", 300);
         }
         void endRaster()
         {
@@ -638,7 +663,7 @@ namespace QosainESSDesktop
             }
             else      // begin
             {                    
-                if (beginCoating())   
+                if (beginCoating(2))   
                     coatB.Text = "Pause";
             }
         }

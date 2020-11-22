@@ -16,7 +16,7 @@ namespace QosainESSDesktop
             TextChanged += TextSavingTextBox_TextChanged;
             ParentChanged += TextSavingTextBox_ParentChanged;
         }
-        public Quantity Value { get; set; } 
+        public Quantity Value { get; set; }
 
         private void TextSavingTextBox_ParentChanged(object sender, EventArgs e)
         {

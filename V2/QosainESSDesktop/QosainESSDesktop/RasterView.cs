@@ -9,10 +9,12 @@ using System.IO;
 
 namespace QosainESSDesktop
 {
-    public class RasterView:Panel
+    public class RasterView : Panel
     {
-        float patternOffsetX = 0, patternOffsetY = 0; 
-        float X, Y, rWidth = 40, rHeight = 30, step = 5;
+        float patternOffsetX = 0, patternOffsetY = 0;
+        public float X { get; private set; }
+        public float Y { get; private set; }
+        float rWidth = 40, rHeight = 30, step = 5;
         // !!!!!!!!!!!!!!!
         float maxX = 130;
         float maxY = 130;

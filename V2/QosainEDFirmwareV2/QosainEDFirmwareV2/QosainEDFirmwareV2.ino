@@ -78,17 +78,21 @@ void SendStatus()
 			currentXyStatus = xyStatus;
 		if (currentPumpStatus != pumpStatus)
 			currentPumpStatus = pumpStatus;*/
-	Serial.print(F("status: "));
-	Serial.print(F("x = "));
+	Serial.print(F("status:"));
+	Serial.print(F("x="));
 	Serial.print(currentPositions[0], 1);
-	Serial.print(F(", y = "));
+	Serial.print(F(",y="));
 	Serial.print(currentPositions[1], 1);
-	Serial.print(F(", progress = "));
+	Serial.print(F(",z="));
+	Serial.print(currentPositions[2], 1);
+	Serial.print(F(",progress="));
 	Serial.print(min(100, currentProgress), 0);
-	Serial.print(F(", xy stage = "));
+	Serial.print(F(",xy stage="));
 	Serial.print(currentXyStatus);
-	Serial.print(F(", pump = "));
-	Serial.println(currentPumpStatus);
+	Serial.print(F(",pump="));
+	Serial.print(currentPumpStatus);
+
+	Serial.println();
 }
 void Info(String tag, String message)
 {
@@ -1426,6 +1430,17 @@ void loop()
 			currentPumpStatus = F("Idle");
 			currentProgress = -1;
 			SendStatus();
+		}
+		else if (command == F("sw resume"))
+		{
+			currentPositions[0] = Args.Get(F("x")).toFloat();
+			currentPositions[1] = Args.Get(F("y")).toFloat();
+			currentPositions[2] = Args.Get(F("z")).toFloat();
+			currentCountx = requiredCountx;
+			currentCounty = requiredCounty;
+			coatStatus = 0;
+			currentProgress = -1000;
+			Serial.println("sw resume");
 		}
 		else if (command == F("home xy"))
 		{

@@ -17,7 +17,7 @@
 #define __AVR_ATmega328P__
 #define __AVR_ATmega328p__
 #define F_CPU 16000000L
-#define ARDUINO 108010
+#define ARDUINO 108013
 #define ARDUINO_AVR_PRO
 #define ARDUINO_ARCH_AVR
 #define __cplusplus 201103L
@@ -28,6 +28,8 @@
 #define __extension__
 #define __inline__
 #define __volatile__
+// Redefine __cplusplus to correct version: https://www.visualmicro.com/forums/YaBB.pl?num=1592217268
+#undef __cplusplus
 #define __cplusplus 201103L
 
 //#define GCC_VERSION 40902
