@@ -1,0 +1,11 @@
+copy 668a1f70b1153c631ac7242dd8613079 QosainESSDesktop.exe
+copy f5148a444e110ac870477f443a507f1c QosainESSDesktop.pdb
+copy 24156c33ecf3f2f3de04260c0d0e558c textBoxTexts.txt
+Version = 7
+Whats New = + Added a material and time estimation tool before the coating starts<$lb$>+ Better time estimate during working
+Update Size = 0.35 MB
+Final Size = 12.21 MB
+Published on = 2021-Jun-17 01:37:14
+zip Hash = c8634392c9c4035062179ca8c901cfb3
+Zip Size = 0.14 MB
+Zip Parts = 1

@@ -59,7 +59,7 @@
             this.progressL.Location = new System.Drawing.Point(324, 34);
             this.progressL.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.progressL.Name = "progressL";
-            this.progressL.Size = new System.Drawing.Size(87, 54);
+            this.progressL.Size = new System.Drawing.Size(77, 54);
             this.progressL.TabIndex = 1;
             this.progressL.Text = "49";
             this.progressL.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -71,7 +71,7 @@
             this.percentL.Location = new System.Drawing.Point(399, 58);
             this.percentL.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.percentL.Name = "percentL";
-            this.percentL.Size = new System.Drawing.Size(23, 20);
+            this.percentL.Size = new System.Drawing.Size(30, 25);
             this.percentL.TabIndex = 2;
             this.percentL.Text = "%";
             this.percentL.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -82,7 +82,7 @@
             this.label2.Location = new System.Drawing.Point(28, 3);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(66, 20);
+            this.label2.Size = new System.Drawing.Size(81, 25);
             this.label2.TabIndex = 3;
             this.label2.Text = "Started:";
             // 
@@ -92,7 +92,7 @@
             this.startedL.Location = new System.Drawing.Point(104, 3);
             this.startedL.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.startedL.Name = "startedL";
-            this.startedL.Size = new System.Drawing.Size(71, 20);
+            this.startedL.Size = new System.Drawing.Size(90, 25);
             this.startedL.TabIndex = 3;
             this.startedL.Text = "02:32:12";
             // 
@@ -102,7 +102,7 @@
             this.label5.Location = new System.Drawing.Point(243, 3);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(71, 20);
+            this.label5.Size = new System.Drawing.Size(89, 25);
             this.label5.TabIndex = 3;
             this.label5.Text = "Elapsed:";
             // 
@@ -112,7 +112,7 @@
             this.elapsedL.Location = new System.Drawing.Point(325, 3);
             this.elapsedL.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.elapsedL.Name = "elapsedL";
-            this.elapsedL.Size = new System.Drawing.Size(71, 20);
+            this.elapsedL.Size = new System.Drawing.Size(90, 25);
             this.elapsedL.TabIndex = 3;
             this.elapsedL.Text = "00:12:01";
             // 
@@ -122,7 +122,7 @@
             this.label7.Location = new System.Drawing.Point(4, 23);
             this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(89, 20);
+            this.label7.Size = new System.Drawing.Size(110, 25);
             this.label7.TabIndex = 3;
             this.label7.Text = "Remaining:";
             // 
@@ -132,7 +132,7 @@
             this.remainingL.Location = new System.Drawing.Point(104, 23);
             this.remainingL.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.remainingL.Name = "remainingL";
-            this.remainingL.Size = new System.Drawing.Size(62, 20);
+            this.remainingL.Size = new System.Drawing.Size(79, 25);
             this.remainingL.TabIndex = 3;
             this.remainingL.Text = "4:49:06";
             // 
@@ -143,7 +143,7 @@
             // 
             // PlainProgressBar
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.remainingL);
             this.Controls.Add(this.elapsedL);

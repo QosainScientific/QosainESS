@@ -1,0 +1,23 @@
+rmfile 28ec2c0690f188690110a98eb544aa4e FivePointNine.VCSExtentions.pdb
+rmfile 50e6524b7ee9c2c93f5210b63cb1ca54 SharpDX.Mathematics.dll
+rmfile 2056464074215066d3d06abbba1a0519 SharpDX.Mathematics.pdb
+rmfile d81cf09538c3459900a5c14a4b072b05 SharpDX.Mathematics.xml
+rmfile 955ddb844ce2bf3d83990d0cfde4cd6a SlimDX.dll
+rmfile 24a193b966dc067c7b5e1451d884806e settings.cfg
+rmfile 1eb1762ca95e2f6e6ab924dc17bcb558 Icon.png
+rmfile 742cf9687a9dcb5088c5ab806349331c Qosain ESS Desktop.exe
+rmfile ef0181de18ef3951806c0ad63b897ba4 Qosain ESS Desktop.exe.config
+rmfile 4c00d4731eaf9c7b975be6592dbe4df8 Qosain ESS Desktop.pdb
+copy 13bc680ddc50ab85c295e1bf3f1832e6 QosainESSDesktop.exe
+copy ef0181de18ef3951806c0ad63b897ba4 QosainESSDesktop.exe.config
+copy 09bd8ee96a2f1f769bea6ab9cf3451c5 QosainESSDesktop.pdb
+dshortcut 13bc680ddc50ab85c295e1bf3f1832e6 Qosain<$s$>ESS<$s$>Desktop QosainESSDesktop.exe
+execute Default Any user 13bc680ddc50ab85c295e1bf3f1832e6 QosainESSDesktop.exe
+Version = 4
+Whats New = - Some cleaning of unused files<$lb$>* Source code project restructuring
+Update Size = -4.52 MB
+Final Size = 11.8 MB
+Published on = 2020-Sep-12 12:56:05
+zip Hash = 0f2da019d989ce7c439e2ac2f35fc1e2
+Zip Size = 0.12 MB
+Zip Parts = 1

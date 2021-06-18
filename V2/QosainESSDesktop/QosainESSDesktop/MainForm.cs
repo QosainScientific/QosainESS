@@ -507,6 +507,7 @@ namespace QosainESSDesktop
             plainProgressBar1.Visible = true;
             // ??????????? progress missing            
             plainProgressBar1.Started();
+            estimateMaterialB.Visible = false;
 
             rasterWidthTB.Enabled = false;
             rasterHeightTB.Enabled = false;
@@ -519,6 +520,7 @@ namespace QosainESSDesktop
         {                                 
             rasterView1.endRaster();
             plainProgressBar1.Ended();
+            estimateMaterialB.Visible = true;
 
             rasterWidthTB.Enabled = true;
             rasterHeightTB.Enabled = true;
@@ -680,6 +682,55 @@ namespace QosainESSDesktop
                 if (coatB.Text.StartsWith("Begin"))
                     coatB.Text = "Begin " + ProcessString;
             })); }).Start();
+        }
+
+        private void estimateMaterialB_Click(object sender, EventArgs e)
+        {
+
+            StringBuilder sb = new StringBuilder();
+            var coats = Convert.ToSingle(rasterCoatsTB.Text);
+            var S = rasterView1.GetTravelDistance() * coats;
+            var v = double.Parse(rasterSpeedTB.Value.As(new Units.mmPerSecond()));
+            var t_actual = S / v;
+            double qUlPs = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F;
+            var f_actual = qUlPs * t_actual;
+
+            double f_volumeLimit = enableVolumeLimitB.Checked ? Convert.ToDouble(syringeVolumeLimitTB.Value.As(new Units.ul())) : f_actual;
+            double t_timeLimit = enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Value.As(new Units.seconds())) : t_actual;
+
+            double f_timeLimit = qUlPs * t_timeLimit;
+            double t_volumeLimit = f_volumeLimit / qUlPs;
+
+            if (t_actual <= t_volumeLimit && t_actual <= t_timeLimit) // not limited by any
+            {
+                sb.AppendLine("Time: " + new TimeSpan(0, 0, 0, (int)t_actual).ToString(@"hh\:mm\:ss"));
+                sb.AppendLine("Material volume: " + new Quantity(f_actual, new Units.ul(), false).As(new Units.cc()) + " cc");
+
+                if (enableVolumeLimitB.Checked && enableTimeLimit.Checked)
+                    sb.AppendLine("\r\nThe coating will end BEFORE the set time and material volume limit is reached");
+                else if (enableVolumeLimitB.Checked)
+                    sb.AppendLine("\r\nThe coating will end BEFORE the set material volume limit is reached");
+                else if (enableTimeLimit.Checked)
+                    sb.AppendLine("\r\nThe coating will end BEFORE the set time limit is reached");
+            }
+            else if (t_actual > t_volumeLimit && t_actual <= t_timeLimit) // volume limit
+            {
+                sb.AppendLine("Time: " + new TimeSpan(0, 0, 0, (int)t_volumeLimit).ToString(@"hh\:mm\:ss"));
+                sb.AppendLine("Material volume: " + new Quantity(f_volumeLimit, new Units.ul(), false).As(new Units.cc()) + " cc");
+
+                sb.AppendLine("\r\nThe coating will stop when the set volume limit is reached");
+            }
+            else if (t_actual >= t_timeLimit) // time limit
+            {
+                sb.AppendLine("Time: " + new TimeSpan(0, 0, 0, (int)t_timeLimit).ToString(@"hh\:mm\:ss"));
+                sb.AppendLine("Material volume: " + new Quantity(f_timeLimit, new Units.ul(), false).As(new Units.cc()) + " cc");
+
+                sb.AppendLine("\r\nThe coating will stop when the set time limit is reached");
+            }
+            if (sb.Length > 0)
+            {
+                MessageBox.Show("Please note that these values are just estimate and may vary slightly depending upon the health of the ESS system.\r\n" + sb.ToString(), "Estimates", MessageBoxButtons.OK);
+            }
         }
     }
 }

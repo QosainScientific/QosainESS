@@ -75,6 +75,7 @@ namespace QosainESSDesktop
             this.syringeVolumeLimitTB = new QosainESSDesktop.ValueSavingQuantityBox();
             this.rasterStepSizeTB = new QosainESSDesktop.ValueSavingQuantityBox();
             this.syringeTimeLimitTB = new QosainESSDesktop.ValueSavingQuantityBox();
+            this.estimateMaterialB = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.syringeDiaTB = new QosainESSDesktop.ValueSavingQuantityBox();
             this.rasterWidthTB = new QosainESSDesktop.ValueSavingQuantityBox();
@@ -496,6 +497,7 @@ namespace QosainESSDesktop
             this.panel1.Controls.Add(this.syringeVolumeLimitTB);
             this.panel1.Controls.Add(this.rasterStepSizeTB);
             this.panel1.Controls.Add(this.syringeTimeLimitTB);
+            this.panel1.Controls.Add(this.estimateMaterialB);
             this.panel1.Controls.Add(this.label13);
             this.panel1.Controls.Add(this.syringeDiaTB);
             this.panel1.Controls.Add(this.rasterWidthTB);
@@ -768,6 +770,21 @@ namespace QosainESSDesktop
             this.syringeTimeLimitTB.TabIndex = 9;
             this.syringeTimeLimitTB.Text = "0";
             this.syringeTimeLimitTB.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+
+            // 
+            // estimateMaterialB
+            // 
+            this.estimateMaterialB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.estimateMaterialB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(172)))), ((int)(((byte)(164)))), ((int)(((byte)(164)))));
+            this.estimateMaterialB.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.estimateMaterialB.FlatAppearance.BorderSize = 0;
+            this.estimateMaterialB.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.estimateMaterialB.Location = new System.Drawing.Point(285, 417);
+            this.estimateMaterialB.Name = "estimateMaterialB";
+            this.estimateMaterialB.Size = new System.Drawing.Size(130, 25);
+            this.estimateMaterialB.Text = "Estimates";
+            this.estimateMaterialB.TextAlign =  System.Drawing.ContentAlignment.MiddleRight;
+            this.estimateMaterialB.Click += new System.EventHandler(this.estimateMaterialB_Click);
             // 
             // label13
             // 
@@ -1102,6 +1119,8 @@ namespace QosainESSDesktop
         private FivePointNine.Windows.Controls.FlatCheckBox enableTimeLimit;
         private ValueSavingQuantityBox syringeVolumeLimitTB;
         private ValueSavingQuantityBox syringeTimeLimitTB;
+        private System.Windows.Forms.Button estimateMaterialB;
+
         private FivePointNine.Windows.Controls.FlatCheckBox enableVolumeLimitB;
         private _8DirectionButtonSet rasterPad;
         private System.Windows.Forms.Panel panel1;

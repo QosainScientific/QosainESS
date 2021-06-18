@@ -1,0 +1,9 @@
+syringeDiaTB=12;mm
+rasterSpeedTB=1;mm/s
+rasterStepSizeTB=3;mm
+rasterCoatsTB=1;
+rasterHeightTB=40;mm
+rasterWidthTB=40;mm
+syringeFlowRateTB=6;cc/min
+syringeVolumeLimitTB=50;cc
+syringeTimeLimitTB=6;minutus

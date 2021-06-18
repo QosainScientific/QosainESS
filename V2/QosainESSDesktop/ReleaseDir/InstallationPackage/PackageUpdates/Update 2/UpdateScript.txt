@@ -1,0 +1,60 @@
+rmfile ef0181de18ef3951806c0ad63b897ba4 Qosain ED Desktop.exe.config
+rmfile 5a968502b84a268ca84018f1a9f6bb59 Qosain ED Desktop.vshost.exe
+rmfile ef0181de18ef3951806c0ad63b897ba4 Qosain ED Desktop.vshost.exe.config
+rmfile a19a2658ba69030c6ac9d11fd7d7e3c1 Qosain ED Desktop.vshost.exe.manifest
+rmfile a9e8fbbc7407054ea7ae43cfa19dec7e Qosain ED Desktop.exe
+rmfile 4e7707dfee3ddadb73ee382caf329350 Qosain ED Desktop.pdb
+rmfile be68144227955c3e39a939334bd98f7a Update Manager.exe
+mkdir loadingAnim
+copy 4b5dfe890390d3ef96499dde00907b98 loadingAnim\Spinner-1s-200px-00.jpg
+copy fe121286301102392260c444f612aace loadingAnim\Spinner-1s-200px-01.jpg
+copy f25dbca4820fc690dda9b4fc30ed9891 loadingAnim\Spinner-1s-200px-02.jpg
+copy 9e2f24faaacb99181e3bda5435363840 loadingAnim\Spinner-1s-200px-03.jpg
+copy e5f576a19974bb3846ffc4981e9ea01e loadingAnim\Spinner-1s-200px-04.jpg
+copy 1ade759888b53ae2c72730bbdb0826c9 loadingAnim\Spinner-1s-200px-05.jpg
+copy e2eafb325ea7a3e3280a5b591c38e56b loadingAnim\Spinner-1s-200px-06.jpg
+copy 221b5d054fcb80b2e6971c608b914ba1 loadingAnim\Spinner-1s-200px-07.jpg
+copy 05cf978e0c231328adaf7792242a735b loadingAnim\Spinner-1s-200px-08.jpg
+copy f10b45c33a1ed628e08d0c2e6b58e275 loadingAnim\Spinner-1s-200px-09.jpg
+copy bb28bc8b5ed1d7d16a3477fd11919fa0 loadingAnim\Spinner-1s-200px-10.jpg
+copy 209e0835c10113fec8c6cc54920dadd2 loadingAnim\Spinner-1s-200px-11.jpg
+copy 4a71742bdde9d18b7344136d08736532 loadingAnim\Spinner-1s-200px-12.jpg
+copy 15d11ede79bff56911d8d0dac6bbe754 loadingAnim\Spinner-1s-200px-13.jpg
+copy 3a52f5f611a8e86cca063a6a72a5916b loadingAnim\Spinner-1s-200px-14.jpg
+copy 2862b6abdfd0d484310ce463dc9c523a loadingAnim\Spinner-1s-200px-15.jpg
+copy 5aa04970954f413423f9ff9feb7375af loadingAnim\Spinner-1s-200px-16.jpg
+copy 56cb8412c634020ac4e4dce8dd84b82a loadingAnim\Spinner-1s-200px-17.jpg
+copy 48a57d258ab1900c34976e58409386c8 loadingAnim\Spinner-1s-200px-18.jpg
+copy 9112b8a0a1bc53e16d0770d1bf20ec1d loadingAnim\Spinner-1s-200px-19.jpg
+copy 450eab439f27a7bf360c6c0c8e43a73e loadingAnim\Spinner-1s-200px-20.jpg
+copy d1dff74ca867fd0c16cb6a882b6515ee loadingAnim\Spinner-1s-200px-21.jpg
+copy aec15615b7141a70a6b5fe406fdf0a1c loadingAnim\Spinner-1s-200px-22.jpg
+copy 37b0a5a9cc3281627af46a22d82ff788 loadingAnim\Spinner-1s-200px-23.jpg
+copy e5f0281ca53f6fd67a618ae7885bad8d loadingAnim\Spinner-1s-200px-24.jpg
+copy d852b704a8bc4924ebddc8fa84783c97 loadingAnim\Spinner-1s-200px-25.jpg
+copy b48c314dd06fa9f3d4cb10b80a91ab65 loadingAnim\Spinner-1s-200px-26.jpg
+copy 83ee31d858c124d57eb765c8dda9c879 loadingAnim\Spinner-1s-200px-27.jpg
+copy 70da65c7e22abb453c7779ae246074fe loadingAnim\Spinner-1s-200px-28.jpg
+copy 4dd46f2e54a571d4ac78e5d9ceb1e174 loadingAnim\Spinner-1s-200px-29.jpg
+copy 4b5dfe890390d3ef96499dde00907b98 loadingAnim\Spinner-1s-200px-30.jpg
+copy fbbc340c152e003ed4e0953232c2fd57 FivePointNine.VCSExtentions.dll
+copy 1eb1762ca95e2f6e6ab924dc17bcb558 Icon.png
+copy 742cf9687a9dcb5088c5ab806349331c Qosain ESS Desktop.exe
+copy ef0181de18ef3951806c0ad63b897ba4 Qosain ESS Desktop.exe.config
+copy 4c00d4731eaf9c7b975be6592dbe4df8 Qosain ESS Desktop.pdb
+copy 4de46989e02f466594bf780befa3a233 textBoxTexts.txt
+copy 6c1bb1d89464e9f3d3cb78d00581df90 textBoxTexts_defaults.txt
+dshortcut d0f2bea636142e0b56320f62e93d8158 ED<$s$>Desktop Qosain ED Desktop.exe
+execute Default Any user d0f2bea636142e0b56320f62e93d8158 Qosain ED Desktop.exe
+suppress dshortcut d0f2bea636142e0b56320f62e93d8158 ED<$s$>Desktop Qosain ED Desktop.exe
+suppress execute Default Any user d0f2bea636142e0b56320f62e93d8158 Qosain ED Desktop.exe
+dshortcut 742cf9687a9dcb5088c5ab806349331c Qosain<$s$>ESS<$s$>Desktop Qosain ESS Desktop.exe
+execute Default Any user 742cf9687a9dcb5088c5ab806349331c Qosain ESS Desktop.exe
+Version = 3
+Whats New = This is a major update.<$lb$>+ Added Qosain Device Selector<$lb$>- Remove FivePointNine SerialChannelSelector and any usage of its other classes<$lb$>+ Added saving user data in input textboxes using  TextSavingTextBox<$lb$>. Removed many minor glitches<$lb$>
+Update Size = -1.02 MB
+Final Size = 16.62 MB
+Published on = 2020-Sep-11 03:58:28
+zip Hash = 51e61f4e8b5d03206ae257577b22bdcb
+Zip Size = 0.24 MB
+Zip Parts = 1

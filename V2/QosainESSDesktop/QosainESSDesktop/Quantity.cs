@@ -21,6 +21,8 @@ namespace QosainESSDesktop
             try { double.Parse(value); } catch { value = "0"; }
             if (!isStandard)
                 StandardValue = double.Parse(currentUnit.F_(value.ToString()));
+            else
+                StandardValue = double.Parse(value);
             CurrentUnit = currentUnit;
         }
         public double StandardValue = 0;

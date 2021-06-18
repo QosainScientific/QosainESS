@@ -1,0 +1,12 @@
+copy 1eb1762ca95e2f6e6ab924dc17bcb558 Icon.png
+copy fd676e05f482e462ac83338cede7528d QosainESSDesktop.exe
+copy e34bf4a293e6d017fb1912b5072db097 QosainESSDesktop.pdb
+copy 4c94a75e09b64711f2c471c35b4b7237 textBoxTexts.txt
+Version = 6
+Whats New = * Partial fix for E07
+Update Size = 0.35 MB
+Final Size = 12.2 MB
+Published on = 2020-Oct-22 04:38:36
+zip Hash = bccace81f4b2d0eaf0033b39a606a18c
+Zip Size = 0.14 MB
+Zip Parts = 1

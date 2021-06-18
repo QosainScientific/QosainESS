@@ -1,0 +1,10 @@
+copy c04e6b9ed8781123f11cd25aab0a455d QosainESSDesktop.exe
+copy 0d2dce80fe32a58100bd9986e62149d8 QosainESSDesktop.pdb
+Version = 8
+Whats New = + Better time estimate during working
+Update Size = 0.35 MB
+Final Size = 12.21 MB
+Published on = 2021-Jun-18 05:12:02
+zip Hash = d72887086d99350829eefaaa03f7edc5
+Zip Size = 0.14 MB
+Zip Parts = 1

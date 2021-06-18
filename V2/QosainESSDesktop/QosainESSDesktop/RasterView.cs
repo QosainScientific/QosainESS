@@ -63,6 +63,24 @@ namespace QosainESSDesktop
             inRaster = false;
         }
 
+        public double GetTravelDistance()
+        {
+            double dis = 0;
+            for (float y = 0; y < rHeight; y += step * 2)
+            {
+                dis += rWidth;
+                if (y + step <= rHeight)
+                {
+                    dis += step;
+                    dis += rWidth;
+                }
+                if (y + step * 2 <= rHeight)
+                {
+                    dis += step;
+                }
+            }
+            return dis;
+        }
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
