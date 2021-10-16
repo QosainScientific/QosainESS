@@ -40,13 +40,11 @@ namespace QosainESSDesktop
             {
                 try
                 {
-                    if (progressBar1.Value == (int)value)
+                    if (progressBar1.Value == value)
                         return;
-                    progressBar1.Value = (int)value; 
-                    progressL.Text = value.ToString();
                     var elapsed = DateTime.Now - started;
-                    speed = progressBar1.Value / elapsed.TotalSeconds;
-                    valueAtUpdate = progressBar1.Value;
+                    speed = value / elapsed.TotalSeconds;
+                    valueAtUpdate = value;
                     updated = DateTime.Now;
                 }
                 catch { }
@@ -61,6 +59,20 @@ namespace QosainESSDesktop
         }
 
         double speed = .00000001;
+        List<double> estimates = new List<double>();
+        public void Reset()
+        {
+            estimates.Clear();
+            Value = 0;
+            speed = .000001;
+            valueAtUpdate = 0;
+        }
+        public void ForceTimeEstimate(double time)
+        {
+            Value = 0;
+            speed = 100 / time;
+            valueAtUpdate = 0;
+        }
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (speed == 0)
@@ -88,15 +100,100 @@ namespace QosainESSDesktop
                 percentL.Visible = false;
                 return;
             }
-            else
+            progressBar1.Value = (int)Math.Round(projectedValue);
+            progressL.Text = progressBar1.Value.ToString();
+            estimates.Add(secondsRemaining);
+            if (estimates.Count == 1)
             {
-                progressBar1.Visible = true;
-                progressL.Visible = true;
-                percentL.Visible = true;
+                return;
             }
+            if (estimates.Count > 100)
+                estimates.RemoveAt(0);
+            if (estimates.Count < 100)
+            {
+                elapsedL.Text = "--";
+                remainingL.Text = "estimating time remaining...";
+                startedL.Text = "--";
+                progressBar1.Visible = false;
+                progressL.Visible = false;
+                percentL.Visible = false;
+                return;
+            }
+            progressBar1.Visible = true;
+            progressL.Visible = true;
+            percentL.Visible = true;
+
             elapsedL.Text = elapsed.ToString(@"hh\:mm\:ss");
             startedL.Text = started.ToLongTimeString();
-            remainingL.Text = new TimeSpan(0, 0, 0, (int)secondsRemaining).ToString(@"hh\:mm\:ss");
+            remainingL.Text = TimeString(estimates.Average());
+        }
+
+        public static string TimeString(double sec)
+        {
+            double accuracyPC = 5;
+            double secondsRoundD = sec * accuracyPC / 100;
+            double minutesToRoundD = sec * accuracyPC / 100 / 60;
+            int secondsToRound = 5;
+            if (secondsRoundD > 30)
+                secondsToRound = 30;
+            else if (secondsRoundD > 20)
+                secondsToRound = 20;
+            else if (secondsRoundD > 15)
+                secondsToRound = 15;
+            else if (secondsRoundD > 10)
+                secondsToRound = 10;
+            int minutesToRound = 1;
+            if (minutesToRoundD > 60)
+                minutesToRound = 60;
+            else if (minutesToRoundD > 30)
+                minutesToRound = 30;
+            else if (minutesToRoundD > 20)
+                minutesToRound = 20;
+            else if (minutesToRoundD > 15)
+                minutesToRound = 15;
+            else if (minutesToRoundD > 10)
+                minutesToRound = 10;
+            else if (minutesToRoundD > 5)
+                minutesToRound = 5;
+            int seconds = ((((int)Math.Round(sec)) % 60) / secondsToRound) * secondsToRound;
+            int minutes = (((((int)sec) % 3600) / 60) / minutesToRound) * minutesToRound;
+            int hours = ((int)sec) / 3600;
+
+            string hoursStr = "", minutesStr = "", secondsStr = "";
+            if (hours > 0)
+                hoursStr = hours + " hour" + (hours > 1 ? "s" : "");
+            if (minutes > 0)
+                minutesStr = minutes + " minute" + (minutes > 1 ? "s" : "");
+            if (sec < 180)
+                ;
+            if (seconds > 0)
+            {
+                if (hours <= 0 && minutesToRound < 60)
+                    secondsStr = seconds + " second" + (seconds > 1 ? "s" : "");
+            }
+            var parts = new string[] { hoursStr, minutesStr, secondsStr }.ToList().FindAll(p => p != "");
+
+            string ans = "";
+            for (int i = 0; i < parts.Count; i++)
+            {
+                if (i == 1) // , or and
+                {
+                    if (parts.Count == 2)
+                        ans += " and ";
+                    else
+                        ans += ", ";
+                }
+                if (i == 2) // , or and
+                {
+                    if (parts.Count > 1)
+                        ans += " and ";
+                }
+                ans += parts[i];
+            }
+
+            if (ans.Length == 0)
+                ans = "Almost there...";
+            return ans;
         }
     }
 }

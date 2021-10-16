@@ -30,6 +30,7 @@ namespace QosainESSDesktop
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            volumePumpedTimer = new System.Windows.Forms.Timer();
             this.panel2 = new System.Windows.Forms.Panel();
             this.label8 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
@@ -96,6 +97,7 @@ namespace QosainESSDesktop
             this.label17 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.minimizeB = new MagneticPendulum.Button2();
+            this.materialPumpedL = new System.Windows.Forms.Label();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -161,6 +163,14 @@ namespace QosainESSDesktop
             this.label5.TabIndex = 2;
             this.label5.Text = "Phase Portrait";
             this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+
+            //
+            // volumePumpedTimer
+            //
+            volumePumpedTimer.Interval = 100;
+            volumePumpedTimer.Enabled = false;
+            volumePumpedTimer.Tick += VolumePumpedTimer_Tick;
+
             // 
             // windowedModeB
             // 
@@ -1051,6 +1061,23 @@ namespace QosainESSDesktop
             this.minimizeB.TabIndex = 17;
             this.minimizeB.UseVisualStyleBackColor = true;
             this.minimizeB.Click += new System.EventHandler(this.minimizeB_Click);
+
+            // 
+            // materialPumpedL
+            // 
+            this.materialPumpedL.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.materialPumpedL.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.materialPumpedL.Location = new System.Drawing.Point(8, 420);
+            this.materialPumpedL.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.materialPumpedL.Name = "materialPumpedL";
+            this.materialPumpedL.Size = new System.Drawing.Size(400, 34);
+            this.materialPumpedL.TabIndex = 0;
+            this.materialPumpedL.Text = "Material Pumped";
+            this.materialPumpedL.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.materialPumpedL.Visible = false;
+
+
+            this.splitContainer1.Panel1.Controls.Add(materialPumpedL);
             // 
             // MainForm
             // 
@@ -1100,6 +1127,7 @@ namespace QosainESSDesktop
         private System.Windows.Forms.Label label8;    
         private MagneticPendulum.Button2 closeB;
         private MagneticPendulum.Button2 minimizeB;
+        private System.Windows.Forms.Label materialPumpedL;
         private MagneticPendulum.Button2 windowedModeB;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.Label pumpStatusL;
@@ -1161,6 +1189,7 @@ namespace QosainESSDesktop
         private UnitChanger speedus;
         private UnitChanger timeus;
         private UnitChanger volumeus;
+        private System.Windows.Forms.Timer volumePumpedTimer;
     }
 }
 

@@ -1,0 +1,10 @@
+copy e3a728b138d61c296eda4a1347bcc452 QosainESSDesktop.exe
+copy 2adeb51e9c544821e22454f50373ee2b QosainESSDesktop.pdb
+Version = 9
+Whats New = + Fix for wrong estimate during pumping
+Update Size = 0.35 MB
+Final Size = 12.22 MB
+Published on = 2021-Jun-21 05:47:53
+zip Hash = 8a1ed96860768c555c3e39307077fb62
+Zip Size = 0.14 MB
+Zip Parts = 1

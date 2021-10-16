@@ -1,0 +1,11 @@
+copy 5a6d4648bf21b9eddaf02cf383a43623 QosainESSDesktop.exe
+copy 450b914bb0816d8d715c02df9dad9084 QosainESSDesktop.pdb
+copy 3840bfd1b7440ed5e8097fb41888451f textBoxTexts.txt
+Version = 10
+Whats New = * Better stability<$lb$>* Firmware upgrades<$lb$>* Better live time estimates
+Update Size = 0.36 MB
+Final Size = 12.23 MB
+Published on = 2021-Jun-25 07:55:48
+zip Hash = 7c65a1869f5393b79043d6ded8516959
+Zip Size = 0.14 MB
+Zip Parts = 1

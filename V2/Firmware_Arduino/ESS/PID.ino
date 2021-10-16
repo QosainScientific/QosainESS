@@ -5,8 +5,8 @@
 #include "PID.h"
 PIDClass::PIDClass(float Kp_, float Ki_, float Kd_)
 {
-	_Kp = Kp_; _Ki = Ki_; _Kd = Kd_;
-	I = 0;
+  _Kp = Kp_; _Ki = Ki_; _Kd = Kd_;
+  I = 0;
 }
 
 float PIDClass::Signal(float setpoint, float pv, float _dt)
@@ -19,8 +19,6 @@ float PIDClass::Signal(float setpoint, float pv, float _dt)
 
     // Integral term
     _integral += error * _dt;
-    if (_Ki == 0)
-        _integral = 0;
     // Restrict to max/min
     float Iout = _Ki * _integral;
 

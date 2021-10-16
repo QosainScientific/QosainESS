@@ -9,6 +9,8 @@
 //#include "Stepper2.h"
 #include "HashTable.h"
 #include "PID.h"
+// Set to 1 to remove the coating commands to make space for M301, G0 and G1
+#define BuildForPIDCalibraiton 0
 // hardware pin map
 #define xLimitPin		A7
 #define yLimitPin		A6
@@ -17,7 +19,7 @@
 #define pLimitPin		A5
 #define pNegatve		1
 #define pPositive		(!pNegatve)
-#define PIDErrorInMM	0.1
+#define PIDErrorInMM	0.2
 
 uint8_t readPosx();
 uint8_t readPosy();
@@ -25,7 +27,8 @@ uint8_t readPosy();
 uint32_t lastVelocityControlMillis = 0;
 
 // vMax must not exceed 7812 - 10% . Its the ISR frequency
-float aMax = 12000, vMax = 6000;
+//float aMax = 12000, vMax = 6000;
+float aMax = 6000, vMax = 4000;
 int32_t currentCountx = 0, lastControllerMicrosx = 0;
 int32_t requiredCountx = 0;
 float time0x = 0, s0x = 0;
@@ -36,7 +39,7 @@ float vTravelx = 0;
 bool reversex = false;
 int8_t lastPosx = 0;
 bool _lastDirx = 0;
-PIDClass PositionControllerx = PIDClass(2, 0.0001, 0);
+PIDClass PositionControllerx = PIDClass(1, 0.00002, 0);
 
 int32_t currentCounty = 0, lastControllerMicrosy = 0;
 int32_t requiredCounty = 0;
@@ -48,7 +51,7 @@ float vTravely = 0;
 bool reversey = false;
 int8_t lastPosy = 0;
 bool _lastDiry = 0;
-PIDClass PositionControllery = PIDClass(2, 0.0001, 0);
+PIDClass PositionControllery = PIDClass(1, 0.00002, 0);
 
 
 
@@ -86,7 +89,7 @@ void SendStatus()
 	Serial.print(F(",z="));
 	Serial.print(currentPositions[2], 1);
 	Serial.print(F(",progress="));
-	Serial.print(min(100, currentProgress), 0);
+	Serial.print(min(100, currentProgress), 2);
 	Serial.print(F(",xy stage="));
 	Serial.print(currentXyStatus);
 	Serial.print(F(",pump="));
@@ -321,9 +324,9 @@ void MoveToHome(int channel)
 
 		//Serial.println(F("Fine finding"));
 		// go back again.
-		speed_mmps = 1;
+		speed_mmps = 0.5;
 		tAllowed = backupMM / speed_mmps;
-		msAllowed = tAllowed * 1000;
+		msAllowed = tAllowed * 1000 * 1.5;
 		SetCourseForXY(channel, -backupMM / mmPerStep[channel], tAllowed, false);
 		tStartedAt = millis();
 		while (millis() - tStartedAt < msAllowed)
@@ -340,13 +343,13 @@ void MoveToHome(int channel)
 		//Serial.println(F("Hard Stop"));
 		SetCourseForXY(channel, 0, 0, false);
 		tStartedAt = millis();
-		while (millis() - tStartedAt < 100)
+		while (millis() - tStartedAt < 500)
 			MotorLoopXY(1, 1); // both motors need to be in PID
 
 		//Serial.println(F("Leaving some room"));
 		SetCourseForXY(channel, 20, 0.5, false);
 		tStartedAt = millis();
-		while (millis() - tStartedAt < 500)
+		while (millis() - tStartedAt < 1500)
 			MotorLoopXY(1, 1); // both motors need to be in PID
 
 		//Serial.println(F("Resetting Vars"));
@@ -473,6 +476,7 @@ uint8_t readPosy()
 	}
 	return pos;
 }
+
 void MotorLoopXY(bool doX, bool doY)
 {
 	if (doX)
@@ -480,7 +484,15 @@ void MotorLoopXY(bool doX, bool doY)
 		int32_t dtI = micros() - lastControllerMicrosx;
 		float dt = dtI / 1000000.0F;
 		float S = PositionControllerx.Signal(requiredCountx, currentCountx, dt);
+		// Velocity controller doens't help. Alsmost same response
+
+		/*float reqV = ((float)requiredCountx - lastPidCountX);
+		float curV = ((float)currentCountx - lastPidCountX);
+		lastPidCountX = currentCountx;
+		float S = PositionControllerx.Signal(reqV, curV, dt);*/
+
 		motorWriteXY(0, S);
+
 	}
 	if (doY)
 	{
@@ -896,6 +908,7 @@ void getArgs(String CommandRaw, HashTable& Args)
 }
 int8_t coatStatus = 0;
 float coatX = 0, coatY = 0, coatWidth = 0, coatHeight = 0, pumpMax = 0, Q = 0, coatSpeed = 0, coatStepY = 0;
+float definitiveLengthTravelled = 0;
 float lengthTravelled = 0;
 float totalLength = 0;
 // Need to design a new scheme
@@ -913,6 +926,7 @@ long lastStatusSend = 0;
 uint32_t lastSerialMillis = 0;
 uint32_t ourCounter = 0;
 uint32_t autoStatusSentAt = 0;
+
 void loop()
 {
 	//ourCounter++;
@@ -982,7 +996,7 @@ void loop()
 					{
 						//Serial.println(F("coat move 4"));
 						coatMove = 4; // go to x zero
-						SetCourseForXY(0, -(currentPositions[0] - coatX) / mmPerStep[0], abs((currentPositions[0] - coatX)) / 4, false);
+						SetCourseForXY(0, -(currentPositions[0] - coatX) / mmPerStep[0], abs((currentPositions[0] - coatX)) / 3, false);
 					}
 				}
 				else
@@ -1053,10 +1067,10 @@ void loop()
 					}
 					else
 					{
-						SetCourseForXY(0, coatWidth / mmPerStep[0], coatWidth / coatSpeed, false);
+						//SetCourseForXY(0, coatWidth / mmPerStep[0], coatWidth / coatSpeed, false);
+						SetCourseForXY(0, (coatX + coatWidth - currentPositions[0]) / mmPerStep[0], coatWidth / coatSpeed, false);
 						currentXyStatus = F("Moving");
 						currentPumpStatus = F("Paused");
-						currentProgress = lengthTravelled / totalLength * 100.0F;
 						SendStatus();
 					}
 				}
@@ -1066,7 +1080,6 @@ void loop()
 					{
 						currentXyStatus = F("Moving");
 						currentPumpStatus = F("Paused");
-						currentProgress = lengthTravelled / totalLength * 100.0F;
 						SendStatus();
 						lastStatusSend = millis();
 					}
@@ -1075,7 +1088,7 @@ void loop()
 			if (stopCoatFlag)
 				return;
 		}
-		else // coating
+		else // coating or pumping
 		{
 			// we only control motor final positions.
 			// xy loop
@@ -1099,10 +1112,12 @@ void loop()
 						currentXyStatus = F("Idle");
 					currentPumpStatus = F("Pumping");
 					if (coatMove == 6)
+						/*currentProgress = abs(currentPositions[2] - pumpStart) / abs(pumpMax - pumpStart) * 100;
+					else*/
+					{
 						currentProgress = abs(currentPositions[2] - pumpStart) / abs(pumpMax - pumpStart) * 100;
-					else
-						currentProgress = lengthTravelled / totalLength * 100.0F;
-					SendStatus();
+						SendStatus();
+					}
 					lastStatusSend = millis();
 				}
 				//delay(1);
@@ -1114,17 +1129,19 @@ void loop()
 			{
 				if (currentPositions[0] + PIDErrorInMM > coatX + coatWidth) // outside x bounds, lets go up
 				{
-					if (currentPositions[1] + PIDErrorInMM + coatStepY > coatY + coatHeight + 0.1) // can't go up. go to x home.
+					if (currentPositions[1] + PIDErrorInMM + coatStepY > coatY + coatHeight + 0.1) 
+						// can't go up. go to x home.
 					{
 						//Serial.println(F("coat move 4"));
 						coatMove = 4; // go to x zero
 						coatsCompleted++;
-						SetCourseForXY(0, -coatWidth / mmPerStep[0], 2, false);
+						//SetCourseForXY(0, -coatWidth / mmPerStep[0], abs(currentPositions[0] - coatX) / 3, false);
+						SetCourseForXY(0, (coatX - currentPositions[0]) / mmPerStep[0], abs(coatX - currentPositions[0]) / 3, false);
 						//Serial.println(F("BP1"));
 					}
 					else
 					{
-						lengthTravelled += coatWidth;
+						definitiveLengthTravelled += coatWidth;
 						coatYStepsTaken++;
 						//Serial.println(F("coat move 1"));
 						coatMove = 1; // go up as usual in steps
@@ -1132,53 +1149,70 @@ void loop()
 						//Serial.println(F("BP2"));
 					}
 				}
+				else // moving normally horizontally towards X++
+					lengthTravelled = definitiveLengthTravelled + (currentPositions[0] - coatX);
+
 			}
 			// Done, going Y+	(1)
 			else if (coatMove == 1)
 			{
 				if (currentPositions[1] + PIDErrorInMM > coatY + coatStepY * coatYStepsTaken) // moved a step, lets go back to x = 0
 				{
-					lengthTravelled += coatStepY;
+					definitiveLengthTravelled += coatStepY;
 					//Serial.println(F("coat move 2"));
 					coatMove = 2; // go left
-					SetCourseForXY(0, -coatWidth / mmPerStep[0], coatWidth / coatSpeed, false);
+					//SetCourseForXY(0, -coatWidth / mmPerStep[0], coatWidth / coatSpeed, false);
+					SetCourseForXY(0, (coatX - currentPositions[0]) / mmPerStep[0], coatWidth / coatSpeed, false);
 				}
+				else // moving normally vertically towards Y++
+					lengthTravelled = definitiveLengthTravelled + (currentPositions[1] - coatY - coatStepY * (coatYStepsTaken - 1));
+
 			}
 			// Done, going x-
 			else if (coatMove == 2)
 			{
 				if (currentPositions[0] - PIDErrorInMM < coatX) // too left, lets go up
 				{
-					if (currentPositions[1] + coatStepY + PIDErrorInMM > coatY + coatHeight + 0.1) // can't go up. already at x home, go to y home.
+					if (currentPositions[1] + coatStepY + PIDErrorInMM > coatY + coatHeight + 0.1) 
+						// can't go up. already at x home, go to y home.
 					{
 						//Serial.println(F("coat move 5"));
 						coatMove = 5;
 						coatsCompleted++;
-						SetCourseForXY(1, -(currentPositions[1] - coatY) / mmPerStep[1], abs(currentPositions[1] - coatY) / 3, false);
+						SetCourseForXY(1, (coatY - currentPositions[1]) / mmPerStep[1], abs(coatY - currentPositions[1]) / 3, false);
 						//Serial.println(F("BP3"));
 					}
 					else
 					{
-						lengthTravelled += coatWidth;
+						definitiveLengthTravelled += coatWidth;
 						coatYStepsTaken++;
 						//Serial.println(F("coat move 3"));
 						coatMove = 3; // go up as usual in steps
 						SetCourseForXY(1, coatStepY / mmPerStep[1], coatStepY / coatSpeed, false);
+
 						//Serial.println(F("BP4"));
 					}
 				}
+				else // moving normally horizontally towards X--
+					lengthTravelled = definitiveLengthTravelled + (coatWidth - (currentPositions[0] - coatX));
 			}
 			// Done, going Y+ (2)
 			else if (coatMove == 3)
 			{
-				if (currentPositions[1] + PIDErrorInMM > coatY + coatStepY * coatYStepsTaken) // step complete, lets go right to x max
+				if (currentPositions[1] + PIDErrorInMM > coatY + coatStepY * coatYStepsTaken) 
+					// step complete, lets go right to x max
 				{
-					lengthTravelled += coatStepY;
+					definitiveLengthTravelled += coatStepY;
 					//Serial.println(F("coat move 0"));
 					coatMove = 0; // go right
-					SetCourseForXY(0, coatWidth / mmPerStep[0], coatWidth / coatSpeed, false);
+					//SetCourseForXY(0, coatWidth / mmPerStep[0], coatWidth / coatSpeed, false);
+					SetCourseForXY(0, (coatX + coatWidth - currentPositions[0]) / mmPerStep[0], coatWidth / coatSpeed, false);
 				}
+				else // moving normally vertically towards Y++
+					lengthTravelled = definitiveLengthTravelled + (currentPositions[1] - coatY - coatStepY * (coatYStepsTaken - 1));
 			}
+			if (coatMove <= 3)
+				currentProgress = lengthTravelled / totalLength * 100.0F;
 		}
 		if (coatsCompleted >= timesToCoat && !stopCoatFlag)
 		{
@@ -1213,11 +1247,13 @@ void loop()
 		String command = String((char)comStart) + Serial.readStringUntil('\n');
 		getArgs(command, Args);
 		command = getCommand(command);
+
 		if (command == F("abort"))
 		{
 			stopCoatFlag = true;
 			Serial.println(F("abort resp: answer = stopped"));
 		}
+#if !BuildForPIDCalibraiton
 		else if (command == F("pause coat"))
 		{
 			targetXAtPause = targetXPosition;
@@ -1296,10 +1332,15 @@ void loop()
 
 			float timeToPump = Args.Get(F("mxt")).toFloat(); // seconds
 			if (timeToPump < 0)
+			{
 				timeToPump = limits[2] / Q;
-
-			millisToCoatTo = millis() + timeToPump * 1000;
-
+				millisToCoatTo = -1;
+			}
+			else
+			{
+				// to implement a more accurate time limit, lets use millis instead of setting a maxDist
+				millisToCoatTo = millis() + timeToPump * 1000;
+			}
 			totalLength = 0;
 			for (float y = 0; y <= lenY + 0.1; y += coatStepY)
 			{
@@ -1317,10 +1358,12 @@ void loop()
 			coatHeight = lenY;
 			coatsCompleted = 0;
 			stopCoatFlag = 0;
+			definitiveLengthTravelled = 0;
 			lengthTravelled = 0;
 			coatYStepsTaken = 0;
 			coatStatus = 1;
 			coatMove = 0;
+
 			if (Args.Get(F("rstr")).toInt() == 0)
 			{
 				coatWidth = 0;
@@ -1329,10 +1372,159 @@ void loop()
 			}
 			timeSinceLastZStep = millis();
 
+
 			Serial.println(String(F("coat resp: answer = yes, total length = ")) + String(totalLength));
 			if (Args.Get(F("rstr")).toInt() == 1)
 				SetCourseForXY(0, lenX / mmPerStep[0], lenX / coatSpeed, false);
 		}
+#endif
+#if BuildForPIDCalibraiton
+		else if (command.startsWith(F("M301")))
+		{
+			if (coatStatus != 0)
+				return;
+
+			command.toLowerCase();
+			float p = PositionControllerx._Kp, i = PositionControllerx._Ki, d = PositionControllerx._Kd;
+			if (command.indexOf(F("p")) > 0)
+			{
+				String vStr = command.substring(command.indexOf(F("p")) + 1);
+				if (vStr.indexOf(F(" ") > 0))
+					vStr = vStr.substring(0, vStr.indexOf(F(" ")));
+				p = vStr.toFloat();
+			}
+			if (command.indexOf(F("i")) > 0)
+			{
+				String vStr = command.substring(command.indexOf(F("i")) + 1);
+				if (vStr.indexOf(F(" ") > 0))
+					vStr = vStr.substring(0, vStr.indexOf(F(" ")));
+				i = vStr.toFloat();
+			}
+			if (command.indexOf(F("d")) > 0)
+			{
+				String vStr = command.substring(command.indexOf(F("d")) + 1);
+				if (vStr.indexOf(F(" ") > 0))
+					vStr = vStr.substring(0, vStr.indexOf(F(" ")));
+				d = vStr.toFloat();
+			}
+			PositionControllerx._Kp = p;
+			PositionControllerx._Ki = i;
+			PositionControllerx._Kd = d;
+			PositionControllery._Kp = p;
+			PositionControllery._Ki = i;
+			PositionControllery._Kd = d;
+			Serial.println(F("Set PID:"));
+			Serial.print(F("P:"));
+			Serial.println(p, 8);
+			Serial.print(F("I:"));
+			Serial.println(i, 8);
+			Serial.print(F("D:"));
+			Serial.print(d, 8);
+			Serial.println();
+		}
+		else if (command.startsWith(F("G0")) || command.startsWith(F("G1")))
+		{
+			if (coatStatus != 0)
+				return;
+
+			command.toLowerCase();
+			float v = 1, x = targetXPosition, y = targetXPosition;
+			if (command.indexOf(F("f")) > 0)
+			{
+				String vStr = command.substring(command.indexOf(F("f")) + 1);
+				if (vStr.indexOf(F(" ") > 0))
+					vStr = vStr.substring(0, vStr.indexOf(F(" ")));
+				v = vStr.toFloat();
+			}
+			if (command.indexOf(F("x")) > 0)
+			{
+				String vStr = command.substring(command.indexOf(F("x")) + 1);
+				if (vStr.indexOf(F(" ") > 0))
+					vStr = vStr.substring(0, vStr.indexOf(F(" ")));
+				if (command.startsWith(F("G1")))
+					x = vStr.toFloat();
+				else
+					x += vStr.toFloat();
+			}
+			if (command.indexOf(F("y")) > 0)
+			{
+				String vStr = command.substring(command.indexOf(F("y")) + 1);
+				if (vStr.indexOf(F(" ") > 0))
+					vStr = vStr.substring(0, vStr.indexOf(F(" ")));
+
+				if (command.startsWith(F("G1")))
+					y = vStr.toFloat();
+				else
+					y += vStr.toFloat();
+			}
+			float th = atan2(y - currentPositions[1], x - currentPositions[0]);
+			float vx = abs(v * cos(th));
+			float vy = abs(v * sin(th));
+
+			float vxyA[] = { vx,vy };
+			float xyA[] = { x,y };
+			for (int channel = 0; channel < 2; channel++)
+			{
+				float xy = xyA[channel];
+				float vxy = vxyA[channel];
+				if (xy < 0)
+					xy = 0;
+				if (xy > limits[channel])
+					xy = limits[channel];
+				float dxy = xy - currentPositions[channel];
+				int32_t toMovePulses = dxy / mmPerStep[channel];
+				float tAllowed = abs(dxy) / vxy;
+				if (abs(vxy) < .00001)
+					continue;
+				if (toMovePulses == 0)
+					continue;
+				Serial.print(F("Set Course: C"));
+				Serial.print(channel);
+				Serial.print(F(", xy"));
+				Serial.print(xy);
+				Serial.print(F(", vxy"));
+				Serial.print(vxy);
+				Serial.print(F(", t"));
+				Serial.print(tAllowed);
+				Serial.println();
+				SetCourseForXY(channel, toMovePulses, tAllowed, false);
+			}
+			for (int channel = 0; channel < 2; channel++)
+			{
+				float xy = xyA[channel];
+				float vxy = vxyA[channel];
+				if (xy < 0)
+					xy = 0;
+				if (xy > limits[channel])
+					xy = limits[channel];
+				float dxy = xy - currentPositions[channel];
+				int32_t toMovePulses = dxy / mmPerStep[channel];
+				float tAllowed = abs(dxy) / vxy;
+				if (abs(vxy) < .00001)
+					continue;
+				if (toMovePulses == 0)
+					continue;
+				int32_t start = millis();
+				while (abs(currentPositions[channel] - xy) > PIDErrorInMM)
+				{
+					MotorLoopXY(true, true);
+					if (millis() - start > 50)
+					{
+						currentXyStatus = F("Moving");
+						currentPumpStatus = F("Idle");
+						currentProgress = -1;
+						SendStatus();
+						start = millis();
+					}
+				}
+			}
+
+			currentXyStatus = F("Idle");
+			currentPumpStatus = F("Idle");
+			currentProgress = -1;
+			SendStatus();
+		}
+#endif
 		else if ((command.startsWith(F("x")) || command.startsWith(F("y"))) && (command.charAt(1) == '+' || command.charAt(1) == '-'))
 		{
 			if (coatStatus != 0)

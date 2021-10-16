@@ -12,9 +12,17 @@ namespace QosainESSDesktop
     {
         public Quantity(double value, IUnit currentUnit, bool isStandard = true) :this(value.ToString(), currentUnit, isStandard)
         { }
-        public string As(IUnit unit)
+        public string As(IUnit unit, string format = null)
         {
-            return unit.F(StandardValue.ToString());
+            if (format == null)
+                return unit.F(StandardValue.ToString());
+            else
+                try
+                {
+                    return double.Parse(unit.F(StandardValue.ToString())).ToString(format);
+                }
+                catch { return As(unit); }
+
         }
         public Quantity(string value, IUnit currentUnit, bool isStandard = true)
         {
@@ -35,7 +43,7 @@ namespace QosainESSDesktop
         { 
         }
         public TextBox TargetControl { get; set; }
-        Quantity Value;
+        public Quantity Value { get; private set; }
         IUnit [] Units;
         public void Initialize(ValueSavingQuantityBox target, params IUnit[] units)
         {
