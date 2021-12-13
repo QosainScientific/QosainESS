@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #pragma once
-#define tableSize 15
+#define tableSize 10
 class HashTable
 {
 //variables

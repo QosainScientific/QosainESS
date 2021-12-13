@@ -11,6 +11,9 @@ PIDClass::PIDClass(float Kp_, float Ki_, float Kd_)
 
 float PIDClass::Signal(float setpoint, float pv, float _dt)
 {
+    //avgSetPoint = setpoint * (1 - setPointAvgFactor) + avgSetPoint * setPointAvgFactor;
+    //setpoint = avgSetPoint;
+    float _Kp = this->_Kp;// +this->_Kp * (1 - abs(lastSignal) / _max) * _Bp;
     // Calculate error
     float error = setpoint - pv;
 
@@ -32,11 +35,11 @@ float PIDClass::Signal(float setpoint, float pv, float _dt)
             _integral = _min / _Ki;
     }
     // Derivative term
-    float derivative = (error - _pre_error) / _dt;
-    float Dout = _Kd * derivative;
+    //float derivative = (error - _pre_error) / _dt;
+    //float Dout = _Kd * derivative;
 
     // Calculate total output
-    float output = Pout + Iout + Dout;
+    float output = Pout + Iout;// +Dout;
 
     // Restrict to max/min
     if (output > _max)
@@ -45,7 +48,7 @@ float PIDClass::Signal(float setpoint, float pv, float _dt)
         output = _min;
 
     // Save error to previous error
-    _pre_error = error;
-
+    //_pre_error = error;
+    //lastSignal = output;
     return output;
 }

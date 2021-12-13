@@ -9,17 +9,21 @@
 //#include "Stepper2.h"
 #include "HashTable.h"
 #include "PID.h"
-// Set to 1 to remove the coating commands to make space for M301, G0 and G1
-#define BuildForPIDCalibraiton 0
+#define DriverIsTMC2208 1
+#define MotorIsSmallFaulHarber 1
+
+// Set to 1 to remove the coating commands to make space for M119, M301, G0 and G1
+#define BuildForPIDCalibraiton 1
 // hardware pin map
-#define xLimitPin		A7
-#define yLimitPin		A6
-#define pStepPin		A3
-#define pDirectionPin	A4
-#define pLimitPin		A5
-#define pNegatve		1
-#define pPositive		(!pNegatve)
-#define PIDErrorInMM	0.2
+#define SyringePumpEnablePin	13
+#define xLimitPin			A7
+#define yLimitPin			A6
+#define pStepPin			A3
+#define pDirectionPin		A4
+#define pLimitPin			A5
+#define pNegatve			1
+#define pPositive			(!pNegatve)
+#define PIDErrorInMM		0.3
 
 uint8_t readPosx();
 uint8_t readPosy();
@@ -39,7 +43,11 @@ float vTravelx = 0;
 bool reversex = false;
 int8_t lastPosx = 0;
 bool _lastDirx = 0;
+#if MotorIsSmallFaulHarber
+PIDClass PositionControllerx = PIDClass(2, 0.000005, 0);
+#else 
 PIDClass PositionControllerx = PIDClass(1, 0.00002, 0);
+#endif
 
 int32_t currentCounty = 0, lastControllerMicrosy = 0;
 int32_t requiredCounty = 0;
@@ -51,13 +59,28 @@ float vTravely = 0;
 bool reversey = false;
 int8_t lastPosy = 0;
 bool _lastDiry = 0;
+#if MotorIsSmallFaulHarber
+PIDClass PositionControllery = PIDClass(1, 0.00001, 0);
+#else 
 PIDClass PositionControllery = PIDClass(1, 0.00002, 0);
+#endif
 
 
 
 int8_t pumpDirection = 0;
 //float mmPerStep[3] = { 0.0075,0.0075, 0.01 };
-float mmPerStep[3] = { 0.0021037695107656, 0.0021037695107656, 0.00317564 }; // recalculate!!!!!
+float mmPerStep[3] = {
+#if MotorIsSmallFaulHarber
+	0.0080211472021715, 0.0080211472021715,
+#else
+	0.0021037695107656, 0.0021037695107656,
+#endif
+#if DriverIsTMC2208
+	0.000198F
+#else
+	0.00317564
+#endif
+}; // recalculate!!!!!
 float limits[3] = { 130,130,98 }; // in mm
 float currentPositions[3] = { 0, 0, 0 };
 float targetXPosition = 0;
@@ -187,6 +210,8 @@ void setup() {
 	//         PIN  MAP            //
 	/////////////////////////////////
 
+	pinMode(SyringePumpEnablePin, 1);
+	digitalWrite(SyringePumpEnablePin, 1);
 	//	_____X_Motor_________ 
 	//	|_PIN___|__Address__|
 	//	|  EN	| PB2, OC1B |
@@ -238,6 +263,10 @@ void setup() {
 	PositionControllery._max = 100;
 	PositionControllery._min = -100;
 
+#if MotorIsSmallFaulHarber
+	//PositionControllerx._Bp = 5;
+	//PositionControllery._Bp = 5;
+#endif
 	// Setup pins used by motor P
 	pinMode(pStepPin, 1);
 	pinMode(pDirectionPin, 1);
@@ -276,8 +305,10 @@ bool pumpStep(int8_t direction, bool dontDelay)
 {
 	setPumpDirection(direction);
 	bool wasMoved = false;
-	digitalWrite(pStepPin, 1);
-	digitalWrite(pStepPin, 0);
+	PORTC |= 0b1000;
+	PORTC &= 0b11110111;
+	/*digitalWrite(pStepPin, 1);
+	digitalWrite(pStepPin, 0);*/
 	if (!dontDelay)
 		delayMicroseconds(400);
 	wasMoved = true;
@@ -306,7 +337,7 @@ void MoveToHome(int channel)
 		int32_t tStartedAt = millis();
 		while (millis() - tStartedAt < msAllowed)
 		{
-			MotorLoopXY(channel == 0, channel == 1);
+			MotorLoopXY(1, 1);
 			if (checkLimit(channel))
 				foundCount++;
 			else if (foundCount > 0)
@@ -320,7 +351,7 @@ void MoveToHome(int channel)
 		SetCourseForXY(channel, backupMM / mmPerStep[channel], backupMM / 2, false);
 		tStartedAt = millis();
 		while (millis() - tStartedAt < (backupMM / 2) * 1000)
-			MotorLoopXY(channel == 0, channel == 1);
+			MotorLoopXY(1, 1);
 
 		//Serial.println(F("Fine finding"));
 		// go back again.
@@ -331,7 +362,7 @@ void MoveToHome(int channel)
 		tStartedAt = millis();
 		while (millis() - tStartedAt < msAllowed)
 		{
-			MotorLoopXY(channel == 0, channel == 1);
+			MotorLoopXY(1, 1);
 			if (checkLimit(channel))
 				foundCount++;
 			else if (foundCount > 0)
@@ -370,7 +401,7 @@ void MoveToHome(int channel)
 	else if (channel == 2)
 	{
 		// Home Pump motor in the usual way
-		for (int i = 0; i < limits[channel] / mmPerStep[channel]; i++)
+		for (long i = 0; i < limits[channel] / mmPerStep[channel]; i++)
 		{
 			if (checkLimit(channel))
 				foundCount++;
@@ -380,12 +411,17 @@ void MoveToHome(int channel)
 			{
 				break;
 			}
-			pumpStep(homeDir);
+			pumpStep(homeDir, true);
+
+			if (i % 200 == 0)
+			{
+				SendStatus();
+			}
 			MotorLoopXY(1, 1); // both motors need to be in PID
 		}
 		for (int i = 0; i < 20; i++)
 		{
-			pumpStep(-homeDir);
+			pumpStep(-homeDir, true);
 			delay(1);
 			MotorLoopXY(1, 1); // both motors need to be in PID
 		}
@@ -962,7 +998,11 @@ void loop()
 
 	//	Serial.println();
 	//}
+#if BuildForPIDCalibraiton
+	if (millis() - autoStatusSentAt > 1000)
+#else
 	if (millis() - autoStatusSentAt > 50)
+#endif
 	{
 		SendStatus();
 		autoStatusSentAt = millis();
@@ -980,8 +1020,10 @@ void loop()
 				coatStatus = 0;
 				coatMove = 0;
 				currentProgress = -1000;
+				digitalWrite(SyringePumpEnablePin, 0);
 				currentXyStatus = F("Idle");
 				currentPumpStatus = F("Idle");
+				digitalWrite(SyringePumpEnablePin, 1);
 				Serial.println("coat end");
 			}
 			else
@@ -991,6 +1033,7 @@ void loop()
 					coatStatus = 1;
 					currentXyStatus = F("Moving");
 					currentPumpStatus = F("Idle");
+					digitalWrite(SyringePumpEnablePin, 1);
 					SendStatus();
 					if (coatMove < 4)
 					{
@@ -1006,8 +1049,10 @@ void loop()
 					coatStatus = 0;
 					coatMove = 0;
 					currentProgress = -1000;
+					digitalWrite(SyringePumpEnablePin, 1);
 					currentXyStatus = F("Idle");
 					currentPumpStatus = F("Idle");
+					digitalWrite(SyringePumpEnablePin, 1);
 					Serial.println("coat end");
 				}
 			}
@@ -1037,7 +1082,11 @@ void loop()
 				}
 				else
 				{
+#if BuildForPIDCalibraiton
+					if (millis() - lastStatusSend > 400)
+#else
 					if (millis() - lastStatusSend > 30)
+#endif
 					{
 						currentXyStatus = F("Moving");
 						currentPumpStatus = F("Paused");
@@ -1058,6 +1107,7 @@ void loop()
 						//SendStatus(F("Moving"), F("Idle"), lengthTravelled / totalLength * 100.0F);
 						currentXyStatus = F("Idle");
 						currentPumpStatus = F("Idle");
+						digitalWrite(SyringePumpEnablePin, 1);
 						currentProgress = -1000;
 						abortBegun = false;
 						stopCoatFlag = 0;
@@ -1076,7 +1126,11 @@ void loop()
 				}
 				else
 				{
+#if BuildForPIDCalibraiton
+					if (millis() - lastStatusSend > 400)
+#else
 					if (millis() - lastStatusSend > 30)
+#endif
 					{
 						currentXyStatus = F("Moving");
 						currentPumpStatus = F("Paused");
@@ -1104,13 +1158,18 @@ void loop()
 			}
 			if (hadAStep)
 			{
+#if BuildForPIDCalibraiton
+				if (millis() - lastStatusSend > 400)
+#else
 				if (millis() - lastStatusSend > 50)
+#endif
 				{
 					if (coatMove < 6)
 						currentXyStatus = F("Coating");
 					else
 						currentXyStatus = F("Idle");
 					currentPumpStatus = F("Pumping");
+					digitalWrite(SyringePumpEnablePin, 0);
 					if (coatMove == 6)
 						/*currentProgress = abs(currentPositions[2] - pumpStart) / abs(pumpMax - pumpStart) * 100;
 					else*/
@@ -1375,7 +1434,10 @@ void loop()
 
 			Serial.println(String(F("coat resp: answer = yes, total length = ")) + String(totalLength));
 			if (Args.Get(F("rstr")).toInt() == 1)
+			{
 				SetCourseForXY(0, lenX / mmPerStep[0], lenX / coatSpeed, false);
+				digitalWrite(SyringePumpEnablePin, 0);
+			}
 		}
 #endif
 #if BuildForPIDCalibraiton
@@ -1422,13 +1484,92 @@ void loop()
 			Serial.print(d, 8);
 			Serial.println();
 		}
+		//else if (command.startsWith(F("M302")))
+		//{
+		//	if (coatStatus != 0)
+		//		return;
+
+		//	command.toLowerCase();
+		//	float p = PositionControllerx._Kp, i = PositionControllerx._Ki, d = PositionControllerx._Kd;
+		//	if (command.indexOf(F("p")) > 0)
+		//	{
+		//		String vStr = command.substring(command.indexOf(F("p")) + 1);
+		//		if (vStr.indexOf(F(" ") > 0))
+		//			vStr = vStr.substring(0, vStr.indexOf(F(" ")));
+		//		p = vStr.toFloat();
+		//	}
+		//	if (command.indexOf(F("i")) > 0)
+		//	{
+		//		String vStr = command.substring(command.indexOf(F("i")) + 1);
+		//		if (vStr.indexOf(F(" ") > 0))
+		//			vStr = vStr.substring(0, vStr.indexOf(F(" ")));
+		//		i = vStr.toFloat();
+		//	}
+		//	if (command.indexOf(F("d")) > 0)
+		//	{
+		//		String vStr = command.substring(command.indexOf(F("d")) + 1);
+		//		if (vStr.indexOf(F(" ") > 0))
+		//			vStr = vStr.substring(0, vStr.indexOf(F(" ")));
+		//		d = vStr.toFloat();
+		//	}
+		//	PositionControllerx._Bp = p;
+		//	PositionControllerx._Bi = i;
+		//	PositionControllerx._Bd = d;
+		//	PositionControllery._Bp = p;
+		//	PositionControllery._Bi = i;
+		//	PositionControllery._Bd = d;
+		//	Serial.println(F("Set PID Bias:"));
+		//	Serial.print(F("P:"));
+		//	Serial.println(p, 8);
+		//	Serial.print(F("I:"));
+		//	Serial.println(i, 8);
+		//	Serial.print(F("D:"));
+		//	Serial.print(d, 8);
+		//	Serial.println();
+		//}
+		//else if (command.startsWith(F("M303")))
+		//{
+		//	if (coatStatus != 0)
+		//		return;
+
+		//	command.toLowerCase();
+		//	float f = PositionControllerx.setPointAvgFactor;
+		//	if (command.indexOf(F("f")) > 0)
+		//	{
+		//		String vStr = command.substring(command.indexOf(F("f")) + 1);
+		//		if (vStr.indexOf(F(" ") > 0))
+		//			vStr = vStr.substring(0, vStr.indexOf(F(" ")));
+		//		f = vStr.toFloat();
+		//	}
+		//	PositionControllerx.setPointAvgFactor = f;
+		//	PositionControllery.setPointAvgFactor = f;
+
+		//	Serial.println(F("Set averaging factor:"));
+		//	Serial.print(F("f: "));
+		//	Serial.println(f, 8);
+		//	Serial.println();
+		//}
+		else if (command == F("M119"))
+		{
+			Serial.print(F("X Limit: "));
+			Serial.println(checkLimit(0) ? F("Touching") : F("Open"));
+			Serial.print(F("Y Limit: "));
+			Serial.println(checkLimit(1) ? F("Touching") : F("Open"));
+			Serial.print(F("Syringe Limit: "));
+			Serial.println(checkLimit(2) ? F("Touching") : F("Open"));
+		}
 		else if (command.startsWith(F("G0")) || command.startsWith(F("G1")))
 		{
-			if (coatStatus != 0)
-				return;
+			/*if (coatStatus != 0)
+				return;*/
 
 			command.toLowerCase();
-			float v = 1, x = targetXPosition, y = targetXPosition;
+			float v = 1, x = targetXPosition, y = targetYPosition;
+
+			Serial.print(F("x0 "));
+			Serial.print(x);
+			Serial.print(F(", y0 "));
+			Serial.print(y);
 			if (command.indexOf(F("f")) > 0)
 			{
 				String vStr = command.substring(command.indexOf(F("f")) + 1);
@@ -1457,14 +1598,25 @@ void loop()
 				else
 					y += vStr.toFloat();
 			}
+			Serial.print(F(" > x1 "));
+			Serial.print(x);
+			Serial.print(F(", y1 "));
+			Serial.println(y);
 			float th = atan2(y - currentPositions[1], x - currentPositions[0]);
 			float vx = abs(v * cos(th));
 			float vy = abs(v * sin(th));
 
 			float vxyA[] = { vx,vy };
-			float xyA[] = { x,y };
+			float xyA[] = { x, y };
 			for (int channel = 0; channel < 2; channel++)
 			{
+				Serial.print(F("Set Course: C"));
+				Serial.print(channel);
+				if (command.indexOf((char)('x' + channel)) < 0)
+				{
+					Serial.println(" skip 1");
+					continue;
+				}
 				float xy = xyA[channel];
 				float vxy = vxyA[channel];
 				if (xy < 0)
@@ -1475,11 +1627,15 @@ void loop()
 				int32_t toMovePulses = dxy / mmPerStep[channel];
 				float tAllowed = abs(dxy) / vxy;
 				if (abs(vxy) < .00001)
+				{
+					Serial.println(" skip 2");
 					continue;
+				}
 				if (toMovePulses == 0)
+				{
+					Serial.println(" skip 3");
 					continue;
-				Serial.print(F("Set Course: C"));
-				Serial.print(channel);
+				}
 				Serial.print(F(", xy"));
 				Serial.print(xy);
 				Serial.print(F(", vxy"));
@@ -1491,6 +1647,8 @@ void loop()
 			}
 			for (int channel = 0; channel < 2; channel++)
 			{
+				if (command.indexOf((char)('x' + channel)) < 0)
+					continue;
 				float xy = xyA[channel];
 				float vxy = vxyA[channel];
 				if (xy < 0)
@@ -1508,19 +1666,26 @@ void loop()
 				while (abs(currentPositions[channel] - xy) > PIDErrorInMM)
 				{
 					MotorLoopXY(true, true);
+#if BuildForPIDCalibraiton
+					if (millis() - start > 1000)
+#else
 					if (millis() - start > 50)
+#endif
 					{
 						currentXyStatus = F("Moving");
 						currentPumpStatus = F("Idle");
+						digitalWrite(SyringePumpEnablePin, 1);
 						currentProgress = -1;
 						SendStatus();
 						start = millis();
 					}
 				}
+				Serial.println("Move done");
 			}
 
 			currentXyStatus = F("Idle");
 			currentPumpStatus = F("Idle");
+			digitalWrite(SyringePumpEnablePin, 1);
 			currentProgress = -1;
 			SendStatus();
 		}
@@ -1565,6 +1730,7 @@ void loop()
 				{
 					currentXyStatus = F("Moving");
 					currentPumpStatus = F("Idle");
+					digitalWrite(SyringePumpEnablePin, 1);
 					currentProgress = -1;
 					SendStatus();
 					start = millis();
@@ -1573,6 +1739,7 @@ void loop()
 
 			currentXyStatus = F("Idle");
 			currentPumpStatus = F("Idle");
+			digitalWrite(SyringePumpEnablePin, 1);
 			currentProgress = -1;
 			SendStatus();
 		}
@@ -1580,13 +1747,14 @@ void loop()
 		{
 			if (coatStatus != 0)
 				return;
-			Serial.println(F("z+"));
-			for (int steps = 0; steps < (command == F("z+") ? 1 : 10) / mmPerStep[2]; steps++)
+			digitalWrite(SyringePumpEnablePin, 0);
+			Serial.print(command);
+			for (long steps = 0; steps < (command == F("z+") ? 1 : 10) / mmPerStep[2]; steps++)
 			{
 				if (currentPositions[2] + mmPerStep[2] > limits[2])
 					break;
 				pumpStep(1);
-				if (steps % 20 == 0)
+				if (steps % 200 == 0)
 				{
 					currentXyStatus = F("Idle");
 					currentPumpStatus = F("Moving");
@@ -1594,9 +1762,9 @@ void loop()
 					SendStatus();
 				}
 			}
-
 			currentXyStatus = F("Idle");
 			currentPumpStatus = F("Idle");
+			digitalWrite(SyringePumpEnablePin, 1);
 			currentProgress = -1;
 			SendStatus();
 		}
@@ -1605,12 +1773,14 @@ void loop()
 			if (coatStatus != 0)
 				return;
 			Serial.println("z-");
-			for (int steps = 0; steps < (command == F("z-") ? 1 : 10) / mmPerStep[2]; steps++)
+			digitalWrite(SyringePumpEnablePin, 0);
+			for (long steps = 0; steps < (command == F("z-") ? 1 : 10) / mmPerStep[2]; steps++)
 			{
 				if (currentPositions[2] + mmPerStep[2] < 0)
 					break;
-				pumpStep(-1);
-				if (steps % 20 == 0)
+				pumpStep(-1, true);
+				//delayMicroseconds(50);
+				if (steps % 200 == 0)
 				{
 					currentXyStatus = F("Idle");
 					currentPumpStatus = F("Moving");
@@ -1620,6 +1790,7 @@ void loop()
 			}
 			currentXyStatus = F("Idle");
 			currentPumpStatus = F("Idle");
+			digitalWrite(SyringePumpEnablePin, 1);
 			currentProgress = -1;
 			SendStatus();
 		}
@@ -1638,11 +1809,13 @@ void loop()
 		{
 			currentXyStatus = F("Homing X");
 			currentPumpStatus = F("Idle");
+			digitalWrite(SyringePumpEnablePin, 1);
 			currentProgress = -1;
 			SendStatus();
 			MoveToHome(0);
 			currentXyStatus = F("Homing Y");
 			currentPumpStatus = F("Idle");
+			digitalWrite(SyringePumpEnablePin, 1);
 			currentProgress = -1;
 			SendStatus();
 			MoveToHome(1);
@@ -1654,6 +1827,7 @@ void loop()
 			//currentPositions[2] = limits[2];
 			currentXyStatus = F("Idle");
 			currentPumpStatus = F("Idle");
+			digitalWrite(SyringePumpEnablePin, 1);
 			currentProgress = -1;
 			SendStatus();
 		}
@@ -1663,6 +1837,7 @@ void loop()
 				return;
 			currentXyStatus = F("Idle");
 			currentPumpStatus = F("Homing Z");
+			digitalWrite(SyringePumpEnablePin, 0);
 			currentProgress = -1;
 			SendStatus();
 			MoveToHome(2);
@@ -1670,6 +1845,7 @@ void loop()
 
 			currentXyStatus = F("Idle");
 			currentPumpStatus = F("Idle");
+			digitalWrite(SyringePumpEnablePin, 1);
 			currentProgress = -1;
 			SendStatus();
 		}
@@ -1677,5 +1853,12 @@ void loop()
 		{
 			SetCourseForXY(command.charAt(1) == 'x' ? 0 : 1, Args.Get(F("d")).toFloat(), Args.Get(F("t")).toFloat(), false);
 		}
+#if BuildForPIDCalibraiton
+		else
+		{
+			Serial.print(F("unknown command: "));
+			Serial.println(command);
+		}
+#endif
 	}
 }
