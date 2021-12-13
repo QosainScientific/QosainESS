@@ -24,6 +24,9 @@
 #define pNegatve			1
 #define pPositive			(!pNegatve)
 #define PIDErrorInMM		0.3
+#if DriverIsTMC2208
+#define PumpStepsMultiplier 5
+#endif
 
 uint8_t readPosx();
 uint8_t readPosy();
@@ -35,6 +38,9 @@ uint32_t lastVelocityControlMillis = 0;
 float aMax = 6000, vMax = 4000;
 int32_t currentCountx = 0, lastControllerMicrosx = 0;
 int32_t requiredCountx = 0;
+#if DriverIsTMC2208
+int currentPumpSteps = 0, targetPumpSteps = 0;
+#endif
 float time0x = 0, s0x = 0;
 float  time1x = 0, s1x = 0;
 float  time2x = 0, s2x = 0;
@@ -44,7 +50,7 @@ bool reversex = false;
 int8_t lastPosx = 0;
 bool _lastDirx = 0;
 #if MotorIsSmallFaulHarber
-PIDClass PositionControllerx = PIDClass(2, 0.000005, 0);
+PIDClass PositionControllerx = PIDClass(1, 0.00001, 0);
 #else 
 PIDClass PositionControllerx = PIDClass(1, 0.00002, 0);
 #endif
@@ -76,7 +82,7 @@ float mmPerStep[3] = {
 	0.0021037695107656, 0.0021037695107656,
 #endif
 #if DriverIsTMC2208
-	0.000198F
+	0.000198F * PumpStepsMultiplier// each soft step contains PumpStepsMultiplier hard steps
 #else
 	0.00317564
 #endif
@@ -129,9 +135,9 @@ void Info(String tag, String message)
 }
 void Error(String tag, String message)
 {}
-uint32_t total = 0;
+//uint32_t total = 0;
 ISR(TIMER2_OVF_vect) {
-	total++;
+	//total++;
 	uint8_t pos = readPosx();
 	if (lastPosx != pos)
 	{
@@ -200,6 +206,22 @@ ISR(TIMER2_OVF_vect) {
 			lastPosy = pos;
 		}
 	}
+#if DriverIsTMC2208
+	if (currentPumpSteps > targetPumpSteps)
+	{
+		setPumpDirection(1);
+		PORTC |= 0b1000;
+		PORTC &= 0b11110111;
+		currentPumpSteps--;
+	}
+	if (currentPumpSteps < targetPumpSteps)
+	{
+		setPumpDirection(-1);
+		PORTC |= 0b1000;
+		PORTC &= 0b11110111;
+		currentPumpSteps++;
+	}
+#endif
 }
 void setup() {
 	Serial.begin(115200);
@@ -303,17 +325,29 @@ bool checkLimit(uint8_t channel)
 
 bool pumpStep(int8_t direction, bool dontDelay)
 {
-	setPumpDirection(direction);
-	bool wasMoved = false;
-	PORTC |= 0b1000;
-	PORTC &= 0b11110111;
-	/*digitalWrite(pStepPin, 1);
-	digitalWrite(pStepPin, 0);*/
+#if DriverIsTMC2208
+	if (direction == -1)
+		targetPumpSteps += PumpStepsMultiplier;
+	else if (direction == 1)
+		targetPumpSteps -= PumpStepsMultiplier;
 	if (!dontDelay)
 		delayMicroseconds(400);
-	wasMoved = true;
-	currentPositions[2] += pumpDirection * mmPerStep[2];
-	return wasMoved;
+	currentPositions[2] += direction * mmPerStep[2];
+	return true;
+#else
+	setPumpDirection(direction);
+	bool wasMoved = false;
+	digitalWrite(pStepPin, 1);
+	digitalWrite(pStepPin, 0);
+	if (!dontDelay)
+	{
+		delayMicroseconds(400);
+	}
+	//wasMoved = true;
+	currentPositions[2] += direction * mmPerStep[2];
+	//return wasMoved;
+	return true;
+#endif
 }
 
 void MoveToHome(int channel)
@@ -421,7 +455,7 @@ void MoveToHome(int channel)
 		}
 		for (int i = 0; i < 20; i++)
 		{
-			pumpStep(-homeDir, true);
+			pumpStep(-homeDir);
 			delay(1);
 			MotorLoopXY(1, 1); // both motors need to be in PID
 		}
@@ -1753,7 +1787,7 @@ void loop()
 			{
 				if (currentPositions[2] + mmPerStep[2] > limits[2])
 					break;
-				pumpStep(1);
+				pumpStep(1, true);
 				if (steps % 200 == 0)
 				{
 					currentXyStatus = F("Idle");
