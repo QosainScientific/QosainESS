@@ -9,11 +9,14 @@
 //#include "Stepper2.h"
 #include "HashTable.h"
 #include "PID.h"
+
+// Set to 1 to remove the coating commands to make space for M119, M301, G0 and G1
+#define BuildForCalibraiton 0
+
+
 #define DriverIsTMC2208 1
 #define MotorIsSmallFaulHarber 1
 
-// Set to 1 to remove the coating commands to make space for M119, M301, G0 and G1
-#define BuildForPIDCalibraiton 1
 // hardware pin map
 #define SyringePumpEnablePin	13
 #define xLimitPin			A7
@@ -25,7 +28,7 @@
 #define pPositive			(!pNegatve)
 #define PIDErrorInMM		0.3
 #if DriverIsTMC2208
-#define PumpStepsMultiplier 5
+int PumpStepsMultiplier = 1;
 #endif
 
 uint8_t readPosx();
@@ -39,7 +42,7 @@ float aMax = 6000, vMax = 4000;
 int32_t currentCountx = 0, lastControllerMicrosx = 0;
 int32_t requiredCountx = 0;
 #if DriverIsTMC2208
-int currentPumpSteps = 0, targetPumpSteps = 0;
+int8_t pumpStepsToMove = 0;
 #endif
 float time0x = 0, s0x = 0;
 float  time1x = 0, s1x = 0;
@@ -87,7 +90,16 @@ float mmPerStep[3] = {
 	0.00317564
 #endif
 }; // recalculate!!!!!
-float limits[3] = { 130,130,98 }; // in mm
+
+
+#if DriverIsTMC2208
+void SetPumpStepsMultiplier(int multiplier)
+{
+	mmPerStep[2] = ((mmPerStep[2] / (float)PumpStepsMultiplier)) * (float)multiplier;
+	PumpStepsMultiplier = multiplier;
+}
+#endif
+float limits[3] = { 120, 120,98 }; // in mm. Was changed from 130 to 120 with small faulharber
 float currentPositions[3] = { 0, 0, 0 };
 float targetXPosition = 0;
 float targetYPosition = 0;
@@ -135,7 +147,6 @@ void Info(String tag, String message)
 }
 void Error(String tag, String message)
 {}
-//uint32_t total = 0;
 ISR(TIMER2_OVF_vect) {
 	//total++;
 	uint8_t pos = readPosx();
@@ -207,19 +218,19 @@ ISR(TIMER2_OVF_vect) {
 		}
 	}
 #if DriverIsTMC2208
-	if (currentPumpSteps > targetPumpSteps)
-	{
-		setPumpDirection(1);
-		PORTC |= 0b1000;
-		PORTC &= 0b11110111;
-		currentPumpSteps--;
-	}
-	if (currentPumpSteps < targetPumpSteps)
+	if (pumpStepsToMove > 0)
 	{
 		setPumpDirection(-1);
 		PORTC |= 0b1000;
 		PORTC &= 0b11110111;
-		currentPumpSteps++;
+		pumpStepsToMove--;
+	}
+	if (pumpStepsToMove < 0)
+	{
+		setPumpDirection(1);
+		PORTC |= 0b1000;
+		PORTC &= 0b11110111;
+		pumpStepsToMove++;
 	}
 #endif
 }
@@ -275,6 +286,7 @@ void setup() {
 	TCCR1B = (0 << ICNC1) | (0 << ICES1) | (1 << WGM13) | (1 << WGM12) | (0 << CS12) | (0 << CS11) | (1 << CS10);
 	//TCCR3C = 0b00001001;
 	ICR1 = 450;
+	//TIMSK1 |= (1 << TOIE1);
 
 	// photogate timer interrupt setup
 	TCCR2A = (0 << COM2A1) | (0 << COM2A0) | (0 << COM2B1) | (0 << COM2B0) | (0 << WGM21) | (0 << WGM20);
@@ -327,9 +339,9 @@ bool pumpStep(int8_t direction, bool dontDelay)
 {
 #if DriverIsTMC2208
 	if (direction == -1)
-		targetPumpSteps += PumpStepsMultiplier;
+		pumpStepsToMove += PumpStepsMultiplier;
 	else if (direction == 1)
-		targetPumpSteps -= PumpStepsMultiplier;
+		pumpStepsToMove -= PumpStepsMultiplier;
 	if (!dontDelay)
 		delayMicroseconds(400);
 	currentPositions[2] += direction * mmPerStep[2];
@@ -456,7 +468,6 @@ void MoveToHome(int channel)
 		for (int i = 0; i < 20; i++)
 		{
 			pumpStep(-homeDir);
-			delay(1);
 			MotorLoopXY(1, 1); // both motors need to be in PID
 		}
 	}
@@ -1032,7 +1043,7 @@ void loop()
 
 	//	Serial.println();
 	//}
-#if BuildForPIDCalibraiton
+#if BuildForCalibraiton
 	if (millis() - autoStatusSentAt > 1000)
 #else
 	if (millis() - autoStatusSentAt > 50)
@@ -1116,7 +1127,7 @@ void loop()
 				}
 				else
 				{
-#if BuildForPIDCalibraiton
+#if BuildForCalibraiton
 					if (millis() - lastStatusSend > 400)
 #else
 					if (millis() - lastStatusSend > 30)
@@ -1160,7 +1171,7 @@ void loop()
 				}
 				else
 				{
-#if BuildForPIDCalibraiton
+#if BuildForCalibraiton
 					if (millis() - lastStatusSend > 400)
 #else
 					if (millis() - lastStatusSend > 30)
@@ -1192,7 +1203,7 @@ void loop()
 			}
 			if (hadAStep)
 			{
-#if BuildForPIDCalibraiton
+#if BuildForCalibraiton
 				if (millis() - lastStatusSend > 400)
 #else
 				if (millis() - lastStatusSend > 50)
@@ -1346,7 +1357,7 @@ void loop()
 			stopCoatFlag = true;
 			Serial.println(F("abort resp: answer = stopped"));
 		}
-#if !BuildForPIDCalibraiton
+#if !BuildForCalibraiton
 		else if (command == F("pause coat"))
 		{
 			targetXAtPause = targetXPosition;
@@ -1474,7 +1485,7 @@ void loop()
 			}
 		}
 #endif
-#if BuildForPIDCalibraiton
+#if BuildForCalibraiton
 		else if (command.startsWith(F("M301")))
 		{
 			if (coatStatus != 0)
@@ -1700,7 +1711,7 @@ void loop()
 				while (abs(currentPositions[channel] - xy) > PIDErrorInMM)
 				{
 					MotorLoopXY(true, true);
-#if BuildForPIDCalibraiton
+#if BuildForCalibraiton
 					if (millis() - start > 1000)
 #else
 					if (millis() - start > 50)
@@ -1781,13 +1792,15 @@ void loop()
 		{
 			if (coatStatus != 0)
 				return;
+			int pumpStepMultiplierBkp = PumpStepsMultiplier;
+			SetPumpStepsMultiplier(50);
 			digitalWrite(SyringePumpEnablePin, 0);
 			Serial.print(command);
 			for (long steps = 0; steps < (command == F("z+") ? 1 : 10) / mmPerStep[2]; steps++)
 			{
 				if (currentPositions[2] + mmPerStep[2] > limits[2])
 					break;
-				pumpStep(1, true);
+				pumpStep(1);
 				if (steps % 200 == 0)
 				{
 					currentXyStatus = F("Idle");
@@ -1799,20 +1812,41 @@ void loop()
 			currentXyStatus = F("Idle");
 			currentPumpStatus = F("Idle");
 			digitalWrite(SyringePumpEnablePin, 1);
+			SetPumpStepsMultiplier(pumpStepMultiplierBkp);
 			currentProgress = -1;
 			SendStatus();
 		}
+#if BuildForCalibraiton
+		else if (command == F("zon"))
+		{
+			digitalWrite(SyringePumpEnablePin, 0);
+		}
+		else if (command == F("zoff"))
+		{
+			digitalWrite(SyringePumpEnablePin, 1);
+		}
+		else if (command == F("zs+"))
+		{
+			pumpStep(1);
+		}
+		else if (command == F("zs-"))
+		{
+			pumpStep(-1);
+		}
+#endif
 		else if (command == F("z-") || command == F("z--"))
 		{
 			if (coatStatus != 0)
 				return;
+			int pumpStepMultiplierBkp = PumpStepsMultiplier;
+			SetPumpStepsMultiplier(50);
 			Serial.println("z-");
 			digitalWrite(SyringePumpEnablePin, 0);
 			for (long steps = 0; steps < (command == F("z-") ? 1 : 10) / mmPerStep[2]; steps++)
 			{
 				if (currentPositions[2] + mmPerStep[2] < 0)
 					break;
-				pumpStep(-1, true);
+				pumpStep(-1);
 				//delayMicroseconds(50);
 				if (steps % 200 == 0)
 				{
@@ -1825,6 +1859,7 @@ void loop()
 			currentXyStatus = F("Idle");
 			currentPumpStatus = F("Idle");
 			digitalWrite(SyringePumpEnablePin, 1);
+			SetPumpStepsMultiplier(pumpStepMultiplierBkp);
 			currentProgress = -1;
 			SendStatus();
 		}
@@ -1869,6 +1904,8 @@ void loop()
 		{
 			if (coatStatus != 0)
 				return;
+			int pumpStepMultiplierBkp = PumpStepsMultiplier;
+			SetPumpStepsMultiplier(50);
 			currentXyStatus = F("Idle");
 			currentPumpStatus = F("Homing Z");
 			digitalWrite(SyringePumpEnablePin, 0);
@@ -1882,12 +1919,13 @@ void loop()
 			digitalWrite(SyringePumpEnablePin, 1);
 			currentProgress = -1;
 			SendStatus();
+			SetPumpStepsMultiplier(pumpStepMultiplierBkp);
 		}
+#if BuildForCalibraiton
 		else if (command == F("mx") || command == F("my"))
 		{
 			SetCourseForXY(command.charAt(1) == 'x' ? 0 : 1, Args.Get(F("d")).toFloat(), Args.Get(F("t")).toFloat(), false);
 		}
-#if BuildForPIDCalibraiton
 		else
 		{
 			Serial.print(F("unknown command: "));

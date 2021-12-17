@@ -48,7 +48,7 @@
             this.progressBar1.Location = new System.Drawing.Point(3, 59);
             this.progressBar1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(326, 23);
+            this.progressBar1.Size = new System.Drawing.Size(294, 23);
             this.progressBar1.TabIndex = 0;
             this.progressBar1.Value = 50;
             // 
@@ -56,10 +56,10 @@
             // 
             this.progressL.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.progressL.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.progressL.Location = new System.Drawing.Point(324, 34);
+            this.progressL.Location = new System.Drawing.Point(305, 34);
             this.progressL.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.progressL.Name = "progressL";
-            this.progressL.Size = new System.Drawing.Size(77, 54);
+            this.progressL.Size = new System.Drawing.Size(96, 54);
             this.progressL.TabIndex = 1;
             this.progressL.Text = "49";
             this.progressL.TextAlign = System.Drawing.ContentAlignment.MiddleRight;

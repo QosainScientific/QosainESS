@@ -20,6 +20,8 @@ namespace QosainESSDesktop
         DateTime updated = new DateTime();
         public void Started()
         {
+            timeInPauses = new TimeSpan();
+            pausedAt = null;
             Visible = true;
             started = DateTime.Now;
             progressBar1.Value = 0;
@@ -62,6 +64,8 @@ namespace QosainESSDesktop
         List<double> estimates = new List<double>();
         public void Reset()
         {
+            timeInPauses = new TimeSpan();
+            pausedAt = null;
             estimates.Clear();
             Value = 0;
             speed = .000001;
@@ -73,11 +77,30 @@ namespace QosainESSDesktop
             speed = 100 / time;
             valueAtUpdate = 0;
         }
+        object pausedAt;
+        public void Pause()
+        {
+            if (pausedAt == null)
+                pausedAt = DateTime.Now;
+        }
+        TimeSpan timeInPauses = new TimeSpan();
+        public void Resume()
+        {
+            if (pausedAt == null)
+                return;
+            timeInPauses += DateTime.Now - (DateTime)pausedAt;
+            pausedAt = null;
+        }
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (speed == 0)
                 speed = .0000001;
-            var elapsed = DateTime.Now - started;
+            if (pausedAt != null) // extract the time and reset counter
+            {
+                timeInPauses += DateTime.Now - (DateTime)pausedAt;
+                pausedAt = DateTime.Now;
+            }
+            var elapsed = DateTime.Now - started - timeInPauses;
             double projectedValue = valueAtUpdate + speed * (DateTime.Now - updated).TotalSeconds;
             double secondsRemaining = (100 - projectedValue) / speed;
             if (secondsRemaining <= 0)

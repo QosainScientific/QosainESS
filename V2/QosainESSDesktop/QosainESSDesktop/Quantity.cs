@@ -156,7 +156,7 @@ namespace QosainESSDesktop
         }
         public class minutes : IUnit
         {
-            public string Suffix { get { return "minutus"; } }
+            public string Suffix { get { return "minutes"; } }
 
             public bool IsStandard => false;
 

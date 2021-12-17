@@ -15,9 +15,9 @@ namespace QosainESSDesktop
         public float X { get; private set; }
         public float Y { get; private set; }
         float rWidth = 40, rHeight = 30, step = 5;
-        // !!!!!!!!!!!!!!!
-        float maxX = 130;
-        float maxY = 130;
+        // Changed from 130 to 120 for compatibility with small faul harber
+        float maxX = 120;
+        float maxY = 120;
         bool noRaster = false;
         public RasterView()
         {

@@ -1,0 +1,12 @@
+copy 7acd865cf6180d0d099b74d5bab70feb ArduinoDrivers\CDM21228_Setup.exe
+copy a226f62933fd32f3a0e5caa1a27d092a QosainESSDesktop.exe
+copy 62e0b70ec510225a6448de3bdba43f71 QosainESSDesktop.pdb
+copy cdd2613700772229315f4dcae15ec2e0 textBoxTexts.txt
+Version = 12
+Whats New = + Estimated material pumped<$lb$>* Time estimate during pause fixed<$lb$>* Fixed a glitch where 100% showed as 10%<$lb$>* Changed the stage size to 120 x 120<$lb$>* Better Time estimates<$lb$>* Minor bug and grammar fixes<$lb$>+ Added FT232 Drivers
+Update Size = 2.71 MB
+Final Size = 14.58 MB
+Published on = 2021-Dec-17 04:22:53
+zip Hash = 9dd23ca812d4717911ed5f37c5291499
+Zip Size = 2.43 MB
+Zip Parts = 1

@@ -711,7 +711,8 @@ namespace QosainESSDesktop
         private void coatB_Click(object sender, EventArgs e)
         {                
             if (coatB.Text == "Pause")
-            {                   
+            {
+                plainProgressBar1.Pause();
                 SendCom("pause coat");
                 coatB.Text = "Resume";
 
@@ -719,6 +720,7 @@ namespace QosainESSDesktop
             else if (coatB.Text == "Resume")
             {
                 SendCom("resume coat");
+                plainProgressBar1.Resume();
                 coatB.Text = "Pause";
 
             }

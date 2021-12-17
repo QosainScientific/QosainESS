@@ -6,4 +6,4 @@ rasterCoatsTB=0;
 rasterStepSizeTB=0;mm
 rasterSpeedTB=1;mm/s
 syringeVolumeLimitTB=1;cc
-syringeTimeLimitTB=3;minutus
+syringeTimeLimitTB=3;minutes
