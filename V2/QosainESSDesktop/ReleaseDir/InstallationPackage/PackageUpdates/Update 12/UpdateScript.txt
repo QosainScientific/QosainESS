@@ -1,0 +1,12 @@
+copy e26f3315158576c156c4ee38b7af9ce3 ArduinoDrivers\arduino-org.inf
+copy ae47106ba2c7a2b4207602642752bf11 ArduinoDrivers\linino.inf
+copy 22bb864fd65323058583a30a247d7890 QosainESSDesktop.exe
+copy f38525285246678dc1175290a3c964ae QosainESSDesktop.pdb
+Version = 13
+Whats New = - Minor glitch fix<$lb$>* Better software performance
+Update Size = 0.39 MB
+Final Size = 14.24 MB
+Published on = 2022-Mar-10 03:15:18
+zip Hash = 6c875eb37d165da5aaba8fb41dcbe047
+Zip Size = 0.15 MB
+Zip Parts = 1

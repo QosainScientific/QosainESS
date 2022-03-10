@@ -62,7 +62,8 @@ namespace QosainESSDesktop
                         {
                             var before = SerialPort.ReadExisting();
                             var call = new byte[] { (byte)253, (byte)':' };
-                            SerialPort.Write(call, 0, 2);
+                            for (int i = 0; i < 100; i++)
+                                SerialPort.Write(call, 0, 2);
                             string str = "";
                             var start = DateTime.Now;
                             var header = new byte[] { 0xAA, 0xFF, 253, (byte)':' };

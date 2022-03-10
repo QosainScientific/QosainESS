@@ -1,11 +1,11 @@
 Application Title = Qosain ESS Desktop
 Company = Qosain Scientific
-Last Updated = 2021-Dec-17 04:22:53
-Whats New = + Estimated material pumped<$lb$>* Time estimate during pause fixed<$lb$>* Fixed a glitch where 100% showed as 10%<$lb$>* Changed the stage size to 120 x 120<$lb$>* Better Time estimates<$lb$>* Minor bug and grammar fixes<$lb$>+ Added FT232 Drivers
-Current Version = 12
+Last Updated = 2022-Mar-10 03:15:18
+Whats New = - Minor glitch fix<$lb$>* Better software performance
+Current Version = 13
 About = Qosain Electrospinning and Electrospraying machines require this application for the user interface.
 App ID = 1B7F20E58E148B6CE52413533ACCC630
-Update Size= 2.71 MB
-Final Size = 14.58 MB
+Update Size= 0.39 MB
+Final Size = 14.24 MB
 Default Exe = QosainESSDesktop.exe
 Zip Parts = 1

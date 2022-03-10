@@ -1381,7 +1381,7 @@ void loop()
 		else if (command == F("set coat"))
 		{
 			abortBegun = false;
-			Serial.println(F("Set Coat")); delay(1);
+			//Serial.println(F("Set Coat")); delay(1);
 			// this command must be used safely							 
 			//int mode = Args.Get(F("mode")).toInt();
 			float startX = currentPositions[0];

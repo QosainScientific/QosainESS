@@ -218,6 +218,7 @@ namespace QosainESSDesktop
             {
                 var raw = ReceiveCom(500);
                 var name = getCommand(raw);
+
                 var args = getArgs(raw);
                 try
                 {
@@ -481,6 +482,7 @@ namespace QosainESSDesktop
         }
         public Dictionary<string, string> getArgs(string CommandRaw)
         {
+
             var comParts = CommandRaw.Split(new char[] { ':' }, 2, StringSplitOptions.RemoveEmptyEntries);
 
             if (comParts.Length == 2)
@@ -490,8 +492,12 @@ namespace QosainESSDesktop
             Dictionary<string, string> Args = new Dictionary<string, string>();
             for (int i = 0; i < comParts.Length; i++)
             {
-                var pair = comParts[i].Split(new char[] { '=' }, 2, StringSplitOptions.RemoveEmptyEntries);
-                Args.Add(pair[0].Trim(), pair[1].Trim());
+                try
+                {
+                    var pair = comParts[i].Split(new char[] { '=' }, 2, StringSplitOptions.RemoveEmptyEntries);
+                    Args.Add(pair[0].Trim(), pair[1].Trim());
+                }
+                catch { }
             }
             return Args;
         }
