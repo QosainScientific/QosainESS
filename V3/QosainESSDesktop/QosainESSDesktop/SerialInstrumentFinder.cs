@@ -37,11 +37,50 @@ namespace QosainESSDesktop
             public bool DTR { get; set; } = false;
             public int Delay { get; set; } = 0;
             public string InstrumentName { get; set; } = "";
+            public bool HasMarlin { get; private set; } = false;
+
             Thread nameFinder;
             public SerialPort SerialPort { get; private set; }
             public bool DoneFinding = false;
             public bool ClosePortAfterChecking { get; set; }
 
+            public void FindInstrumentNameMarlin()
+            {
+                nameFinder = new Thread(() =>
+                {
+                    SerialPort = new SerialPort(ComPortName, BaudRate);
+                    SerialPort.DtrEnable = DTR;
+                    SerialPort.Encoding = new UTF8Encoding();
+                    for (int mainRetries = 0; mainRetries < 10 && InstrumentName == ""; mainRetries++)
+                    {
+                        try
+                        {
+                            SerialPort.Open();
+                        }
+                        catch { Thread.Sleep(1000); continue; }
+                        Thread.Sleep(Delay);
+
+                        var resp = MarlinCommunication.GetResponse(SerialPort, "M115").ToList();
+                        if (resp.Count > 1)
+                        {
+                            InstrumentName = resp.Find(line => line.Contains("MACHINE_TYPE:"))?.Split(new string[] { "MACHINE_TYPE:" }, StringSplitOptions.None)[1];
+                            HasMarlin = true;
+                            if (ClosePortAfterChecking)
+                                SerialPort.Close();
+                            nameFinder = null;
+                            DoneFinding = true;
+                            OnResult?.Invoke(this, new EventArgs());
+                            return;
+                        }
+                    }
+                    SerialPort.Close(); 
+                    SerialPort = null; nameFinder = null;
+                    OnResult?.Invoke(this, new EventArgs());
+                    DoneFinding = true;
+
+                });
+                nameFinder.Start();
+            }
             public void FindInstrumentName()
             {
                 nameFinder = new Thread(() =>
@@ -154,8 +193,7 @@ namespace QosainESSDesktop
                 foreach (ManagementObject property in Ports)
                 {
                     if (property.GetPropertyValue("Name") != null)
-                        if (property.GetPropertyValue("Name").ToString().Contains("USB") &&
-                            property.GetPropertyValue("Name").ToString().Contains("COM"))
+                        if (property.GetPropertyValue("Name").ToString().Contains("COM"))
                         {
                             var fullName = property.GetPropertyValue("Name").ToString();
                             foreach (var port in SerialPort.GetPortNames())
@@ -189,12 +227,13 @@ namespace QosainESSDesktop
                     {
                         ComPortName = usbDev.Value,
                         USBDeviceName = usbDev.Key,
-                        BaudRate = this.BaudRate,
+                        BaudRate = this.BaudRate == -1 ? (usbDev.Key.Contains("Arduino Mega 2560") ? 250000 : 115200) : this.BaudRate,
                         DTR = this.DTR,
                         Delay = Delay,
                         ClosePortAfterChecking = this.ClosePortAfterChecking
                     };
-                    toAdd.Add(newDevice);
+                    if (!toAdd.Any(dev => dev.USBDeviceName == usbDev.Key))
+                        toAdd.Add(newDevice);
                 }
                 foreach (var nd in toAdd)
                 {
@@ -243,7 +282,10 @@ namespace QosainESSDesktop
                         flowLayoutPanel1.Controls.Add(instC);
                         instC.SetText("{" + nd.USBDeviceName + "}", false);
                     }));
-                    nd.FindInstrumentName();
+                    if (nd.USBDeviceName.Contains("Arduino Mega 2560"))
+                        nd.FindInstrumentNameMarlin();
+                    else
+                        nd.FindInstrumentName();
                 }
                 foreach (var rd in toRemove)
                 {
@@ -292,7 +334,7 @@ namespace QosainESSDesktop
             }
         }
 
-        public static SerialDevice GetDevice(string nameKey = "", int baud = 115200, bool dtr = true, int delay = 2000, bool closePortAfterChecking = false)
+        public static SerialDevice GetDevice(string nameKey = "", int baud = -1, bool dtr = true, int delay = 2000, bool closePortAfterChecking = false)
         {
             var f = new SerialInstrumentFinder();
             f.StartPosition = FormStartPosition.CenterScreen;
