@@ -41,7 +41,8 @@ namespace QosainESSDesktop
                 }
                 catch (TimeoutException)
                 {
-                    break;
+                    Flushed.AddRange(resp);
+                    return new string[0];
                 }
 
             }

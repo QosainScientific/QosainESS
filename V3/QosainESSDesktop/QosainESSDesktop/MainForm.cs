@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 using System.IO;
+using System.Xml.Linq;
+using SharpDX.Direct3D9;
 
 namespace QosainESSDesktop
 {
@@ -41,12 +43,12 @@ namespace QosainESSDesktop
             timeus.Initialize(syringeTimeLimitTB, new Units.seconds(), new Units.minutes(), new Units.hours());
             volumeus.Initialize(syringeVolumeLimitTB, new Units.ml(), new Units.ul(), new Units.cc());
             rasterParamTB_TextChanged(null, null);
-            var device = SerialInstrumentFinder.GetDevice("Qosain ESS");
-            if (device != null)
+            ConnectedDevice = SerialInstrumentFinder.GetDevice("Qosain ESS");
+            if (ConnectedDevice != null)
             {
-                Channel = device.SerialPort;
-                if (device.SerialPort == null)
-                    device = null;
+                Channel = ConnectedDevice.SerialPort;
+                if (ConnectedDevice.SerialPort == null)
+                    ConnectedDevice = null;
             }
             //if (device == null)
             //{
@@ -172,16 +174,39 @@ namespace QosainESSDesktop
             rasterView1.UpdateViewXY(0, 0);
             new Thread(() =>
             {
-                while (firstHomingStatus == -1) Thread.Sleep(30); 
-                if (firstHomingStatus == 0) this.Invoke(new MethodInvoker(() =>
+                if (ConnectedDevice.HasMarlin)
                 {
-                    SendCom("home xy");
-                }));
-            }).Start() ;
+                    this.Invoke(new MethodInvoker(() =>
+                    {
+                        currentXyStatusMarlin = "Homing X";
+                        MarlinStatusWrapperSendStatus();
+                        MarlinCommunication.GetResponse(Channel, "G28 X0", 10000);
 
-                poller = new System.Windows.Forms.Timer();
+                        currentXyStatusMarlin = "Homing Y";
+                        MarlinStatusWrapperSendStatus();
+                        MarlinCommunication.GetResponse(Channel, "G28 Y0", 30000);
+
+                        currentXyStatusMarlin = "Idle";
+                        MarlinStatusWrapperSendStatus();
+                    }));
+                }
+                else
+                {
+                    while (firstHomingStatus == -1) Thread.Sleep(30);
+                    if (firstHomingStatus == 0) this.Invoke(new MethodInvoker(() =>
+                    {
+                        SendCom("home xy");
+                    }));
+                }
+            }).Start();
+
+            poller = new System.Windows.Forms.Timer();
             poller.Interval = 30;
-            poller.Tick += Poller_Tick;
+            if (!ConnectedDevice.HasMarlin)
+                poller.Tick += MarlinPoller_Tick;
+            else
+                poller.Tick += Poller_Tick;
+
             poller.Enabled = true;
             //dataPort.Visible = false;
             coatB.Visible = true;
@@ -197,7 +222,6 @@ namespace QosainESSDesktop
             if (inTick)
                 return;
             inTick = true;
-            //SendCom("status");
             if (Channel == null)
                 return;
             if (!Channel.IsOpen)
@@ -208,109 +232,299 @@ namespace QosainESSDesktop
                 var name = getCommand(raw);
 
                 var args = getArgs(raw);
+                applyStatusArgs(name, args);
+            }
+            inTick = false;
+        }
+        float [] currentPositionsMarlin = new float[3];
+        float[] axisStepsPerUnitMarlin;
+        float currentProgressMarlin = 0;
+        string currentXyStatusMarlin = "Idle"; // Idle, Homing X, Homing Y, Coating, Moving, paused
+        string currentPumpStatusMarlin = "Idle"; // Idle, paused, Pumping, Moving, Homing Z
+        void UpdateXYPositionMarlin()
+        {
+            if (axisStepsPerUnitMarlin == null)
+            {
+                foreach (var statusLine in MarlinCommunication.Flushed)
+                {
+                    if (statusLine.Contains("M92"))
+                    {
+                        var line = statusLine.Split(new string[] { "M92" }, StringSplitOptions.RemoveEmptyEntries)[1].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                        axisStepsPerUnitMarlin = new float[3];
+                        axisStepsPerUnitMarlin[0] = float.Parse(line[0].Substring(1));
+                        axisStepsPerUnitMarlin[1] = float.Parse(line[1].Substring(1));
+                        axisStepsPerUnitMarlin[2] = float.Parse(line[3].Substring(1));
+                    }
+                }
+            }
+            var pos = MarlinCommunication.GetResponse(Channel, "M114");
+            if (pos.Length != 2)
+                return;
+            var pairs = pos[0].Split(' ');
+            foreach (var pair in pairs)
+            {
                 try
                 {
-                    if (name == "status")
+                    var key = pair.Split(':')[0].ToLower();
+                    var value = pair.Split(':')[1];
+                    var index = -1;
+
+                    if (key[0] == 'x')
+                        index = 0;
+                    else if (key[0] == 'y')
+                        index = 1;
+                    else if (key[0] == 'e')
+                        index = 2;
+                    if (index >= 0)
+                        currentPositionsMarlin[index] = float.Parse(value) / axisStepsPerUnitMarlin[index];
+                }
+                catch { }
+            }
+            currentXyStatusMarlin = "Moving";
+            MarlinStatusWrapperSendStatus();
+            currentXyStatusMarlin = "Idle";
+            MarlinStatusWrapperSendStatus();
+        }
+        void MarlinStatusWrapperSendStatus()
+        {
+            var args = new Dictionary<string, string>();
+            args["x"]=
+            currentPositionsMarlin[0].ToString();
+            args["y"] =
+            currentPositionsMarlin[1].ToString();
+            args["z"]=
+            currentPositionsMarlin[2].ToString();
+            args["progress"] =
+            Math.Min(100, currentProgressMarlin).ToString();
+            args["xy stage"]= 
+            currentXyStatusMarlin;
+            args["pump"]=
+            currentPumpStatusMarlin;
+            applyStatusArgs("status", args);
+        }
+        void applyStatusArgs(string name, Dictionary<string, string> args)
+        {
+
+            try
+            {
+                if (name == "status")
+                {
+                    try
                     {
-                        try
-                        {
-                            backupXYZ[0] = float.Parse(args["x"]);
-                            backupXYZ[1] = float.Parse(args["y"]);
-                            backupXYZ[2] = float.Parse(args["z"]);
-                        }
-                        catch { }
-                        xCoordL.Text = args["x"];
-                        yCoordL.Text = args["y"];
+                        backupXYZ[0] = float.Parse(args["x"]);
+                        backupXYZ[1] = float.Parse(args["y"]);
+                        backupXYZ[2] = float.Parse(args["z"]);
+                    }
+                    catch { }
+                    xCoordL.Text = args["x"];
+                    yCoordL.Text = args["y"];
+                    if (args["xy stage"] != "{last}")
+                        xyStageStatusL.Text = args["xy stage"];
+                    if (firstHomingStatus == -1)
+                    {
                         if (args["xy stage"] != "{last}")
-                            xyStageStatusL.Text = args["xy stage"];
-                        if (firstHomingStatus == -1)
                         {
-                            if (args["xy stage"] != "{last}")
+                            if (args["xy stage"] != "Idle")
+                                firstHomingStatus = 1;
+                            else
                             {
-                                if (args["xy stage"] != "Idle")
+                                if (Math.Abs(double.Parse(args["x"])) > 0.5 || Math.Abs(double.Parse(args["y"])) > 0.5)
                                     firstHomingStatus = 1;
                                 else
-                                {
-                                    if (Math.Abs(double.Parse(args["x"])) > 0.5 || Math.Abs(double.Parse(args["y"])) > 0.5)
-                                        firstHomingStatus = 1;
-                                    else
-                                        firstHomingStatus = 0;
-                                }
+                                    firstHomingStatus = 0;
                             }
                         }
-                        if (args["pump"] != "{last}")
-                            pumpStatusL.Text = args["pump"];
-                        if (Convert.ToDouble(args["progress"]) >= 0)
+                    }
+                    if (args["pump"] != "{last}")
+                        pumpStatusL.Text = args["pump"];
+                    if (Convert.ToDouble(args["progress"]) >= 0)
+                    {
+                        if (!rasterEnabledCB.Checked)
                         {
-                            if (!rasterEnabledCB.Checked)
-                            {
-                                if (!enableVolumeLimitB.Checked && !enableTimeLimit.Checked)
-                                    plainProgressBar1.Visible = false;
-                                else
-                                    plainProgressBar1.Visible = true;
-                            }
+                            if (!enableVolumeLimitB.Checked && !enableTimeLimit.Checked)
+                                plainProgressBar1.Visible = false;
                             else
                                 plainProgressBar1.Visible = true;
                         }
                         else
-                            plainProgressBar1.Visible = false;
-                        if (coatB.Text.ToLower().StartsWith("begin"))
-                        {
-                            plainProgressBar1.Visible = false;
-                            materialPumpedL.Visible = false;
-                        }
-                        if (Convert.ToDouble(args["progress"]) >= 0)
-                        {
-                            SetProgressBar(double.Parse(args["progress"]));
-                        }
-                        if (xyStageStatusL.Text == "Moving" || xyStageStatusL.Text == "Coating")
-                        {
-                            xyStageStatusL.BackColor = Color.FromArgb(255, 128, 128);
-                            rasterView1.UpdateViewXY(Convert.ToSingle(args["x"]), Convert.ToSingle(args["y"]));
-                        }
-                        else if (xyStageStatusL.Text.Contains("Homing"))
-                        {
-                            xyStageStatusL.BackColor = Color.FromArgb(128, 255, 128);
-                            if (args["pump"] != "{last}")
-                                xCoordL.Text = "Homing";
-                            yCoordL.Text = "Homing";
-                        }
-                        else if (xyStageStatusL.Text == "Idle")
-                            xyStageStatusL.BackColor = Color.DimGray;
+                            plainProgressBar1.Visible = true;
+                    }
+                    else
+                        plainProgressBar1.Visible = false;
+                    if (coatB.Text.ToLower().StartsWith("begin"))
+                    {
+                        plainProgressBar1.Visible = false;
+                        materialPumpedL.Visible = false;
+                    }
+                    if (Convert.ToDouble(args["progress"]) >= 0)
+                    {
+                        SetProgressBar(double.Parse(args["progress"]));
+                    }
+                    if (xyStageStatusL.Text == "Moving" || xyStageStatusL.Text == "Coating")
+                    {
+                        xyStageStatusL.BackColor = Color.FromArgb(255, 128, 128);
+                        rasterView1.UpdateViewXY(Convert.ToSingle(args["x"]), Convert.ToSingle(args["y"]));
+                    }
+                    else if (xyStageStatusL.Text.Contains("Homing"))
+                    {
+                        xyStageStatusL.BackColor = Color.FromArgb(128, 255, 128);
+                        if (args["pump"] != "{last}")
+                            xCoordL.Text = "Homing";
+                        yCoordL.Text = "Homing";
+                    }
+                    else if (xyStageStatusL.Text == "Idle")
+                        xyStageStatusL.BackColor = Color.DimGray;
 
-                        if (pumpStatusL.Text == "Pumping")
-                            pumpStatusL.BackColor = Color.FromArgb(255, 128, 128);
-                        else if (pumpStatusL.Text.Contains("Homing"))
-                            pumpStatusL.BackColor = Color.FromArgb(128, 255, 128);
-                        else if (pumpStatusL.Text == "Idle")
-                            pumpStatusL.BackColor = Color.DimGray;
-                        //Application.DoEvents();
-                    }
-                    else if (name == "info")
+                    if (pumpStatusL.Text == "Pumping")
+                        pumpStatusL.BackColor = Color.FromArgb(255, 128, 128);
+                    else if (pumpStatusL.Text.Contains("Homing"))
+                        pumpStatusL.BackColor = Color.FromArgb(128, 255, 128);
+                    else if (pumpStatusL.Text == "Idle")
+                        pumpStatusL.BackColor = Color.DimGray;
+                    //Application.DoEvents();
+                }
+                else if (name == "info")
+                {
+                    if (args["tag"] == "homing")
+                        ;
+                    else if (args["tag"] == "..")
+                    { }
+                    else
                     {
-                        if (args["tag"] == "homing")
-                            ;
-                        else if (args["tag"] == "..")
-                        { }
-                        else
-                        {
-                            var msg = args["message"];
-                        }
-                    }
-                    else if (name == "coat end")
-                    {
-                        rasterEnded();
-                        coatB.Text = "Begin " + ProcessString;
-                        MessageBox.Show(ProcessString + " finished successfully", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        InPlaceReset();
-                    }
-                    else if (name != "")
-                    {
-                        args = args;
+                        var msg = args["message"];
                     }
                 }
-                catch { }
+                else if (name == "coat end")
+                {
+                    rasterEnded();
+                    coatB.Text = "Begin " + ProcessString;
+                    MessageBox.Show(ProcessString + " finished successfully", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    InPlaceReset();
+                }
+                else if (name != "")
+                {
+                }
             }
+            catch { }
+        }
+        private void MarlinPoller_Tick(object sender, EventArgs e)
+        {
+            if (inTick)
+                return;
+            inTick = true;
+            if (Channel == null)
+                return;
+            if (!Channel.IsOpen)
+            //    return;
+            //while (Channel.BytesToRead > 0)
+            //{
+            //    var raw = ReceiveCom(500);
+            //    var name = getCommand(raw);
+
+            //    var args = getArgs(raw);
+            //    try
+            //    {
+            //        if (name == "status")
+            //        {
+            //            try
+            //            {
+            //                backupXYZ[0] = float.Parse(args["x"]);
+            //                backupXYZ[1] = float.Parse(args["y"]);
+            //                backupXYZ[2] = float.Parse(args["z"]);
+            //            }
+            //            catch { }
+            //            xCoordL.Text = args["x"];
+            //            yCoordL.Text = args["y"];
+            //            if (args["xy stage"] != "{last}")
+            //                xyStageStatusL.Text = args["xy stage"];
+            //            if (firstHomingStatus == -1)
+            //            {
+            //                if (args["xy stage"] != "{last}")
+            //                {
+            //                    if (args["xy stage"] != "Idle")
+            //                        firstHomingStatus = 1;
+            //                    else
+            //                    {
+            //                        if (Math.Abs(double.Parse(args["x"])) > 0.5 || Math.Abs(double.Parse(args["y"])) > 0.5)
+            //                            firstHomingStatus = 1;
+            //                        else
+            //                            firstHomingStatus = 0;
+            //                    }
+            //                }
+            //            }
+            //            if (args["pump"] != "{last}")
+            //                pumpStatusL.Text = args["pump"];
+            //            if (Convert.ToDouble(args["progress"]) >= 0)
+            //            {
+            //                if (!rasterEnabledCB.Checked)
+            //                {
+            //                    if (!enableVolumeLimitB.Checked && !enableTimeLimit.Checked)
+            //                        plainProgressBar1.Visible = false;
+            //                    else
+            //                        plainProgressBar1.Visible = true;
+            //                }
+            //                else
+            //                    plainProgressBar1.Visible = true;
+            //            }
+            //            else
+            //                plainProgressBar1.Visible = false;
+            //            if (coatB.Text.ToLower().StartsWith("begin"))
+            //            {
+            //                plainProgressBar1.Visible = false;
+            //                materialPumpedL.Visible = false;
+            //            }
+            //            if (Convert.ToDouble(args["progress"]) >= 0)
+            //            {
+            //                SetProgressBar(double.Parse(args["progress"]));
+            //            }
+            //            if (xyStageStatusL.Text == "Moving" || xyStageStatusL.Text == "Coating")
+            //            {
+            //                xyStageStatusL.BackColor = Color.FromArgb(255, 128, 128);
+            //                rasterView1.UpdateViewXY(Convert.ToSingle(args["x"]), Convert.ToSingle(args["y"]));
+            //            }
+            //            else if (xyStageStatusL.Text.Contains("Homing"))
+            //            {
+            //                xyStageStatusL.BackColor = Color.FromArgb(128, 255, 128);
+            //                if (args["pump"] != "{last}")
+            //                    xCoordL.Text = "Homing";
+            //                yCoordL.Text = "Homing";
+            //            }
+            //            else if (xyStageStatusL.Text == "Idle")
+            //                xyStageStatusL.BackColor = Color.DimGray;
+
+            //            if (pumpStatusL.Text == "Pumping")
+            //                pumpStatusL.BackColor = Color.FromArgb(255, 128, 128);
+            //            else if (pumpStatusL.Text.Contains("Homing"))
+            //                pumpStatusL.BackColor = Color.FromArgb(128, 255, 128);
+            //            else if (pumpStatusL.Text == "Idle")
+            //                pumpStatusL.BackColor = Color.DimGray;
+            //            //Application.DoEvents();
+            //        }
+            //        else if (name == "info")
+            //        {
+            //            if (args["tag"] == "homing")
+            //                ;
+            //            else if (args["tag"] == "..")
+            //            { }
+            //            else
+            //            {
+            //                var msg = args["message"];
+            //            }
+            //        }
+            //        else if (name == "coat end")
+            //        {
+            //            rasterEnded();
+            //            coatB.Text = "Begin " + ProcessString;
+            //            MessageBox.Show(ProcessString + " finished successfully", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //            InPlaceReset();
+            //        }
+            //        else if (name != "")
+            //        {
+            //            args = args;
+            //        }
+            //    }
+            //    catch { }
+            //}
             inTick = false;
         }
 
@@ -458,8 +672,32 @@ namespace QosainESSDesktop
         {
             if (id < 0 || id > 8)
                 return;
-            string [] comTable = { "y+", "y++", "y-", "y--", "x-", "x--", "x+", "x++"};
-            SendCom(comTable[id]);
+            if (ConnectedDevice.HasMarlin)
+            {
+                MarlinCommunication.GetResponse(Channel, "G91"); // absolute coordinates
+                var comTable = new string[] { 
+                    "G1 Y1 F2400", //"y+", 
+                    "G1 Y10 F2400", //"y++", 
+                    "G1 Y-1 F2400", //"y-",
+                    "G1 Y-10 F2400", //"y--", 
+                    "G1 X-1 F2400", //"x-", 
+                    "G1 X-10 F2400", //"x--", 
+                    "G1 X1 F2400", //"x+", 
+                    "G1 X10 F2400", //"x++"
+                };
+                currentXyStatusMarlin = "Moving";
+                MarlinStatusWrapperSendStatus();
+                MarlinCommunication.GetResponse(Channel, comTable[id]);
+                MarlinCommunication.GetResponse(Channel, "M400", 2000);
+                currentXyStatusMarlin = "Idle";
+                MarlinStatusWrapperSendStatus();
+                UpdateXYPositionMarlin();
+            }
+            else
+            {
+                string[] comTable = { "y+", "y++", "y-", "y--", "x-", "x--", "x+", "x++" };
+                SendCom(comTable[id]);
+            }
         }
 
         public string getCommand(string CommandRaw)
@@ -496,26 +734,75 @@ namespace QosainESSDesktop
 
         private void spUpB_Click(object sender, EventArgs e)
         {
-            SendCom("z+");
-            var resp = waitForResponse("z moving", 1000);
+            if (ConnectedDevice.HasMarlin)
+            {
+                MarlinCommunication.GetResponse(Channel, "M83"); // absolute coordinates for extruder
+                currentPumpStatusMarlin = "Moving";
+                MarlinStatusWrapperSendStatus();
+                MarlinCommunication.GetResponse(Channel, "G1 E10 F4000");
+                MarlinCommunication.GetResponse(Channel, "M400", 2000);
+                currentPumpStatusMarlin = "Idle";
+                MarlinStatusWrapperSendStatus();
+            }
+            else
+            {
+                SendCom("z+");
+                var resp = waitForResponse("z moving", 1000);
+            }
         }
 
         private void spUpUpB_Click(object sender, EventArgs e)
         {
-
-            SendCom("z++");
+            if (ConnectedDevice.HasMarlin)
+            {
+                MarlinCommunication.GetResponse(Channel, "M83"); // absolute coordinates for extruder
+                currentPumpStatusMarlin = "Moving";
+                MarlinStatusWrapperSendStatus();
+                MarlinCommunication.GetResponse(Channel, "G1 E10 F4000");
+                MarlinCommunication.GetResponse(Channel, "M400", 2000);
+                currentPumpStatusMarlin = "Idle";
+                MarlinStatusWrapperSendStatus();
+            }
+            else
+            {
+                SendCom("z++");
+            }
         }
 
         private void spDownB_Click(object sender, EventArgs e)
         {
-
-            SendCom("z-");
+            if (ConnectedDevice.HasMarlin)
+            {
+                MarlinCommunication.GetResponse(Channel, "M83"); // absolute coordinates for extruder
+                currentPumpStatusMarlin = "Moving";
+                MarlinStatusWrapperSendStatus();
+                MarlinCommunication.GetResponse(Channel, "G1 E-1 F4000");
+                MarlinCommunication.GetResponse(Channel, "M400", 2000);
+                currentPumpStatusMarlin = "Idle";
+                MarlinStatusWrapperSendStatus();
+            }
+            else
+            {
+                SendCom("z-");
+            }
         }
 
         private void spDownDownB_Click(object sender, EventArgs e)
         {
-
-            SendCom("z--");
+            if (ConnectedDevice.HasMarlin)
+            {
+                MarlinCommunication.GetResponse(Channel, "M83"); // absolute coordinates for extruder
+                currentPumpStatusMarlin = "Moving";
+                MarlinStatusWrapperSendStatus();
+                MarlinCommunication.GetResponse(Channel, "G1 E-10 F4000");
+                MarlinCommunication.GetResponse(Channel, "M400", 2000);
+                currentPumpStatusMarlin = "Idle";
+                MarlinStatusWrapperSendStatus();
+            }
+            else
+            {
+                SendCom("z--");
+            }
         }
 
         private void spTopB_Click(object sender, EventArgs e)
@@ -525,6 +812,8 @@ namespace QosainESSDesktop
 
         bool inRasterStart = false;
         DateTime RasterStartedAt;
+        private SerialInstrumentFinder.SerialDevice ConnectedDevice;
+
         void rasterStarted()
         {                               
             plainProgressBar1.Visible = true;
