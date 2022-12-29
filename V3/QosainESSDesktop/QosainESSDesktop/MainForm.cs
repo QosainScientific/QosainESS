@@ -379,6 +379,8 @@ namespace QosainESSDesktop
                         pumpStatusL.BackColor = Color.FromArgb(255, 128, 128);
                     else if (pumpStatusL.Text.Contains("Homing"))
                         pumpStatusL.BackColor = Color.FromArgb(128, 255, 128);
+                    else if (pumpStatusL.Text.Contains("Moving"))
+                        pumpStatusL.BackColor = Color.FromArgb(128, 255, 128);
                     else if (pumpStatusL.Text == "Idle")
                         pumpStatusL.BackColor = Color.DimGray;
                     //Application.DoEvents();
@@ -739,7 +741,7 @@ namespace QosainESSDesktop
                 MarlinCommunication.GetResponse(Channel, "M83"); // absolute coordinates for extruder
                 currentPumpStatusMarlin = "Moving";
                 MarlinStatusWrapperSendStatus();
-                MarlinCommunication.GetResponse(Channel, "G1 E10 F4000");
+                MarlinCommunication.GetResponse(Channel, "G1 E1 F4000");
                 MarlinCommunication.GetResponse(Channel, "M400", 2000);
                 currentPumpStatusMarlin = "Idle";
                 MarlinStatusWrapperSendStatus();
