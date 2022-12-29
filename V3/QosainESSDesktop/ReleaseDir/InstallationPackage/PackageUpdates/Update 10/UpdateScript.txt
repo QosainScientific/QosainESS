@@ -1,0 +1,11 @@
+copy 2ea1b36661ba8a998bcbf3794251d509 QosainESSDesktop.exe
+copy fa7fc533053e3edfbd6f9c516007655c QosainESSDesktop.pdb
+copy cdd2613700772229315f4dcae15ec2e0 textBoxTexts.txt
+Version = 11
+Whats New = + Estimated material pumped<$lb$>* Better Time estimates<$lb$>* Minor bug fixes
+Update Size = 0.36 MB
+Final Size = 12.24 MB
+Published on = 2021-Jun-27 04:48:55
+zip Hash = 0908a9b8e12d9932c7099e860f03321b
+Zip Size = 0.14 MB
+Zip Parts = 1

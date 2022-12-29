@@ -1,0 +1,11 @@
+Application Title = Qosain ESS Desktop
+Company = Qosain Scientific
+Last Updated = 2022-Mar-10 03:15:18
+Whats New = - Minor glitch fix<$lb$>* Better software performance
+Current Version = 13
+About = Qosain Electrospinning and Electrospraying machines require this application for the user interface.
+App ID = 1B7F20E58E148B6CE52413533ACCC630
+Update Size= 0.39 MB
+Final Size = 14.24 MB
+Default Exe = QosainESSDesktop.exe
+Zip Parts = 1
