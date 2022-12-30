@@ -123,7 +123,8 @@ namespace QosainESSDesktop
                 percentL.Visible = false;
                 return;
             }
-            progressBar1.Value = (int)Math.Round(projectedValue);
+            if (progressBar1.Value < projectedValue || estimates.Count <= 1)
+                progressBar1.Value = (int)Math.Round(projectedValue);
             progressL.Text = progressBar1.Value.ToString();
             estimates.Add(secondsRemaining);
             if (estimates.Count == 1)
@@ -132,7 +133,7 @@ namespace QosainESSDesktop
             }
             if (estimates.Count > 100)
                 estimates.RemoveAt(0);
-            if (estimates.Count < 100)
+            if (estimates.Count < 100 && valueAtUpdate < 2)
             {
                 elapsedL.Text = "--";
                 remainingL.Text = "estimating time remaining...";
