@@ -11,11 +11,14 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 using System.IO;
+using System.Xml.Linq;
+using SharpDX.Direct3D9;
 
 namespace QosainESSDesktop
 {
     public partial class MainForm : Form
     {
+        public ESSMachine Machine;
         public MainForm()
         {
             if (!File.Exists("textBoxTexts.txt") && File.Exists("textBoxTexts_defaults.txt"))
@@ -41,12 +44,17 @@ namespace QosainESSDesktop
             timeus.Initialize(syringeTimeLimitTB, new Units.seconds(), new Units.minutes(), new Units.hours());
             volumeus.Initialize(syringeVolumeLimitTB, new Units.ml(), new Units.ul(), new Units.cc());
             rasterParamTB_TextChanged(null, null);
-            var device = SerialInstrumentFinder.GetDevice("Qosain ESS");
-            if (device != null)
+            ConnectedDevice = SerialInstrumentFinder.GetDevice("Qosain ESS");
+            if (ConnectedDevice.HasMarlin)
+                Machine = new MarlinESSMachine(ConnectedDevice.SerialPort);
+            else
+                Machine = new ArduinoESSMachine(Channel);
+            Machine.OnStatusArgsUpdate += applyStatusArgs;
+            if (ConnectedDevice != null)
             {
-                Channel = device.SerialPort;
-                if (device.SerialPort == null)
-                    device = null;
+                Channel = ConnectedDevice.SerialPort;
+                if (ConnectedDevice.SerialPort == null)
+                    ConnectedDevice = null;
             }
             //if (device == null)
             //{
@@ -78,87 +86,6 @@ namespace QosainESSDesktop
         }
 
 
-        void SendCom(string com)
-        {
-            if (Channel == null)
-            {
-                MessageBox.Show("Kindly connect to the hardware first (E02)");
-                return;
-            }
-            Channel.Write(new UTF8Encoding().GetBytes(com + "\n"), 0, com.Length + 1);
-            //sendInParts(com + "\n");
-        }
-        string waitForResponse(string com, int timeOut)
-        {
-            while (inTick && timeOut > 0)
-            {
-                System.Threading.Thread.Sleep(100);
-                timeOut -= 100;
-            }
-            if (timeOut <= 0)
-                return "";
-            inTick = true;
-
-            var start = DateTime.Now;
-            var rec = "";
-            while (getCommand(rec) != com && timeOut > 0)
-            {
-                rec = ReceiveCom(timeOut);
-                timeOut -= (int)(DateTime.Now - start).TotalMilliseconds;
-                start = DateTime.Now;
-            }
-            if (getCommand(rec) == com)
-            {
-                inTick = false;
-                return rec;
-            }
-            else
-            {
-                inTick = false;
-                return "";
-            }
-        }
-        string ReceiveCom(int timeOut = 1000)
-        {
-            if (Channel == null)
-                return "";
-            if (!Channel.IsOpen)
-            {
-                MessageBox.Show("The connection to the device was broken abnormally. The system must exit now. (E03)");
-                Environment.Exit(1);
-                return "";
-            }
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < timeOut; i+=30)
-            {
-                if (Channel == null)
-                    return "";
-
-                if (!Channel.IsOpen)
-                {
-                    MessageBox.Show("The connection to the device was broken abnormally. The system must exit now. (E04)");
-                    Environment.Exit(1);
-                    return "";
-                }
-                while (Channel.BytesToRead > 0)
-                {
-                    char c = (char)Channel.ReadByte();
-                    if (c == '\r')
-                        continue;
-                    if (c == '\n')
-                    {
-                        if (sb.ToString() == ", xy = idle")
-                            ;
-                        return sb.ToString();
-                    }
-                    sb.Append(c.ToString());
-                    i = 0;
-                }
-                System.Threading.Thread.Sleep(30);
-                Application.DoEvents();
-            }
-            return sb.ToString();
-        }
         System.Windows.Forms.Timer poller;
         private void dataPort_Connected()
         {
@@ -172,42 +99,31 @@ namespace QosainESSDesktop
             rasterView1.UpdateViewXY(0, 0);
             new Thread(() =>
             {
-                while (firstHomingStatus == -1) Thread.Sleep(30); 
-                if (firstHomingStatus == 0) this.Invoke(new MethodInvoker(() =>
-                {
-                    SendCom("home xy");
-                }));
-            }).Start() ;
+                while (firstHomingStatus == -1) Thread.Sleep(30);
+                if (firstHomingStatus == 0)
+                    this.Invoke(new MethodInvoker(() =>
+                    {
+                        Machine.SendCom("home xy");
+                    }));
+            }).Start();
 
-                poller = new System.Windows.Forms.Timer();
+            poller = new System.Windows.Forms.Timer();
             poller.Interval = 30;
-            poller.Tick += Poller_Tick;
+            poller.Tick += Machine.Poller_Tick;
+
             poller.Enabled = true;
             //dataPort.Visible = false;
             coatB.Visible = true;
             abortB.Visible = true;
         }
 
-        bool inTick = false;
         int firstHomingStatus = -1; // -1 is undefined, 0 is no, 1 is done
         SerialPort Channel;
         float[] backupXYZ = new float[3];
-        private void Poller_Tick(object sender, EventArgs e)
+        void applyStatusArgs(string name, Dictionary<string, string> args)
         {
-            if (inTick)
-                return;
-            inTick = true;
-            //SendCom("status");
-            if (Channel == null)
-                return;
-            if (!Channel.IsOpen)
-                return;
-            while (Channel.BytesToRead > 0)
+            Invoke(new MethodInvoker(() =>
             {
-                var raw = ReceiveCom(500);
-                var name = getCommand(raw);
-
-                var args = getArgs(raw);
                 try
                 {
                     if (name == "status")
@@ -282,6 +198,8 @@ namespace QosainESSDesktop
                             pumpStatusL.BackColor = Color.FromArgb(255, 128, 128);
                         else if (pumpStatusL.Text.Contains("Homing"))
                             pumpStatusL.BackColor = Color.FromArgb(128, 255, 128);
+                        else if (pumpStatusL.Text.Contains("Moving"))
+                            pumpStatusL.BackColor = Color.FromArgb(128, 255, 128);
                         else if (pumpStatusL.Text == "Idle")
                             pumpStatusL.BackColor = Color.DimGray;
                         //Application.DoEvents();
@@ -306,12 +224,10 @@ namespace QosainESSDesktop
                     }
                     else if (name != "")
                     {
-                        args = args;
                     }
                 }
                 catch { }
-            }
-            inTick = false;
+            }));
         }
 
         private void SetProgressBar(double progress)
@@ -458,37 +374,10 @@ namespace QosainESSDesktop
         {
             if (id < 0 || id > 8)
                 return;
-            string [] comTable = { "y+", "y++", "y-", "y--", "x-", "x--", "x+", "x++"};
-            SendCom(comTable[id]);
+            string[] comTable = { "y+", "y++", "y-", "y--", "x-", "x--", "x+", "x++" };
+            Machine.SendCom(comTable[id]);
         }
 
-        public string getCommand(string CommandRaw)
-        {
-            if (CommandRaw == "")
-                return "";
-            return CommandRaw.Split(new char[] { ':' }, 2, StringSplitOptions.RemoveEmptyEntries)[0];
-        }
-        public Dictionary<string, string> getArgs(string CommandRaw)
-        {
-
-            var comParts = CommandRaw.Split(new char[] { ':' }, 2, StringSplitOptions.RemoveEmptyEntries);
-
-            if (comParts.Length == 2)
-                comParts = comParts[1].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            else
-                comParts = new string[0];
-            Dictionary<string, string> Args = new Dictionary<string, string>();
-            for (int i = 0; i < comParts.Length; i++)
-            {
-                try
-                {
-                    var pair = comParts[i].Split(new char[] { '=' }, 2, StringSplitOptions.RemoveEmptyEntries);
-                    Args.Add(pair[0].Trim(), pair[1].Trim());
-                }
-                catch { }
-            }
-            return Args;
-        }
         private void label2_Click(object sender, EventArgs e)
         {
 
@@ -496,35 +385,32 @@ namespace QosainESSDesktop
 
         private void spUpB_Click(object sender, EventArgs e)
         {
-            SendCom("z+");
-            var resp = waitForResponse("z moving", 1000);
+            Machine.SendCom("z+");
         }
 
         private void spUpUpB_Click(object sender, EventArgs e)
         {
-
-            SendCom("z++");
+            Machine.SendCom("z++");
         }
 
         private void spDownB_Click(object sender, EventArgs e)
         {
-
-            SendCom("z-");
+            Machine.SendCom("z-");
         }
 
         private void spDownDownB_Click(object sender, EventArgs e)
         {
-
-            SendCom("z--");
+            Machine.SendCom("z--");
         }
-
         private void spTopB_Click(object sender, EventArgs e)
-        {   
-            SendCom("ztop");
+        {
+            Machine.SendCom("ztop");
         }
 
         bool inRasterStart = false;
         DateTime RasterStartedAt;
+        private SerialInstrumentFinder.SerialDevice ConnectedDevice;
+
         void rasterStarted()
         {                               
             plainProgressBar1.Visible = true;
@@ -543,7 +429,7 @@ namespace QosainESSDesktop
             RasterStartedAt = DateTime.Now;
         }
         void rasterEnded()
-        {                                 
+        {
             rasterView1.endRaster();
             plainProgressBar1.Ended();
             estimateMaterialB.Visible = true;
@@ -578,7 +464,7 @@ namespace QosainESSDesktop
                 double mxd = Convert.ToDouble(syringeVolumeLimitTB.Value.As(new Units.ml())) * 1000 / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.mm())) / 2, 2) * (float)Math.PI);
                 double q = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.mm())) / 2, 2) * (float)Math.PI);
 
-                SendCom("set coat:" +
+                Machine.SendCom("set coat:" +
                     "lenX=" + Convert.ToSingle(rasterWidthTB.Value.As(new Units.mm())) +
                     ",lenY=" + Convert.ToSingle(rasterHeightTB.Value.As(new Units.mm())) +
                     ",stepY=" + Convert.ToSingle(rasterStepSizeTB.Value.As(new Units.mm())) +
@@ -586,7 +472,7 @@ namespace QosainESSDesktop
                     ",speed=" + Convert.ToSingle(rasterSpeedTB.Value.As(new Units.mmPerSecond())) +
                     ",Q=" + q +
                     ",mxt=" + (enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Value.As(new Units.minutes())) * 60 : -1) +
-                    ",mxd=" + (enableVolumeLimitB.Checked ? mxd : -1) + 
+                    ",mxd=" + (enableVolumeLimitB.Checked ? mxd : -1) +
                     ",rstr=" + (rasterEnabledCB.Checked ? "1" : "0")
                     );
                 plainProgressBar1.Reset();
@@ -614,7 +500,7 @@ namespace QosainESSDesktop
                     else if (t_actual > t_volumeLimit && t_volumeLimit <= t_timeLimit) // volume limit
                         plainProgressBar1.ForceTimeEstimate(t_volumeLimit);
                 }
-                var resp = waitForResponse("coat resp", 2000);
+                var resp = Machine.waitForResponse("coat resp", 2000);
                 if (resp == "")
                 {
                     InPlaceReset();
@@ -626,8 +512,8 @@ namespace QosainESSDesktop
 
                 else
                 {
-                    if (getArgs(resp)["answer"] == "no")
-                        MessageBox.Show(getArgs(resp)["message"] + " (E08)");
+                    if (ESSMachine.getArgs(resp)["answer"] == "no")
+                        MessageBox.Show(ESSMachine.getArgs(resp)["message"] + " (E08)");
                     else
                     {
                         rasterView1.beginRaster();
@@ -648,16 +534,16 @@ namespace QosainESSDesktop
             Channel = new SerialPort(Channel.PortName, Channel.BaudRate);
             Channel.DtrEnable = true;
             Channel.Open();
-            SendCom("sw resume: x=" + backupXYZ[0] + ",y=" + backupXYZ[1] + ",z=" + backupXYZ[2]);
-            var resp = waitForResponse("sw resume", 1800);
+            Machine.SendCom("sw resume: x=" + backupXYZ[0] + ",y=" + backupXYZ[1] + ",z=" + backupXYZ[2]);
+            var resp = Machine.waitForResponse("sw resume", 1800);
         }
         void endRaster()
         {
-            SendCom("abort");
-            var resp = waitForResponse("abort resp", 2000);
+            Machine.SendCom("abort");
+            var resp = Machine.waitForResponse("abort resp", 2000);
             if (resp != "")
             {
-                if (getArgs(resp)["answer"] == "stopped")
+                if (ESSMachine.getArgs(resp)["answer"] == "stopped")
                 {
                     rasterEnded();
                 }
@@ -699,7 +585,7 @@ namespace QosainESSDesktop
                 }
                 dist *= Convert.ToSingle(rasterCoatsTB.Text);
             }
-            catch { rasterView1.HideRaster();  }
+            catch { rasterView1.HideRaster(); }
         }
 
         private void coatB_Click(object sender, EventArgs e)
@@ -707,13 +593,13 @@ namespace QosainESSDesktop
             if (coatB.Text == "Pause")
             {
                 plainProgressBar1.Pause();
-                SendCom("pause coat");
+                Machine.SendCom("pause coat");
                 coatB.Text = "Resume";
 
             }
             else if (coatB.Text == "Resume")
             {
-                SendCom("resume coat");
+                Machine.SendCom("resume coat");
                 plainProgressBar1.Resume();
                 coatB.Text = "Pause";
 
