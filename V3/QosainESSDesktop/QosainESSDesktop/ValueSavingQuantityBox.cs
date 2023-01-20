@@ -48,7 +48,16 @@ namespace QosainESSDesktop
                     ans = pairs.Find(pair => pair[0] == name)[1];
                 string v = ans.Split(new char[] { ';' })[0];
                 string unit = ans.Split(new char[] { ';' }, 2)[1];
-                var allUnits = new IUnit[] { new Units.none(), new Units.cm(), new Units.cc(), new Units.ccPerMinutes(), new Units.hours(), new Units.Inch(), new Units.inchesPerMinute(), new Units.inchesPerSecond(), new Units.mills(), new Units.minutes(), new Units.ml(), new Units.mlPerMinute(), new Units.mlPerSecond(), new Units.mm(), new Units.mmPerMinute(), new Units.mmPerSecond(), new Units.seconds(), new Units.ul(), new Units.ulPerMinutes(), new Units.ulPerSecond(), new Units.um() };
+                var allUnits = new IUnit[] { 
+                    new Units.none(), 
+                    new Units.cm(), new Units.Inch(), new Units.mm(), new Units.um(),
+                    new Units.cc(), new Units.ml(), new Units.ul(),
+                    new Units.ccPerMinutes(), new Units.mlPerMinute(), new Units.mlPerSecond(), new Units.ulPerMinutes(), new Units.ulPerSecond(),
+                    new Units.hours(), new Units.mills(), new Units.minutes(), new Units.seconds(),
+                    new Units.inchesPerMinute(), new Units.inchesPerSecond(), new Units.mmPerMinute(), new Units.mmPerSecond(), 
+                    new Units.kelvin(), new Units.celsius(), new Units.fahrenheit(), 
+                    new Units.radpersec(), new Units.revpermin(), new Units.revpersec(),
+                };
                 quantity.CurrentUnit = allUnits.ToList().Find(u => u.Suffix == unit);
                 if (quantity.CurrentUnit.IsStandard)
                     quantity.StandardValue = double.Parse(v);

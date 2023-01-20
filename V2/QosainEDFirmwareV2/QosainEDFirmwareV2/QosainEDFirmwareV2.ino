@@ -109,7 +109,7 @@ bool pumpStep(int8_t direction, bool dontDelay = false);
 String currentXyStatus, currentPumpStatus;
 float currentProgress = 0;
 void SendStatus()
-//void SendStatus(String xyStatus, String pumpStatus, float progress)
+//void  (String xyStatus, String pumpStatus, float progress)
 {
 	//if (progress == -1000)
 		/*progress = currentProgress;
@@ -945,13 +945,13 @@ String trimString(String str) {
 	while (str.endsWith(F(" ")))
 		str = str.substring(0, str.length() - 1);
 	return str;
-}
-String getCommand(String CommandRaw)
-{
-	if (CommandRaw.indexOf(F(":")) >= 0)
-		return trimString(CommandRaw.substring(0, CommandRaw.indexOf(F(":"))));
-	return CommandRaw;
-}
+	}
+	String getCommand(String CommandRaw)
+	{
+		if (CommandRaw.indexOf(F(":")) >= 0)
+			return trimString(CommandRaw.substring(0, CommandRaw.indexOf(F(":"))));
+		return CommandRaw;
+	}
 void getArgs(String CommandRaw, HashTable& Args)
 {
 	String argsPart;
@@ -989,19 +989,19 @@ void getArgs(String CommandRaw, HashTable& Args)
 }
 int8_t coatStatus = 0;
 float coatX = 0, coatY = 0, coatWidth = 0, coatHeight = 0, pumpMax = 0, Q = 0, coatSpeed = 0, coatStepY = 0;
-float definitiveLengthTravelled = 0;
-float lengthTravelled = 0;
 float totalLength = 0;
 // Need to design a new scheme
 float pumpStart = 0;
 int coatMove = 0;
 float targetXAtPause = 0;
 float targetYAtPause = 0;
-int coatYStepsTaken = 0;
 long millisToCoatTo = 0;
 long timeSinceLastZStep = 0;
 int coatsCompleted = 0, timesToCoat = 0;
 bool stopCoatFlag = 0;
+float lengthTravelled = 0;
+int coatYStepsTaken = 0;
+float definitiveLengthTravelled = 0;
 bool abortBegun = false;
 long lastStatusSend = 0;
 uint32_t lastSerialMillis = 0;
@@ -1402,6 +1402,7 @@ void loop()
 					Serial.println(F("coat resp: answer = no, message = The set coat speed is too much for the linear stage."));
 					return;
 				}
+				// TBD: Max Pump Q limit
 
 				if (currentPositions[0] + lenX > limits[0])
 				{
@@ -1437,7 +1438,7 @@ void loop()
 			float timeToPump = Args.Get(F("mxt")).toFloat(); // seconds
 			if (timeToPump < 0)
 			{
-				timeToPump = limits[2] / Q;
+				timeToPump = limits[2] / Q; // TBD this should be (Q * 1000)
 				millisToCoatTo = -1;
 			}
 			else

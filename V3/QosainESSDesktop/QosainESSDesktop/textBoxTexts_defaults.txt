@@ -7,3 +7,5 @@ rasterStepSizeTB=0;mm
 rasterSpeedTB=1;mm/s
 syringeVolumeLimitTB=1;cc
 syringeTimeLimitTB=3;minutes
+setTempTB=60;°C
+cylinderSpeedTB=100;rev/m

@@ -43,30 +43,46 @@ namespace QosainESSDesktop
             speedus.Initialize(rasterSpeedTB, new Units.mmPerSecond(), new Units.mmPerMinute(), new Units.inchesPerSecond(), new Units.inchesPerMinute());
             timeus.Initialize(syringeTimeLimitTB, new Units.seconds(), new Units.minutes(), new Units.hours());
             volumeus.Initialize(syringeVolumeLimitTB, new Units.ml(), new Units.ul(), new Units.cc());
+            setTempUS.Initialize(setTempTB, new Units.kelvin(), new Units.celsius(), new Units.fahrenheit());
+            cylinderSpeedUS.Initialize(cylinderSpeedTB, new Units.radpersec(), new Units.revpermin(), new Units.revpersec());
             rasterParamTB_TextChanged(null, null);
             ConnectedDevice = SerialInstrumentFinder.GetDevice("Qosain ESS");
-            if (ConnectedDevice.HasMarlin)
-                Machine = new MarlinESSMachine(ConnectedDevice.SerialPort);
-            else
-                Machine = new ArduinoESSMachine(Channel);
-            Machine.OnStatusArgsUpdate += applyStatusArgs;
-            if (ConnectedDevice != null)
+            if (ConnectedDevice == null) // user closed our machine selector
             {
-                Channel = ConnectedDevice.SerialPort;
-                if (ConnectedDevice.SerialPort == null)
-                    ConnectedDevice = null;
+                Close();
             }
-            //if (device == null)
-            //{
-            //    MessageBox.Show("The application cannot run without a device and will now exit. (E01)");
-            //    Environment.Exit(1);
-            //}
-            //else
+            else
             {
-                new Thread(() => { Thread.Sleep(300); Invoke(new MethodInvoker(() => { dataPort_Connected(); })); }).Start();
+                if (ConnectedDevice.HasMarlin)
+                    Machine = new MarlinESSMachine(ConnectedDevice.SerialPort);
+                else
+                    Machine = new ArduinoESSMachine(Channel);
+                Machine.OnStatusArgsUpdate += applyStatusArgs;
+                ESSMachine.OnMachineError += ESSMachine_OnMachineError;
+                if (ConnectedDevice != null)
+                {
+                    Channel = ConnectedDevice.SerialPort;
+                    if (ConnectedDevice.SerialPort == null)
+                        ConnectedDevice = null;
+                }
+                //if (device == null)
+                //{
+                //    MessageBox.Show("The application cannot run without a device and will now exit. (E01)");
+                //    Environment.Exit(1);
+                //}
+                //else
+                {
+                    new Thread(() => { Thread.Sleep(300); Invoke(new MethodInvoker(() => { dataPort_Connected(); })); }).Start();
+                }
             }
         }
-        
+
+        private void ESSMachine_OnMachineError(string message)
+        {
+            MessageBox.Show(message);
+            Close();
+        }
+
         private void closeB_Click(object sender, EventArgs e)
         {
             Close();
@@ -154,6 +170,16 @@ namespace QosainESSDesktop
                                 }
                             }
                         }
+                        if (args.ContainsKey("temp"))
+                        {
+                            try
+                            {
+                                double v = double.Parse(args["temp"]);
+                                var tq = new Quantity(v, new Units.celsius(), false);
+                                actualTempL.Text = tq.As(setTempTB.Value.CurrentUnit);
+                            }
+                            catch { actualTempL.Text = "--"; }
+                        }
                         if (args["pump"] != "{last}")
                             pumpStatusL.Text = args["pump"];
                         if (Convert.ToDouble(args["progress"]) >= 0)
@@ -220,7 +246,7 @@ namespace QosainESSDesktop
                         rasterEnded();
                         coatB.Text = "Begin " + ProcessString;
                         MessageBox.Show(ProcessString + " finished successfully", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        InPlaceReset();
+                        Machine.InPlaceReset(backupXYZ);
                     }
                     else if (name != "")
                     {
@@ -446,7 +472,7 @@ namespace QosainESSDesktop
         }
         bool beginCoating(int retries)
         {
-            try
+            //try
             {
                 if (rasterEnabledCB.Checked)
                 {
@@ -503,7 +529,7 @@ namespace QosainESSDesktop
                 var resp = Machine.waitForResponse("coat resp", 2000);
                 if (resp == "")
                 {
-                    InPlaceReset();
+                    Machine.InPlaceReset(backupXYZ);
                     if (retries > 0)
                         return beginCoating(retries - 1);
                     MessageBox.Show(ProcessString + " could not be started, kindly try again. (E07)");
@@ -522,20 +548,11 @@ namespace QosainESSDesktop
                     }
                 }
             }
-            catch (Exception ex)
-            {                        
-                MessageBox.Show(ex.Message);
-            }
+            //catch (Exception ex)
+            //{                        
+            //    MessageBox.Show(ex.Message);
+            //}
             return false;
-        }
-        void InPlaceReset()
-        {
-            Channel.Close();
-            Channel = new SerialPort(Channel.PortName, Channel.BaudRate);
-            Channel.DtrEnable = true;
-            Channel.Open();
-            Machine.SendCom("sw resume: x=" + backupXYZ[0] + ",y=" + backupXYZ[1] + ",z=" + backupXYZ[2]);
-            var resp = Machine.waitForResponse("sw resume", 1800);
         }
         void endRaster()
         {
@@ -723,6 +740,16 @@ namespace QosainESSDesktop
                 timeMult = 3600;
             var dt = (DateTime.Now - RasterStartedAt).TotalSeconds;
             materialPumpedL.Text = "Material pumped: " + (double.Parse(syringeFlowRateTB.Text) * dt / timeMult).ToString("F2") + flowrateUS.Value.CurrentUnit.Suffix.Split(new char[] { '/' })[0];
+        }
+
+        private void setTempB_Click(object sender, EventArgs e)
+        {
+            Machine.SendCom("heat " + setTempTB.Value.As(new Units.celsius()));
+        }
+
+        private void setCylenderSpeedB_Click(object sender, EventArgs e)
+        {
+            Machine.SendCom("cylinder " + cylinderSpeedTB.Value.As(new Units.revpermin()));
         }
     }
 }

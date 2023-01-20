@@ -66,6 +66,8 @@ namespace QosainESSDesktop
         public double GetTravelDistance()
         {
             double dis = 0;
+            if (step == 0)
+                return 0;
             for (float y = 0; y < rHeight; y += step * 2)
             {
                 dis += rWidth;

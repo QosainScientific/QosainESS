@@ -10,8 +10,10 @@ namespace QosainESSDesktop
     public class MarlinCommunication
     {
         public static List<string> Flushed { get; private set; } = new List<string>();
+        public static bool InGetResponse { get; private set; }
         public static string[] GetResponse(SerialPort sp, string com, int timeOut = 1000)
         {
+            InGetResponse = true;
             var st = DateTime.Now;
             sp.Encoding = new UTF8Encoding();
             sp.NewLine = "\n";
@@ -21,6 +23,11 @@ namespace QosainESSDesktop
                 try
                 {
                     Flushed.Add(sp.ReadLine());
+                    if (Flushed.Last().ToLower().Contains("error"))
+                    {
+                        var error = Flushed.Last();
+                        ESSMachine.ThrowMachineError(error);
+                    }
                 }
                 catch
                 {
@@ -35,17 +42,19 @@ namespace QosainESSDesktop
                 try
                 {
                     resp.Add(sp.ReadLine());
-                    if (resp.Last() == "ok")
+                    if (resp.Last().Trim() == "ok")
                         // already done!
                         break;
                 }
                 catch (TimeoutException)
                 {
                     Flushed.AddRange(resp);
+                    InGetResponse = false;
                     return new string[0];
                 }
 
             }
+            InGetResponse = false;
             return resp.ToArray();
         }
     }

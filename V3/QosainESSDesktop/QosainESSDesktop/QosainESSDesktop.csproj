@@ -80,6 +80,7 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MarlinCommunication.cs" />
+    <Compile Include="MarlinESSMachine.cs" />
     <Compile Include="PlainProgressBar.cs">
       <SubType>UserControl</SubType>
     </Compile>

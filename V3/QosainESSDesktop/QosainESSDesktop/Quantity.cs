@@ -34,7 +34,13 @@ namespace QosainESSDesktop
             CurrentUnit = currentUnit;
         }
         public double StandardValue = 0;
-        public string ScaledValue { get { return double.Parse(CurrentUnit.F(StandardValue.ToString())).ToString("0.000").TrimEnd(new char[] { '0' }).TrimEnd(new char[] { '.' }); } }
+        public string ScaledValue
+        {
+            get
+            {
+                return double.Parse(CurrentUnit.F(StandardValue.ToString())).ToString("0.000").TrimEnd(new char[] { '0' }).TrimEnd(new char[] { '.' });
+            }
+        }
         public IUnit CurrentUnit { get; set; } = null;
     }
     public class UnitChanger : Button
@@ -184,6 +190,109 @@ namespace QosainESSDesktop
             public string F_(string v)
             {
                 return (double.Parse(v) * 3600).ToString();
+            }
+        }
+        public class kelvin : IUnit
+        {
+            public string Suffix { get { return "K"; } }
+
+            public bool IsStandard => true;
+
+            public string F(string v)
+            {
+                return v;
+            }
+
+            public string F_(string v)
+            {
+                return v;
+            }
+        }
+        public class celsius : IUnit
+        {
+            public string Suffix { get { return "°C"; } }
+
+            public bool IsStandard => false;
+
+            public string F(string v)
+            {
+                return (double.Parse(v) - 273.15D).ToString();
+            }
+
+            public string F_(string v)
+            {
+                return (double.Parse(v) + 273.15D).ToString();
+            }
+        }
+        public class fahrenheit : IUnit
+        {
+            public string Suffix { get { return "°F"; } }
+
+            public bool IsStandard => false;
+
+            public string F(string v)
+            {
+                var vv = double.Parse(v);
+                return ((vv - 273.15) * 9 / 5 + 32).ToString();
+            }
+
+            public string F_(string v)
+            {
+                double vv = double.Parse(v);
+                return (((vv - 32) * 5 / 9) + 273.15).ToString();
+            }
+        }
+
+        public class radpersec : IUnit
+        {
+            public string Suffix { get { return "rad/s"; } }
+
+            public bool IsStandard => true;
+
+            public string F(string v)
+            {
+                return v;
+            }
+
+            public string F_(string v)
+            {
+                return v;
+            }
+        }
+        public class revpersec : IUnit
+        {
+            public string Suffix { get { return "rev/s"; } }
+
+            public bool IsStandard => false;
+
+            public string F(string v)
+            {
+                var vv = double.Parse(v);
+                return (vv / (2 * Math.PI)).ToString();
+            }
+
+            public string F_(string v)
+            {
+                var vv = double.Parse(v);
+                return (vv * (2 * Math.PI)).ToString();
+            }
+        }
+        public class revpermin : IUnit
+        {
+            public string Suffix { get { return "rev/m"; } }
+
+            public bool IsStandard => false;
+
+            public string F(string v)
+            {
+                var vv = double.Parse(v);
+                return (vv / (2 * Math.PI) * 60).ToString();
+            }
+
+            public string F_(string v)
+            {
+                var vv = double.Parse(v);
+                return (vv * (2 * Math.PI) / 60).ToString();
             }
         }
         public class mmPerSecond : IUnit
