@@ -44,12 +44,19 @@ namespace QosainESSDesktop
             timeus.Initialize(syringeTimeLimitTB, new Units.seconds(), new Units.minutes(), new Units.hours());
             volumeus.Initialize(syringeVolumeLimitTB, new Units.ml(), new Units.ul(), new Units.cc());
             setTempUS.Initialize(setTempTB, new Units.kelvin(), new Units.celsius(), new Units.fahrenheit());
+            cylinderSpeedTB.NotifyControlCreated();
             cylinderSpeedUS.Initialize(cylinderSpeedTB, new Units.radpersec(), new Units.revpermin(), new Units.revpersec());
+
+            try
+            {
+                ((CheckBox)this.Controls.Find(File.ReadAllText("programMode.txt"), true)[0]).Checked = true;
+            }
+            catch { }
             rasterParamTB_TextChanged(null, null);
             ConnectedDevice = SerialInstrumentFinder.GetDevice("Qosain ESS");
             if (ConnectedDevice == null) // user closed our machine selector
             {
-                Close();
+                //Close();
             }
             else
             {
@@ -88,7 +95,7 @@ namespace QosainESSDesktop
             Close();
         }
 
-        public string ProcessString { get { return rasterEnabledCB.Checked ? "Process" : "Pumping"; } }
+        public string ProcessString { get { return rasterEnabledCB.Checked ? "Process" : (cylinderEnabledCB.Checked ? "Spinning" : "Pumping"); } }
         private void minimizeB_Click(object sender, EventArgs e)
         {
             WindowState = FormWindowState.Minimized;
@@ -170,6 +177,10 @@ namespace QosainESSDesktop
                                 }
                             }
                         }
+                        if (args.ContainsKey("cylinder"))
+                        {
+                            cylinderStatusL.Text = args["cylinder"];
+                        }
                         if (args.ContainsKey("temp"))
                         {
                             try
@@ -184,15 +195,16 @@ namespace QosainESSDesktop
                             pumpStatusL.Text = args["pump"];
                         if (Convert.ToDouble(args["progress"]) >= 0)
                         {
-                            if (!rasterEnabledCB.Checked)
-                            {
-                                if (!enableVolumeLimitB.Checked && !enableTimeLimit.Checked)
-                                    plainProgressBar1.Visible = false;
-                                else
+                            plainProgressBar1.Visible = !coatB.Text.StartsWith("Begin");
+                            //if (!rasterEnabledCB.Checked)
+                            //{
+                            //if (!enableVolumeLimitB.Checked && !enableTimeLimit.Checked)
+                            //    plainProgressBar1.Visible = false;
+                            //else
                                     plainProgressBar1.Visible = true;
-                            }
-                            else
-                                plainProgressBar1.Visible = true;
+                            //}
+                            //else
+                            //    plainProgressBar1.Visible = true;
                         }
                         else
                             plainProgressBar1.Visible = false;
@@ -220,13 +232,14 @@ namespace QosainESSDesktop
                         else if (xyStageStatusL.Text == "Idle")
                             xyStageStatusL.BackColor = Color.DimGray;
 
+                        if (cylinderStatusL.Text == "Spinning")
+                            cylinderStatusL.BackColor = Color.FromArgb(255, 128, 128);
+                        else
+                            cylinderStatusL.BackColor = Color.DimGray;
+
                         if (pumpStatusL.Text == "Pumping")
                             pumpStatusL.BackColor = Color.FromArgb(255, 128, 128);
-                        else if (pumpStatusL.Text.Contains("Homing"))
-                            pumpStatusL.BackColor = Color.FromArgb(128, 255, 128);
-                        else if (pumpStatusL.Text.Contains("Moving"))
-                            pumpStatusL.BackColor = Color.FromArgb(128, 255, 128);
-                        else if (pumpStatusL.Text == "Idle")
+                        else
                             pumpStatusL.BackColor = Color.DimGray;
                         //Application.DoEvents();
                     }
@@ -258,42 +271,49 @@ namespace QosainESSDesktop
 
         private void SetProgressBar(double progress)
         {
-            if (rasterEnabledCB.Checked)
-            {
-                var coats = Convert.ToSingle(rasterCoatsTB.Text);
-                var S = rasterView1.GetTravelDistance() * coats;
-                var v = double.Parse(rasterSpeedTB.Value.As(new Units.mmPerSecond()));
-                var t_actual = S / v;
-                double qUlPs = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F;
-                var f_actual = qUlPs * t_actual;
+            plainProgressBar1.Value = progress;
+            // Also update on the material pumped
+            var dt = (DateTime.Now - RasterStartedAt).TotalSeconds - timeInPause;
+            var dQ = dt * setPumpQ; // ml
+            materialPumpedL.Text =
+                "Material pumped: " +
+                dQ.ToString("F2") + "ml";
+            //if (rasterEnabledCB.Checked)
+            //{
+            //    var coats = Convert.ToSingle(rasterCoatsTB.Text);
+            //    var S = rasterView1.GetTravelDistance() * coats;
+            //    var v = double.Parse(rasterSpeedTB.Value.As(new Units.mmPerSecond()));
+            //    var t_actual = S / v;
+            //    double qUlPs = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F;
+            //    var f_actual = qUlPs * t_actual;
 
-                double f_volumeLimit = enableVolumeLimitB.Checked ? Convert.ToDouble(syringeVolumeLimitTB.Value.As(new Units.ul())) : f_actual;
-                double t_timeLimit = enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Value.As(new Units.seconds())) : t_actual;
+            //    double f_volumeLimit = enableVolumeLimitB.Checked ? Convert.ToDouble(syringeVolumeLimitTB.Value.As(new Units.ul())) : f_actual;
+            //    double t_timeLimit = enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Value.As(new Units.seconds())) : t_actual;
 
-                double f_timeLimit = qUlPs * t_timeLimit;
-                double t_volumeLimit = f_volumeLimit / qUlPs;
+            //    double f_timeLimit = qUlPs * t_timeLimit;
+            //    double t_volumeLimit = f_volumeLimit / qUlPs;
 
-                if (t_actual <= t_volumeLimit && t_actual <= t_timeLimit) // not limited by any
-                    plainProgressBar1.Value = progress;
-                // else, let time decide
-            }
-            else
-            {
-                var t_actual = double.MaxValue;
-                double qUlPs = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F;
-                var f_actual = qUlPs * t_actual;
+            //    if (t_actual <= t_volumeLimit && t_actual <= t_timeLimit) // not limited by any
+            //        plainProgressBar1.Value = progress;
+            //    // else, let time decide
+            //}
+            //else
+            //{
+            //    var t_actual = double.MaxValue;
+            //    double qUlPs = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F;
+            //    var f_actual = qUlPs * t_actual;
 
-                double f_volumeLimit = enableVolumeLimitB.Checked ? Convert.ToDouble(syringeVolumeLimitTB.Value.As(new Units.ul())) : f_actual;
-                double t_timeLimit = enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Value.As(new Units.seconds())) : t_actual;
+            //    double f_volumeLimit = enableVolumeLimitB.Checked ? Convert.ToDouble(syringeVolumeLimitTB.Value.As(new Units.ul())) : f_actual;
+            //    double t_timeLimit = enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Value.As(new Units.seconds())) : t_actual;
 
-                double f_timeLimit = qUlPs * t_timeLimit;
-                double t_volumeLimit = f_volumeLimit / qUlPs;
+            //    double f_timeLimit = qUlPs * t_timeLimit;
+            //    double t_volumeLimit = f_volumeLimit / qUlPs;
 
-                if (t_actual <= t_volumeLimit && t_actual <= t_timeLimit) // not limited by any
-                    ;
-                else if (t_volumeLimit <= t_timeLimit) // volume limit
-                    plainProgressBar1.Value = progress;
-            }
+            //    if (t_actual <= t_volumeLimit && t_actual <= t_timeLimit) // not limited by any
+            //        ;
+            //    else if (t_volumeLimit <= t_timeLimit) // volume limit
+            //        plainProgressBar1.Value = progress;
+            //}
         }
 
         private void dataPort_Disconnected(object sender, EventArgs e)
@@ -435,9 +455,12 @@ namespace QosainESSDesktop
 
         bool inRasterStart = false;
         DateTime RasterStartedAt;
+        float setPumpQ = 0; // ml/s
+        double timeInPause = 0;
+        DateTime pausedAt;
         private SerialInstrumentFinder.SerialDevice ConnectedDevice;
 
-        void rasterStarted()
+        void processStarted()
         {                               
             plainProgressBar1.Visible = true;
             // ??????????? progress missing            
@@ -453,6 +476,8 @@ namespace QosainESSDesktop
             rasterPad.Enabled = false;
             rasterCoatsTB.Enabled = false;
             RasterStartedAt = DateTime.Now;
+            setPumpQ = float.Parse(syringeFlowRateTB.Value.As(new Units.mlPerSecond()));
+
         }
         void rasterEnded()
         {
@@ -490,16 +515,19 @@ namespace QosainESSDesktop
                 double mxd = Convert.ToDouble(syringeVolumeLimitTB.Value.As(new Units.ml())) * 1000 / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.mm())) / 2, 2) * (float)Math.PI);
                 double q = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.mm())) / 2, 2) * (float)Math.PI);
 
+
                 Machine.SendCom("set coat:" +
                     "lenX=" + Convert.ToSingle(rasterWidthTB.Value.As(new Units.mm())) +
                     ",lenY=" + Convert.ToSingle(rasterHeightTB.Value.As(new Units.mm())) +
                     ",stepY=" + Convert.ToSingle(rasterStepSizeTB.Value.As(new Units.mm())) +
                     ",coats=" + Convert.ToSingle(rasterCoatsTB.Text) +
                     ",speed=" + Convert.ToSingle(rasterSpeedTB.Value.As(new Units.mmPerSecond())) +
+                    ",cylrps=" + Convert.ToSingle(cylinderSpeedTB.Value.As(new Units.revpersec())) +
                     ",Q=" + q +
                     ",mxt=" + (enableTimeLimit.Checked ? Convert.ToDouble(syringeTimeLimitTB.Value.As(new Units.minutes())) * 60 : -1) +
                     ",mxd=" + (enableVolumeLimitB.Checked ? mxd : -1) +
-                    ",rstr=" + (rasterEnabledCB.Checked ? "1" : "0")
+                    ",rstr=" + (rasterEnabledCB.Checked ? "1" : "0") +
+                    ",cyl=" + (cylinderEnabledCB.Checked ? "1" : "0")
                     );
                 plainProgressBar1.Reset();
                 if (enableTimeLimit.Checked)
@@ -543,13 +571,15 @@ namespace QosainESSDesktop
                     else
                     {
                         rasterView1.beginRaster();
-                        rasterStarted();
+                        processStarted();
                         return true;
                     }
                 }
+                timeInPause = 0;
+                plainProgressBar1.Reset();
             }
             //catch (Exception ex)
-            //{                        
+            //{
             //    MessageBox.Show(ex.Message);
             //}
             return false;
@@ -609,6 +639,7 @@ namespace QosainESSDesktop
         {                
             if (coatB.Text == "Pause")
             {
+                pausedAt = DateTime.Now;
                 plainProgressBar1.Pause();
                 Machine.SendCom("pause coat");
                 coatB.Text = "Resume";
@@ -616,6 +647,7 @@ namespace QosainESSDesktop
             }
             else if (coatB.Text == "Resume")
             {
+                timeInPause += (DateTime.Now - pausedAt).TotalSeconds;
                 Machine.SendCom("resume coat");
                 plainProgressBar1.Resume();
                 coatB.Text = "Pause";
@@ -631,15 +663,6 @@ namespace QosainESSDesktop
         private void panel4_Paint(object sender, PaintEventArgs e)
         {
 
-        }
-
-        private void rasterEnabledCB_CheckedChanged(object sender, EventArgs e)
-        {
-            new Thread(() => { Thread.Sleep(30); Invoke(new MethodInvoker(() => {
-                rasterEnabledCB.Text = rasterEnabledCB.Checked ? "Enabled" : "Disabled";
-                if (coatB.Text.StartsWith("Begin"))
-                    coatB.Text = "Begin " + ProcessString;
-            })); }).Start();
         }
 
         private void estimateMaterialB_Click(object sender, EventArgs e)
@@ -749,7 +772,61 @@ namespace QosainESSDesktop
 
         private void setCylenderSpeedB_Click(object sender, EventArgs e)
         {
-            Machine.SendCom("cylinder " + cylinderSpeedTB.Value.As(new Units.revpermin()));
+        }
+
+        private void rasterEnabledCB_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!((CheckBox)sender).Checked)
+                return;
+
+            cylinderP.Visible = false;
+            rasterP.Visible = true;
+
+            cylinderEnabledCB.Checked = false;
+            noMoveCB.Checked = false;
+            new Thread(() => {
+                Thread.Sleep(30); Invoke(new MethodInvoker(() => {
+                    if (coatB.Text.StartsWith("Begin"))
+                        coatB.Text = "Begin " + ProcessString;
+                }));
+            }).Start();
+            File.WriteAllText("programMode.txt", ((CheckBox)sender).Name);
+        }
+
+        private void cylinderEnabledCB_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!((CheckBox)sender).Checked)
+                return;
+            cylinderP.Visible = true;
+            rasterP.Visible = false;
+
+            rasterEnabledCB.Checked = false;
+            noMoveCB.Checked = false;
+            new Thread(() => {
+                Thread.Sleep(30); Invoke(new MethodInvoker(() => {
+                    if (coatB.Text.StartsWith("Begin"))
+                        coatB.Text = "Begin " + ProcessString;
+                }));
+            }).Start();
+            File.WriteAllText("programMode.txt", ((CheckBox)sender).Name);
+        }
+
+        private void noMoveCB_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!((CheckBox)sender).Checked)
+                return;
+            cylinderP.Visible = false;
+            rasterP.Visible = false;
+
+            rasterEnabledCB.Checked = false;
+            cylinderEnabledCB.Checked = false;
+            new Thread(() => {
+                Thread.Sleep(30); Invoke(new MethodInvoker(() => {
+                    if (coatB.Text.StartsWith("Begin"))
+                        coatB.Text = "Begin " + ProcessString;
+                }));
+            }).Start();
+            File.WriteAllText("programMode.txt", ((CheckBox)sender).Name);
         }
     }
 }

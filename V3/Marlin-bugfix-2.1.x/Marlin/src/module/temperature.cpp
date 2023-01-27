@@ -1010,7 +1010,10 @@ volatile bool Temperature::raw_temps_ready = false;
           block_responsiveness = -log((t2 - asymp_temp) / (t1 - asymp_temp)) / (sample_distance * (sample_count >> 1));
 
     constants.ambient_xfer_coeff_fan0 = constants.heater_power * (MPC_MAX) / 255 / (asymp_temp - ambient_temp);
+    
+    #if ENABLED(MPC_INCLUDE_FAN)
     constants.fan255_adjustment = 0.0f;
+    #endif
     constants.block_heat_capacity = constants.ambient_xfer_coeff_fan0 / block_responsiveness;
     constants.sensor_responsiveness = block_responsiveness / (1.0f - (ambient_temp - asymp_temp) * exp(-block_responsiveness * t1_time) / (t1 - asymp_temp));
 
@@ -1066,7 +1069,7 @@ volatile bool Temperature::raw_temps_ready = false;
     const float power_fan0 = total_energy_fan0 * 1000 / test_duration;
     constants.ambient_xfer_coeff_fan0 = power_fan0 / (hotend.target - ambient_temp);
 
-    #if HAS_FAN
+    #if ENABLED(MPC_INCLUDE_FAN)
       const float power_fan255 = total_energy_fan255 * 1000 / test_duration,
                   ambient_xfer_coeff_fan255 = power_fan255 / (hotend.target - ambient_temp);
       constants.fan255_adjustment = ambient_xfer_coeff_fan255 - constants.ambient_xfer_coeff_fan0;
@@ -1094,7 +1097,9 @@ volatile bool Temperature::raw_temps_ready = false;
     SERIAL_ECHOLNPGM("MPC_BLOCK_HEAT_CAPACITY ", constants.block_heat_capacity);
     SERIAL_ECHOLNPAIR_F("MPC_SENSOR_RESPONSIVENESS ", constants.sensor_responsiveness, 4);
     SERIAL_ECHOLNPAIR_F("MPC_AMBIENT_XFER_COEFF ", constants.ambient_xfer_coeff_fan0, 4);
+    #if ENABLED(MPC_INCLUDE_FAN)
     TERN_(HAS_FAN, SERIAL_ECHOLNPAIR_F("MPC_AMBIENT_XFER_COEFF_FAN255 ", ambient_xfer_coeff_fan255, 4));
+    #endif
   }
 
 #endif // MPCTEMP

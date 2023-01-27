@@ -92,8 +92,12 @@ namespace QosainESSDesktop
             }
             catch { }
         }
+        public void NotifyControlCreated() { OnCreateControl(); }
         protected override void OnCreateControl()
         {
+            if (Value != null)
+                // already created
+                return;
             Value = new Quantity(0, new Units.none());
             getText(Name, Value);
             if (Value.CurrentUnit == null)

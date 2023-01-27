@@ -18,6 +18,8 @@ namespace QosainESSDesktop
             sp.Encoding = new UTF8Encoding();
             sp.NewLine = "\n";
             sp.ReadTimeout = 100;
+            if (!sp.IsOpen)
+                return new string[0];
             while (sp.BytesToRead > 0)
             {
                 try
@@ -42,7 +44,15 @@ namespace QosainESSDesktop
                 try
                 {
                     resp.Add(sp.ReadLine());
-                    if (resp.Last().Trim() == "ok")
+                    var str = resp.Last().Trim();
+                    if (str.StartsWith("ok") && str != "ok")
+                    {
+                        resp.RemoveAt(resp.Count - 1);
+                        resp.Add(str.Substring(2).Trim());
+                        resp.Add("ok");
+                        break;
+                    }
+                    if (str == "ok")
                         // already done!
                         break;
                 }

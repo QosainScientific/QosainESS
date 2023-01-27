@@ -202,6 +202,7 @@ namespace QosainESSDesktop
         float currentProgressMarlin = 0;
         string currentXyStatusMarlin = "Idle"; // Idle, Homing X, Homing Y, Coating, Moving, paused
         string currentPumpStatusMarlin = "Idle"; // Idle, paused, Pumping, Moving, Homing Z
+        string currentCylinderStatusMarlin = "Idle";
         private string currentTemp = "--";
         float timeToPumpOrCoat = 0;
         DateTime systemStartAt = DateTime.Now;
@@ -242,6 +243,8 @@ namespace QosainESSDesktop
             {
                 var m92 = MarlinCommunication.GetResponse(Channel, "M92");
                 var line = m92[0].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                if (line[0] == "M92")
+                    line.RemoveAt(0);
                 axisStepsPerUnitMarlin = new float[3];
                 axisStepsPerUnitMarlin[0] = float.Parse(line[0].Substring(1));
                 axisStepsPerUnitMarlin[1] = float.Parse(line[1].Substring(1));
@@ -251,6 +254,8 @@ namespace QosainESSDesktop
             {
                 var m203 = MarlinCommunication.GetResponse(Channel, "M203");
                 var line = m203[0].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                if (line[0] == "M203")
+                    line.RemoveAt(0);
                 maxFeedRatesMarlin = new float[3];
                 maxFeedRatesMarlin[0] = float.Parse(line[0].Substring(1));
                 maxFeedRatesMarlin[1] = float.Parse(line[1].Substring(1));
@@ -331,6 +336,8 @@ namespace QosainESSDesktop
             currentXyStatusMarlin;
             args["pump"] =
             currentPumpStatusMarlin;
+            args["cylinder"] =
+            currentCylinderStatusMarlin;
             args["temp"] =
             currentTemp;
             applyStatusArgs("status", args);
@@ -376,7 +383,7 @@ namespace QosainESSDesktop
             {
                 if (timeMs < 200)
                     timeMs = 200;
-                MarlinCommunication.GetResponse(Channel, $"G1 X{move.X} Y{move.Y} E{move.E} F{move.Feed}", 1000);
+                MarlinCommunication.GetResponse(Channel, $"G1 X{move.X} Y{move.Y} Z{move.Z} E{move.E} F{move.Feed}", 1000);
                 var resp = MarlinCommunication.GetResponse(Channel, "M400", (int)(timeMs * 1.4));
                 UpdateXYPositionMarlin();
             }
@@ -402,13 +409,13 @@ namespace QosainESSDesktop
                     "G1 X-10 F2400", //"x--", 
                     "G1 X1 F2400", //"x+", 
                     "G1 X10 F2400", //"x++"
-                    "G1 E-1 F2400", //"z+", 
-                    "G1 E-10 F2400", //"z++", 
-                    "G1 E1 F2400", //"z-",
-                    "G1 E10 F2400", //"z--", 
+                    "G1 Z-1 F2400", //"z+", 
+                    "G1 Z-10 F2400", //"z++", 
+                    "G1 Z1 F2400", //"z-",
+                    "G1 Z10 F2400", //"z--", 
                 };
-                for(int i =0;  i < keys.Length; i++)
-                    dict[keys[i]]= values[i];
+                for (int i = 0; i < keys.Length; i++)
+                    dict[keys[i]] = values[i];
 
                 MarlinCommunication.GetResponse(Channel, "G91"); // relative coordinates
                 MarlinCommunication.GetResponse(Channel, "M83"); // relative pump coordinates
@@ -431,11 +438,8 @@ namespace QosainESSDesktop
             {
                 tempAcquireEnabled = true;
                 var t = MarlinCommunication.GetResponse(Channel, "M104 S" + command.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[1], 10000);
-            }
-            else if (command.StartsWith("cylinder"))
-            {
-                MarlinCommunication.GetResponse(Channel, "M18 Z", 100); // Stop Z first
-                MarlinCommunication.GetResponse(Channel, "G1 Z" + command.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)[1], 10000);
+
+                //MarlinCommunication.GetResponse(Channel, "M220 S10", 100);
             }
             else if (command.StartsWith("home xy"))
             {
@@ -453,10 +457,11 @@ namespace QosainESSDesktop
             }
             else if (command.StartsWith("pause coat"))
             {
+                MarlinCommunication.GetResponse(Channel, "M410", 1000);
                 pauseCoatFlag = true;
                 if (MarlinCommunication.InGetResponse)
                 {
-                    MessageBox.Show("The process will pause after the current movement command", "Cannot stop instantaneously", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+                    //MessageBox.Show("The process will pause after the current movement command", "Cannot stop instantaneously", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
                     while (MarlinCommunication.InGetResponse)
                         Thread.Sleep(30);
                 }
@@ -467,10 +472,12 @@ namespace QosainESSDesktop
             }
             else if (command.StartsWith("abort"))
             {
+                MarlinCommunication.GetResponse(Channel, "M410", 1000);
                 stopCoatFlag = true;
+                pauseCoatFlag = false;
                 if (MarlinCommunication.InGetResponse)
                 {
-                    MessageBox.Show("The process will abort after the current movement command", "Cannot stop instantaneously", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
+                    //MessageBox.Show("The process will abort after the current movement command", "Cannot stop instantaneously", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
                     while (MarlinCommunication.InGetResponse)
                         Thread.Sleep(30);
                 }
@@ -489,6 +496,7 @@ namespace QosainESSDesktop
                 coatStepY = float.Parse(Args[F("stepY")]); // ~ 
                 timesToCoat = int.Parse(Args[F("coats")]);   // ~
                 coatSpeed = float.Parse(Args[F("speed")]); // mm/sec
+                float cylinderRPS = float.Parse(Args[F("cylrps")]); // revs/s
                 Q = float.Parse(Args[F("Q")]) / 1000;        // mm/ms
 
                 if (maxFeedRatesMarlin[2] < Q * 1000 || maxFeedRatesMarlin[1] < coatSpeed)
@@ -577,7 +585,7 @@ namespace QosainESSDesktop
 
 
                 respMarlin.Add("coat resp: answer = yes, total length = " + totalLengthToCoat);
-                MarlinCommunication.GetResponse(Channel, "M83");    
+                MarlinCommunication.GetResponse(Channel, "M83");
                 if (int.Parse(Args[F("rstr")]) == 1)
                 {
                     new Thread(() =>
@@ -590,34 +598,61 @@ namespace QosainESSDesktop
                 }
                 else
                 {
-                    // pump only
+                    // pump only with or without cylinder
                     new Thread(() =>
                     {
-                        currentPumpStatusMarlin = "Pumping";
-                        double timeDone = 0;
                         MarlinCommunication.GetResponse(Channel, $"G1 F{1}");
-                        while (true)
-                        {
-                            var st = DateTime.Now;
-                            var dt = timeToPumpOrCoat - timeDone;
-                            if (dt > 10)
-                                dt = 10;
-                            if (dt <= 0)
-                                break;
-                            float move = -0.1F;
-                            float rate = 0.1F;
-                            MarlinCommunication.GetResponse(Channel, $"G1 E{move} F{rate}");
-                            MarlinCommunication.GetResponse(Channel, "M400", (int)(dt * 1200000));
-                            var correct = Math.Abs(move / rate * 60);
-                            var took = DateTime.Now - st;
-                            var error = took.TotalSeconds / correct;
-                            var faster = 1 / (error);
-                            var resp = MarlinCommunication.GetResponse(Channel, "M205");
-                            timeDone += dt;
+                        var totalRevs = timeToPumpOrCoat * cylinderRPS;
 
-                            while (pauseCoatFlag) Thread.Sleep(30);
+                        var feed = Q * 60 * 1000;
+                        var pumpTravel = timeToPumpOrCoat * Q * 1000;
+                        var cylinderTravel = timeToPumpOrCoat * cylinderRPS;
+
+                        MarlinCommunication.GetResponse(Channel, "M83");
+                        MarlinCommunication.GetResponse(Channel, "G91");
+                        currentXyStatusMarlin = "Idle";
+                        currentPumpStatusMarlin = "Pumping";
+                        if (int.Parse(Args[F("cyl")]) == 1)
+                        {
+                            MarlinCommunication.GetResponse(Channel, $"G1 Z{pumpTravel} E{cylinderTravel} F{feed}");
+                            currentCylinderStatusMarlin = "Spinning";
                         }
+                        else
+                        {
+                            MarlinCommunication.GetResponse(Channel, $"G1 Z{pumpTravel} F{feed}");
+                            currentCylinderStatusMarlin = "Idle";
+                        }
+
+                        // begin a thread to send progress updates
+                        var statusT = new Thread(() => {
+                            var st = DateTime.Now;
+                            while ((DateTime.Now - st).TotalSeconds < timeToPumpOrCoat)
+                            {
+                                try
+                                {
+                                    Thread.Sleep(100);
+                                }
+                                catch (ThreadInterruptedException) { break; }
+                                currentProgressMarlin = (float)((DateTime.Now - st).TotalSeconds / timeToPumpOrCoat * 100);
+                                MarlinStatusWrapperSendStatus();
+                            }
+                        });
+                        statusT.Start();
+
+                        MarlinStatusWrapperSendStatus();
+                        UpdateXYPositionMarlin();
+                        var resp = MarlinCommunication.GetResponse(Channel, "M400", (int)(timeToPumpOrCoat * 1.2 * 1000));
+                        if (statusT.ThreadState== ThreadState.Running) statusT.Interrupt();
+                        while (statusT.ThreadState == ThreadState.Running) Thread.Sleep(30);
+                        // this happens either due to process completion or stop/pause
+                        currentXyStatusMarlin = "Idle";
                         currentPumpStatusMarlin = "Idle";
+                        currentCylinderStatusMarlin = "Idle";
+                        MarlinStatusWrapperSendStatus();
+                        UpdateXYPositionMarlin();
+                        applyStatusArgs(F("coat end"));
+                        stopCoatFlag = false;
+                        pauseCoatFlag = false;
                     }).Start();
                 }
             }
@@ -633,11 +668,34 @@ namespace QosainESSDesktop
                 currentXyStatusMarlin = "Coating";
                 currentPumpStatusMarlin = "Pumping";
                 MarlinCommunication.GetResponse(Channel, "G91");
+                MarlinCommunication.GetResponse(Channel, "M83");
                 MarlinStatusWrapperSendStatus();
                 UpdateXYPositionMarlin();
             }
             if (timeToPumpOrCoat == -1)
                 timeToPumpOrCoat = long.MaxValue;
+            // the first progress estimate might take some time. We should send dummy updates because they are also pretty accurate
+            var statusT = new Thread(() =>
+            {
+                var st = DateTime.Now;
+                while (true)
+                {
+                    try
+                    {
+                        Thread.Sleep(100);
+                        var dt = (DateTime.Now - st).TotalSeconds;
+                        var ds = dt * coatSpeed;
+                        currentProgressMarlin = (float)(ds / totalLengthToCoat * 100);
+                        MarlinStatusWrapperSendStatus();
+
+                    }
+                    catch (ThreadInterruptedException)
+                    {
+                        break;
+                    }
+                }
+            });
+            statusT.Start();
             for (int ci = 0; ci < timesToCoat 
                 && currentTime <= timeToPumpOrCoat
                 && !stopCoatFlag; ci++)
@@ -648,8 +706,10 @@ namespace QosainESSDesktop
                 {
                     while (pauseCoatFlag) Thread.Sleep(30);
                     // move left
-                    G1Blocking(new G1Move(coatWidth, 0, eMovePerWidth, coatSpeed * 60 /*Feed is in mm/min*/));
+                    G1Blocking(new G1Move(coatWidth, 0, eMovePerWidth, 0, coatSpeed * 60 /*Feed is in mm/min*/));
+                    if (statusT.ThreadState == ThreadState.Running) statusT.Interrupt();
                     currentProgressMarlin = totalTravelInG1s / totalLengthToCoat * 100;
+                    MarlinStatusWrapperSendStatus();
                     currentX += coatWidth;
                     currentTime +=  coatWidth / coatSpeed;
 
@@ -658,10 +718,11 @@ namespace QosainESSDesktop
                     if (currentY + coatStepY <= coatHeight && currentTime + (coatWidth + coatStepY) / coatSpeed <= timeToPumpOrCoat && !stopCoatFlag) // safe to move up
                     {
                         // move Up and left
-                        G1Blocking(new G1Move(0, coatStepY, eMovePerStep, coatSpeed * 60 /*Feed is in mm/min*/));
+                        G1Blocking(new G1Move(0, coatStepY, eMovePerStep, 0, coatSpeed * 60 /*Feed is in mm/min*/));
                         currentProgressMarlin = totalTravelInG1s / totalLengthToCoat * 100;
-                        G1Blocking(new G1Move(-coatWidth, 0, eMovePerWidth, coatSpeed * 60 /*Feed is in mm/min*/));
+                        G1Blocking(new G1Move(-coatWidth, 0, eMovePerWidth, 0, coatSpeed * 60 /*Feed is in mm/min*/));
                         currentProgressMarlin = totalTravelInG1s / totalLengthToCoat * 100;
+                        MarlinStatusWrapperSendStatus();
                         currentX -= coatWidth;
                         currentY += coatStepY;
                         currentTime += coatWidth / coatSpeed;
@@ -669,12 +730,14 @@ namespace QosainESSDesktop
                     }
                     else
                     { break; }
+                    while (pauseCoatFlag) Thread.Sleep(30);
                     // can we go up?
                     if (currentY + coatStepY <= coatHeight && currentTime + coatStepY / coatSpeed <= timeToPumpOrCoat && !stopCoatFlag) // safe to move up
                     {
                         // move Up 
-                        G1Blocking(new G1Move(0, coatStepY, eMovePerStep, coatSpeed * 60 /*Feed is in mm/min*/));
+                        G1Blocking(new G1Move(0, coatStepY, eMovePerStep, 0, coatSpeed * 60 /*Feed is in mm/min*/));
                         currentProgressMarlin = totalTravelInG1s / totalLengthToCoat * 100;
+                        MarlinStatusWrapperSendStatus();
                         currentY += coatStepY;
                         currentTime += coatStepY / coatSpeed;
                     }
@@ -686,14 +749,14 @@ namespace QosainESSDesktop
                 {
                     // move Left
 
-                    G1Blocking(new G1Move(-currentX, 0, 0, maxFeedRatesMarlin[0] * 60));
+                    G1Blocking(new G1Move(-currentX, 0, 0, 0, maxFeedRatesMarlin[0] * 60));
                     currentX = 0;
                 }
                 // we are at the top left. Need to go down
                 if (currentY > 0)
                 {
                     // move Down
-                    G1Blocking(new G1Move(0, -currentY, 0, maxFeedRatesMarlin[1] * 60));
+                    G1Blocking(new G1Move(0, -currentY, 0, 0, maxFeedRatesMarlin[1] * 60));
                     currentX = 0;
                 }
             }
@@ -743,16 +806,18 @@ namespace QosainESSDesktop
     }
     struct G1Move
     {
-        public G1Move(float X, float Y, float E, float feed) : this()
+        public G1Move(float X, float Y, float Z, float E, float feed) : this()
         {
             this.X = X;
             this.Y = Y;
+            this.Z = Z;
             this.E = E;
             this.Feed = feed;
         }
 
         public float X { get; set; }
         public float Y { get; set; }
+        public float Z { get; set; }
         public float E { get; set; }
         public float Feed { get; set; }
     }
