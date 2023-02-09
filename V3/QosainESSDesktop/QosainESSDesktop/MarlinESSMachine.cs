@@ -388,8 +388,10 @@ namespace QosainESSDesktop
                 UpdateXYPositionMarlin();
             }
         }
+        public static List<string> Coms { get; private set; } = new List<string>();
         public override void SendCom(string command)
         {
+            Coms.Add(command);
             var Args = getArgs(command);
             command = getCommand(command);
             if (
@@ -457,14 +459,10 @@ namespace QosainESSDesktop
             }
             else if (command.StartsWith("pause coat"))
             {
-                MarlinCommunication.GetResponse(Channel, "M410", 1000);
                 pauseCoatFlag = true;
-                if (MarlinCommunication.InGetResponse)
-                {
-                    //MessageBox.Show("The process will pause after the current movement command", "Cannot stop instantaneously", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
-                    while (MarlinCommunication.InGetResponse)
-                        Thread.Sleep(30);
-                }
+                MarlinCommunication.GetResponse(Channel, "M410", 1000);
+                while (MarlinCommunication.InGetResponse)
+                    Thread.Sleep(30);
             }
             else if (command.StartsWith("resume coat"))
             {
@@ -624,7 +622,8 @@ namespace QosainESSDesktop
                         }
 
                         // begin a thread to send progress updates
-                        var statusT = new Thread(() => {
+                        var statusT = new Thread(() =>
+                        {
                             var st = DateTime.Now;
                             while ((DateTime.Now - st).TotalSeconds < timeToPumpOrCoat)
                             {
@@ -642,7 +641,7 @@ namespace QosainESSDesktop
                         MarlinStatusWrapperSendStatus();
                         UpdateXYPositionMarlin();
                         var resp = MarlinCommunication.GetResponse(Channel, "M400", (int)(timeToPumpOrCoat * 1.2 * 1000));
-                        if (statusT.ThreadState== ThreadState.Running) statusT.Interrupt();
+                        if (statusT.ThreadState == ThreadState.Running) statusT.Interrupt();
                         while (statusT.ThreadState == ThreadState.Running) Thread.Sleep(30);
                         // this happens either due to process completion or stop/pause
                         currentXyStatusMarlin = "Idle";

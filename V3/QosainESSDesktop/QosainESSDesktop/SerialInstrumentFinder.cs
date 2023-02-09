@@ -44,10 +44,11 @@ namespace QosainESSDesktop
             public bool DoneFinding = false;
             public bool ClosePortAfterChecking { get; set; }
 
-            public void FindInstrumentNameMarlin()
+            public void FindInstrumentNameMarlin(Action tryNonMarlin)
             {
                 nameFinder = new Thread(() =>
                 {
+                    BaudRate = 250000;
                     SerialPort = new SerialPort(ComPortName, BaudRate);
                     SerialPort.DtrEnable = DTR;
                     SerialPort.Encoding = new UTF8Encoding();
@@ -72,8 +73,13 @@ namespace QosainESSDesktop
                             OnResult?.Invoke(this, new EventArgs());
                             return;
                         }
+                    }                    
+                    SerialPort.Close();
+                    if (InstrumentName == "")
+                    {
+                        tryNonMarlin();
+                        return;
                     }
-                    SerialPort.Close(); 
                     SerialPort = null; nameFinder = null;
                     OnResult?.Invoke(this, new EventArgs());
                     DoneFinding = true;
@@ -85,6 +91,7 @@ namespace QosainESSDesktop
             {
                 nameFinder = new Thread(() =>
                 {
+                    BaudRate = 115200;
                     SerialPort = new SerialPort(ComPortName, BaudRate);
                     SerialPort.DtrEnable = DTR;
                     SerialPort.Encoding = new UTF8Encoding();
@@ -227,7 +234,7 @@ namespace QosainESSDesktop
                     {
                         ComPortName = usbDev.Value,
                         USBDeviceName = usbDev.Key,
-                        BaudRate = this.BaudRate == -1 ? (usbDev.Key.Contains("Arduino Mega 2560") ? 250000 : 115200) : this.BaudRate,
+                        BaudRate = this.BaudRate == -1 ? 115200: this.BaudRate,
                         DTR = this.DTR,
                         Delay = Delay,
                         ClosePortAfterChecking = this.ClosePortAfterChecking
@@ -279,11 +286,13 @@ namespace QosainESSDesktop
                     {
                         if (flowLayoutPanel1.Controls.Contains(noDevicesL))
                             flowLayoutPanel1.Controls.Remove(noDevicesL);
-                        flowLayoutPanel1.Controls.Add(instC);
+                        flowLayoutPanel1 .Controls.Add(instC);
                         instC.SetText("{" + nd.USBDeviceName + "}", false);
                     }));
-                    if (nd.USBDeviceName.Contains("Arduino Mega 2560"))
-                        nd.FindInstrumentNameMarlin();
+                    if (
+                    nd.USBDeviceName.Contains("Arduino Mega 2560") ||
+                    nd.USBDeviceName.Contains("CH340 "))
+                        nd.FindInstrumentNameMarlin(() => { nd.FindInstrumentName(); });
                     else
                         nd.FindInstrumentName();
                 }

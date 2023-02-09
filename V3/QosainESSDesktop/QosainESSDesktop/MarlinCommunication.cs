@@ -11,6 +11,7 @@ namespace QosainESSDesktop
     {
         public static List<string> Flushed { get; private set; } = new List<string>();
         public static bool InGetResponse { get; private set; }
+        public static List<KeyValuePair<string, string>> Responses { get; private set; } = new List<KeyValuePair<string, string>>();
         public static string[] GetResponse(SerialPort sp, string com, int timeOut = 1000)
         {
             InGetResponse = true;
@@ -33,7 +34,11 @@ namespace QosainESSDesktop
                 }
                 catch
                 {
-                    Flushed.Add(sp.ReadExisting());
+                    try
+                    {
+                        Flushed.Add(sp.ReadExisting());
+                    }
+                    catch { }
                 }
             }
             sp.ReadTimeout = timeOut;
@@ -56,15 +61,18 @@ namespace QosainESSDesktop
                         // already done!
                         break;
                 }
+                catch()
                 catch (TimeoutException)
                 {
                     Flushed.AddRange(resp);
                     InGetResponse = false;
+                    Responses.Add(new KeyValuePair<string, string>(com, "NO_RESPONSE"));
                     return new string[0];
                 }
 
             }
             InGetResponse = false;
+            Responses.Add(new KeyValuePair<string, string>(com, string.Join(";", resp)));
             return resp.ToArray();
         }
     }

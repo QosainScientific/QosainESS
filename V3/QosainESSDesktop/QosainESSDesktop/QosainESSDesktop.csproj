@@ -42,6 +42,9 @@
     <Reference Include="MathNet.Numerics, Version=4.7.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MathNet.Numerics.4.7.0\lib\net40\MathNet.Numerics.dll</HintPath>
     </Reference>
+    <Reference Include="RJCP.SerialPortStream, Version=2.4.1.0, Culture=neutral, PublicKeyToken=5f5e7b70c6a74deb, processorArchitecture=MSIL">
+      <HintPath>..\packages\SerialPortStream.2.4.1\lib\net45\RJCP.SerialPortStream.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpDX.4.2.0\lib\net45\SharpDX.dll</HintPath>
     </Reference>

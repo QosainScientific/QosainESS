@@ -56,7 +56,7 @@ namespace QosainESSDesktop
             ConnectedDevice = SerialInstrumentFinder.GetDevice("Qosain ESS");
             if (ConnectedDevice == null) // user closed our machine selector
             {
-                //Close();
+                Close();
             }
             else
             {
@@ -145,128 +145,133 @@ namespace QosainESSDesktop
         float[] backupXYZ = new float[3];
         void applyStatusArgs(string name, Dictionary<string, string> args)
         {
-            Invoke(new MethodInvoker(() =>
+            try
             {
-                try
+                Invoke(new MethodInvoker(() =>
                 {
-                    if (name == "status")
+                    try
                     {
-                        try
-                        {
-                            backupXYZ[0] = float.Parse(args["x"]);
-                            backupXYZ[1] = float.Parse(args["y"]);
-                            backupXYZ[2] = float.Parse(args["z"]);
-                        }
-                        catch { }
-                        xCoordL.Text = args["x"];
-                        yCoordL.Text = args["y"];
-                        if (args["xy stage"] != "{last}")
-                            xyStageStatusL.Text = args["xy stage"];
-                        if (firstHomingStatus == -1)
-                        {
-                            if (args["xy stage"] != "{last}")
-                            {
-                                if (args["xy stage"] != "Idle")
-                                    firstHomingStatus = 1;
-                                else
-                                {
-                                    if (Math.Abs(double.Parse(args["x"])) > 0.5 || Math.Abs(double.Parse(args["y"])) > 0.5)
-                                        firstHomingStatus = 1;
-                                    else
-                                        firstHomingStatus = 0;
-                                }
-                            }
-                        }
-                        if (args.ContainsKey("cylinder"))
-                        {
-                            cylinderStatusL.Text = args["cylinder"];
-                        }
-                        if (args.ContainsKey("temp"))
+                        if (name == "status")
                         {
                             try
                             {
-                                double v = double.Parse(args["temp"]);
-                                var tq = new Quantity(v, new Units.celsius(), false);
-                                actualTempL.Text = tq.As(setTempTB.Value.CurrentUnit);
+                                backupXYZ[0] = float.Parse(args["x"]);
+                                backupXYZ[1] = float.Parse(args["y"]);
+                                backupXYZ[2] = float.Parse(args["z"]);
                             }
-                            catch { actualTempL.Text = "--"; }
-                        }
-                        if (args["pump"] != "{last}")
-                            pumpStatusL.Text = args["pump"];
-                        if (Convert.ToDouble(args["progress"]) >= 0)
-                        {
-                            plainProgressBar1.Visible = !coatB.Text.StartsWith("Begin");
-                            //if (!rasterEnabledCB.Checked)
-                            //{
-                            //if (!enableVolumeLimitB.Checked && !enableTimeLimit.Checked)
-                            //    plainProgressBar1.Visible = false;
-                            //else
-                                    plainProgressBar1.Visible = true;
-                            //}
-                            //else
-                            //    plainProgressBar1.Visible = true;
-                        }
-                        else
-                            plainProgressBar1.Visible = false;
-                        if (coatB.Text.ToLower().StartsWith("begin"))
-                        {
-                            plainProgressBar1.Visible = false;
-                            materialPumpedL.Visible = false;
-                        }
-                        if (Convert.ToDouble(args["progress"]) >= 0)
-                        {
-                            SetProgressBar(double.Parse(args["progress"]));
-                        }
-                        if (xyStageStatusL.Text == "Moving" || xyStageStatusL.Text == "Coating")
-                        {
-                            xyStageStatusL.BackColor = Color.FromArgb(255, 128, 128);
-                            rasterView1.UpdateViewXY(Convert.ToSingle(args["x"]), Convert.ToSingle(args["y"]));
-                        }
-                        else if (xyStageStatusL.Text.Contains("Homing"))
-                        {
-                            xyStageStatusL.BackColor = Color.FromArgb(128, 255, 128);
+                            catch { }
+                            xCoordL.Text = args["x"];
+                            yCoordL.Text = args["y"];
+                            if (args["xy stage"] != "{last}")
+                                xyStageStatusL.Text = args["xy stage"];
+                            if (firstHomingStatus == -1)
+                            {
+                                if (args["xy stage"] != "{last}")
+                                {
+                                    if (args["xy stage"] != "Idle")
+                                        firstHomingStatus = 1;
+                                    else
+                                    {
+                                        if (Math.Abs(double.Parse(args["x"])) > 0.5 || Math.Abs(double.Parse(args["y"])) > 0.5)
+                                            firstHomingStatus = 1;
+                                        else
+                                            firstHomingStatus = 0;
+                                    }
+                                }
+                            }
+                            if (args.ContainsKey("cylinder"))
+                            {
+                                cylinderStatusL.Text = args["cylinder"];
+                            }
+                            if (args.ContainsKey("temp"))
+                            {
+                                try
+                                {
+                                    double v = double.Parse(args["temp"]);
+                                    var tq = new Quantity(v, new Units.celsius(), false);
+                                    actualTempL.Text = tq.As(setTempTB.Value.CurrentUnit);
+                                }
+                                catch { actualTempL.Text = "--"; }
+                            }
                             if (args["pump"] != "{last}")
-                                xCoordL.Text = "Homing";
-                            yCoordL.Text = "Homing";
+                                pumpStatusL.Text = args["pump"];
+                            if (Convert.ToDouble(args["progress"]) >= 0)
+                            {
+                                plainProgressBar1.Visible = !coatB.Text.StartsWith("Begin");
+                                //if (!rasterEnabledCB.Checked)
+                                //{
+                                //if (!enableVolumeLimitB.Checked && !enableTimeLimit.Checked)
+                                //    plainProgressBar1.Visible = false;
+                                //else
+                                plainProgressBar1.Visible = true;
+                                //}
+                                //else
+                                //    plainProgressBar1.Visible = true;
+                            }
+                            else
+                                plainProgressBar1.Visible = false;
+                            if (coatB.Text.ToLower().StartsWith("begin"))
+                            {
+                                plainProgressBar1.Visible = false;
+                                materialPumpedL.Visible = false;
+                            }
+                            if (Convert.ToDouble(args["progress"]) >= 0)
+                            {
+                                SetProgressBar(double.Parse(args["progress"]));
+                            }
+                            if (xyStageStatusL.Text == "Moving" || xyStageStatusL.Text == "Coating")
+                            {
+                                xyStageStatusL.BackColor = Color.FromArgb(255, 128, 128);
+                                rasterView1.UpdateViewXY(Convert.ToSingle(args["x"]), Convert.ToSingle(args["y"]));
+                            }
+                            else if (xyStageStatusL.Text.Contains("Homing"))
+                            {
+                                xyStageStatusL.BackColor = Color.FromArgb(128, 255, 128);
+                                if (args["pump"] != "{last}")
+                                    xCoordL.Text = "Homing";
+                                yCoordL.Text = "Homing";
+                            }
+                            else if (xyStageStatusL.Text == "Idle")
+                                xyStageStatusL.BackColor = Color.DimGray;
+
+                            if (cylinderStatusL.Text == "Spinning")
+                                cylinderStatusL.BackColor = Color.FromArgb(255, 128, 128);
+                            else
+                                cylinderStatusL.BackColor = Color.DimGray;
+
+                            if (pumpStatusL.Text == "Pumping")
+                                pumpStatusL.BackColor = Color.FromArgb(255, 128, 128);
+                            else
+                                pumpStatusL.BackColor = Color.DimGray;
+                            Application.DoEvents();
                         }
-                        else if (xyStageStatusL.Text == "Idle")
-                            xyStageStatusL.BackColor = Color.DimGray;
-
-                        if (cylinderStatusL.Text == "Spinning")
-                            cylinderStatusL.BackColor = Color.FromArgb(255, 128, 128);
-                        else
-                            cylinderStatusL.BackColor = Color.DimGray;
-
-                        if (pumpStatusL.Text == "Pumping")
-                            pumpStatusL.BackColor = Color.FromArgb(255, 128, 128);
-                        else
-                            pumpStatusL.BackColor = Color.DimGray;
-                        //Application.DoEvents();
-                    }
-                    else if (name == "info")
-                    {
-                        if (args["tag"] == "homing")
-                            ;
-                        else if (args["tag"] == "..")
-                        { }
-                        else
+                        else if (name == "info")
                         {
-                            var msg = args["message"];
+                            if (args["tag"] == "homing")
+                                ;
+                            else if (args["tag"] == "..")
+                            { }
+                            else
+                            {
+                                var msg = args["message"];
+                            }
+                        }
+                        else if (name == "coat end")
+                        {
+                            rasterEnded();
+                            coatB.Visible = true;
+                            coatB.Text = "Begin " + ProcessString;
+                            MessageBox.Show(ProcessString + " finished successfully", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            Machine.InPlaceReset(backupXYZ);
+                        }
+                        else if (name != "")
+                        {
                         }
                     }
-                    else if (name == "coat end")
-                    {
-                        rasterEnded();
-                        coatB.Text = "Begin " + ProcessString;
-                        MessageBox.Show(ProcessString + " finished successfully", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        Machine.InPlaceReset(backupXYZ);
-                    }
-                    else if (name != "")
-                    {
-                    }
-                }
-                catch { }
-            }));
+                    catch { }
+                }));
+            }
+            catch { }
         }
 
         private void SetProgressBar(double progress)
@@ -467,14 +472,8 @@ namespace QosainESSDesktop
             plainProgressBar1.Started();
             estimateMaterialB.Visible = false;
             materialPumpedL.Visible = true;
-            volumePumpedTimer.Enabled = true;
 
-            rasterWidthTB.Enabled = false;
-            rasterHeightTB.Enabled = false;
-            rasterStepSizeTB.Enabled = false;
-            rasterSpeedTB.Enabled = false;
-            rasterPad.Enabled = false;
-            rasterCoatsTB.Enabled = false;
+            panel1.Enabled = false;
             RasterStartedAt = DateTime.Now;
             setPumpQ = float.Parse(syringeFlowRateTB.Value.As(new Units.mlPerSecond()));
 
@@ -485,15 +484,9 @@ namespace QosainESSDesktop
             plainProgressBar1.Ended();
             estimateMaterialB.Visible = true;
             materialPumpedL.Visible = false;
-            volumePumpedTimer.Enabled = false;
 
-            rasterWidthTB.Enabled = true;
-            rasterHeightTB.Enabled = true;
-            rasterStepSizeTB.Enabled = true;
-            rasterSpeedTB.Enabled = true;
+            panel1.Enabled = true;
             rasterParamTB_TextChanged(null, null);
-            rasterPad.Enabled = true;
-            rasterCoatsTB.Enabled = true;
         }
         bool beginCoating(int retries)
         {
@@ -516,6 +509,7 @@ namespace QosainESSDesktop
                 double q = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.mm())) / 2, 2) * (float)Math.PI);
 
 
+                plainProgressBar1.Reset();
                 Machine.SendCom("set coat:" +
                     "lenX=" + Convert.ToSingle(rasterWidthTB.Value.As(new Units.mm())) +
                     ",lenY=" + Convert.ToSingle(rasterHeightTB.Value.As(new Units.mm())) +
@@ -529,7 +523,6 @@ namespace QosainESSDesktop
                     ",rstr=" + (rasterEnabledCB.Checked ? "1" : "0") +
                     ",cyl=" + (cylinderEnabledCB.Checked ? "1" : "0")
                     );
-                plainProgressBar1.Reset();
                 if (enableTimeLimit.Checked)
                     plainProgressBar1.ForceTimeEstimate(Convert.ToDouble(syringeTimeLimitTB.Value.As(new Units.minutes())) * 60);
                 if (enableVolumeLimitB.Checked && rasterEnabledCB.Checked) // in case raster is enabled, valume limit can be estimated with time
@@ -571,6 +564,7 @@ namespace QosainESSDesktop
                     else
                     {
                         rasterView1.beginRaster();
+                        coatB.Visible = rasterEnabledCB.Checked;
                         processStarted();
                         return true;
                     }
@@ -601,6 +595,7 @@ namespace QosainESSDesktop
         {
             endRaster();
             coatB.Text = "Begin " + ProcessString;
+            coatB.Visible = true;
         }
 
         private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
@@ -640,8 +635,16 @@ namespace QosainESSDesktop
             if (coatB.Text == "Pause")
             {
                 pausedAt = DateTime.Now;
-                plainProgressBar1.Pause();
-                Machine.SendCom("pause coat");
+                try
+                {
+                    plainProgressBar1.Pause();
+                }
+                catch { }
+                try
+                {
+                    Machine.SendCom("pause coat");
+                }
+                catch { }
                 coatB.Text = "Resume";
 
             }
