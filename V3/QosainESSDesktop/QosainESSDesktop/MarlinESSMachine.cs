@@ -618,7 +618,7 @@ namespace QosainESSDesktop
                         }
                         else
                         {
-                            MarlinCommunication.GetResponse(Channel, $"G1 Z{pumpTravel} F{feed}");
+                            MarlinCommunication.GetResponse(Channel, $"G1 Z{pumpTravel} E{1} F{feed}");
                             currentCylinderStatusMarlin = "Idle";
                         }
 
