@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.IO.Ports;
 using FivePointNine.Windows.Controls;
 using System.Linq;
 using System.Text;
@@ -13,6 +12,7 @@ using System.Threading;
 using System.IO;
 using System.Xml.Linq;
 using SharpDX.Direct3D9;
+using RJCP.IO.Ports;
 
 namespace QosainESSDesktop
 {
@@ -141,7 +141,7 @@ namespace QosainESSDesktop
         }
 
         int firstHomingStatus = -1; // -1 is undefined, 0 is no, 1 is done
-        SerialPort Channel;
+        SerialPortStream Channel;
         float[] backupXYZ = new float[3];
         void applyStatusArgs(string name, Dictionary<string, string> args)
         {
@@ -508,8 +508,7 @@ namespace QosainESSDesktop
                 double mxd = Convert.ToDouble(syringeVolumeLimitTB.Value.As(new Units.ml())) * 1000 / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.mm())) / 2, 2) * (float)Math.PI);
                 double q = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.mm())) / 2, 2) * (float)Math.PI);
 
-
-                plainProgressBar1.Reset();
+                
                 Machine.SendCom("set coat:" +
                     "lenX=" + Convert.ToSingle(rasterWidthTB.Value.As(new Units.mm())) +
                     ",lenY=" + Convert.ToSingle(rasterHeightTB.Value.As(new Units.mm())) +

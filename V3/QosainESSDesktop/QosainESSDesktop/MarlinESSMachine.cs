@@ -1,9 +1,9 @@
-﻿using SharpDX.Direct3D9;
+﻿using RJCP.IO.Ports;
+using SharpDX.Direct3D9;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -28,11 +28,16 @@ namespace QosainESSDesktop
         {
             if (args == null)
                 args = new Dictionary<string, string>();
+            if (args.Keys.Contains("progress"))
+            {
+                if (args["progress"] == "100")
+                    ;
+            }
             OnStatusArgsUpdate?.Invoke(name, args);
         }
 
-        public SerialPort Channel;
-        public ESSMachine(SerialPort sp)
+        public SerialPortStream Channel;
+        public ESSMachine(SerialPortStream sp)
         {
             Channel = sp;
         }
@@ -75,7 +80,7 @@ namespace QosainESSDesktop
     }
     public class ArduinoESSMachine : ESSMachine
     {
-        public ArduinoESSMachine(SerialPort sp) : base(sp)
+        public ArduinoESSMachine(SerialPortStream sp) : base(sp)
         {
 
         }
@@ -186,7 +191,7 @@ namespace QosainESSDesktop
         public override void InPlaceReset(float[] backupXYZ)
         {
             Channel.Close();
-            Channel = new SerialPort(Channel.PortName, Channel.BaudRate);
+            Channel = new SerialPortStream(Channel.PortName, Channel.BaudRate);
             Channel.DtrEnable = true;
             Channel.Open();
             SendCom("sw resume: x=" + backupXYZ[0] + ",y=" + backupXYZ[1] + ",z=" + backupXYZ[2]);
@@ -209,7 +214,7 @@ namespace QosainESSDesktop
         bool stopCoatFlag = false;
         bool pauseCoatFlag = false;
         bool tempAcquireEnabled = false;
-        public MarlinESSMachine(SerialPort sp) : base(sp)
+        public MarlinESSMachine(SerialPortStream sp) : base(sp)
         {
             new Thread(() =>
             {
@@ -342,7 +347,7 @@ namespace QosainESSDesktop
             currentTemp;
             applyStatusArgs("status", args);
         }
-        float coatX = 0, coatY = 0, coatWidth = 0, coatHeight = 0, pumpMax = 0, Q = 0, coatSpeed = 0, coatStepY = 0;
+        float coatX = 0, coatY = 0, coatWidth = 0, coatHeight = 0, Q = 0, coatSpeed = 0, coatStepY = 0;
         int timesToCoat = 0;
         float pumpStart = 0;
         float totalLengthToCoat = 0;
@@ -535,27 +540,22 @@ namespace QosainESSDesktop
                         return;
                     }
                 }
-                if (maxDist < 0) // not needed
-                    pumpMax = 0;
-                else
+                float pumpMax = 0;
+                if (maxDist >= 0) // not needed
                     pumpMax = maxDist;
+                else
+                    pumpMax = limits[2];
                 pumpStart = currentPositions[2];
 
-                float timeToPump = float.Parse(Args[F("mxt")]); // seconds
-                if (timeToPump < 0)
-                {
-                    timeToPump = limits[2] / (Q * 1000);
-                    this.timeToPumpOrCoat = timeToPump;
-                    if (pumpMax > 0)
-                    {
-                        this.timeToPumpOrCoat = pumpMax / (Q * 1000);
-                    }
-                }
-                else
-                {
+                float timeLimitTime = float.Parse(Args[F("mxt")]); // seconds
+                if (timeLimitTime < 0) // if not limited by time, do max distance limit
+                    timeLimitTime = limits[2] / (Q * 1000);
+                float volumeLimitTime = pumpMax / (Q * 1000); // pumpMax is already min set.
+                if (timeLimitTime < volumeLimitTime)
                     // to implement a more accurate time limit, lets use millis instead of setting a maxDist
-                    this.timeToPumpOrCoat = timeToPump;
-                }
+                    this.timeToPumpOrCoat = timeLimitTime;
+                else
+                    this.timeToPumpOrCoat = volumeLimitTime;
 
                 coatX = currentPositions[0];
                 coatY = currentPositions[1];
@@ -652,6 +652,7 @@ namespace QosainESSDesktop
                         applyStatusArgs(F("coat end"));
                         stopCoatFlag = false;
                         pauseCoatFlag = false;
+                        currentProgressMarlin = 0; // progress is continuously sent in other updates, so make it 0
                     }).Start();
                 }
             }
@@ -666,6 +667,7 @@ namespace QosainESSDesktop
             {
                 currentXyStatusMarlin = "Coating";
                 currentPumpStatusMarlin = "Pumping";
+                currentProgressMarlin = 0;
                 MarlinCommunication.GetResponse(Channel, "G91");
                 MarlinCommunication.GetResponse(Channel, "M83");
                 MarlinStatusWrapperSendStatus();
@@ -673,7 +675,9 @@ namespace QosainESSDesktop
             }
             if (timeToPumpOrCoat == -1)
                 timeToPumpOrCoat = long.MaxValue;
+            double timeInPause = 0;
             // the first progress estimate might take some time. We should send dummy updates because they are also pretty accurate
+
             var statusT = new Thread(() =>
             {
                 var st = DateTime.Now;
@@ -681,12 +685,17 @@ namespace QosainESSDesktop
                 {
                     try
                     {
+                        if (pauseCoatFlag)
+                        {
+                            Thread.Sleep(30);
+                            continue;
+                        }
                         Thread.Sleep(100);
-                        var dt = (DateTime.Now - st).TotalSeconds;
+                        var dt = (DateTime.Now - st).TotalSeconds - timeInPause;
                         var ds = dt * coatSpeed;
                         currentProgressMarlin = (float)(ds / totalLengthToCoat * 100);
-                        MarlinStatusWrapperSendStatus();
-
+                        if (!simulateOnly)
+                            MarlinStatusWrapperSendStatus();
                     }
                     catch (ThreadInterruptedException)
                     {
@@ -694,25 +703,46 @@ namespace QosainESSDesktop
                     }
                 }
             });
-            statusT.Start();
+            if (!simulateOnly)
+                statusT.Start();
             for (int ci = 0; ci < timesToCoat 
                 && currentTime <= timeToPumpOrCoat
                 && !stopCoatFlag; ci++)
             {
                 float currentY = 0;
                 float currentX = 0;
+                void waitIfPaused()
+                {
+                    if (pauseCoatFlag && !simulateOnly)
+                    {
+                        var pausedAt = DateTime.Now;
+                        string bkpCurrentXyStatusMarlin = currentXyStatusMarlin;
+                        string bkpCurrentPumpStatusMarlin = currentPumpStatusMarlin;
+                        currentXyStatusMarlin = "Paused";
+                        currentPumpStatusMarlin = "Paused";
+                        if (!simulateOnly)
+                            MarlinStatusWrapperSendStatus();
+                        while (pauseCoatFlag) Thread.Sleep(30);
+                        timeInPause += (DateTime.Now - pausedAt).TotalSeconds;
+                        currentXyStatusMarlin = bkpCurrentXyStatusMarlin;
+                        currentPumpStatusMarlin = bkpCurrentPumpStatusMarlin;
+                        if (!simulateOnly)
+                            MarlinStatusWrapperSendStatus();
+                    }
+                }
                 while (currentY <= coatHeight && currentTime + coatWidth / coatSpeed <= timeToPumpOrCoat && !stopCoatFlag)
                 {
-                    while (pauseCoatFlag) Thread.Sleep(30);
+                    waitIfPaused();
                     // move left
                     G1Blocking(new G1Move(coatWidth, 0, eMovePerWidth, 0, coatSpeed * 60 /*Feed is in mm/min*/));
                     if (statusT.ThreadState == ThreadState.Running) statusT.Interrupt();
                     currentProgressMarlin = totalTravelInG1s / totalLengthToCoat * 100;
-                    MarlinStatusWrapperSendStatus();
+                    if (!simulateOnly)
+                        MarlinStatusWrapperSendStatus();
                     currentX += coatWidth;
                     currentTime +=  coatWidth / coatSpeed;
 
-                    while (pauseCoatFlag) Thread.Sleep(30);
+                    waitIfPaused();
                     // can we go up?
                     if (currentY + coatStepY <= coatHeight && currentTime + (coatWidth + coatStepY) / coatSpeed <= timeToPumpOrCoat && !stopCoatFlag) // safe to move up
                     {
@@ -721,7 +751,8 @@ namespace QosainESSDesktop
                         currentProgressMarlin = totalTravelInG1s / totalLengthToCoat * 100;
                         G1Blocking(new G1Move(-coatWidth, 0, eMovePerWidth, 0, coatSpeed * 60 /*Feed is in mm/min*/));
                         currentProgressMarlin = totalTravelInG1s / totalLengthToCoat * 100;
-                        MarlinStatusWrapperSendStatus();
+                        if (!simulateOnly)
+                            MarlinStatusWrapperSendStatus();
                         currentX -= coatWidth;
                         currentY += coatStepY;
                         currentTime += coatWidth / coatSpeed;
@@ -729,13 +760,14 @@ namespace QosainESSDesktop
                     }
                     else
                     { break; }
-                    while (pauseCoatFlag) Thread.Sleep(30);
+                    waitIfPaused();
                     // can we go up?
                     if (currentY + coatStepY <= coatHeight && currentTime + coatStepY / coatSpeed <= timeToPumpOrCoat && !stopCoatFlag) // safe to move up
                     {
                         // move Up 
                         G1Blocking(new G1Move(0, coatStepY, eMovePerStep, 0, coatSpeed * 60 /*Feed is in mm/min*/));
                         currentProgressMarlin = totalTravelInG1s / totalLengthToCoat * 100;
+                        if (!simulateOnly)
                         MarlinStatusWrapperSendStatus();
                         currentY += coatStepY;
                         currentTime += coatStepY / coatSpeed;
@@ -746,14 +778,15 @@ namespace QosainESSDesktop
                 // we are at the top edge. Need to go to the left
                 if (currentX > 0)
                 {
+                    waitIfPaused();
                     // move Left
-
                     G1Blocking(new G1Move(-currentX, 0, 0, 0, maxFeedRatesMarlin[0] * 60));
                     currentX = 0;
                 }
                 // we are at the top left. Need to go down
                 if (currentY > 0)
                 {
+                    waitIfPaused();
                     // move Down
                     G1Blocking(new G1Move(0, -currentY, 0, 0, maxFeedRatesMarlin[1] * 60));
                     currentX = 0;
@@ -763,6 +796,7 @@ namespace QosainESSDesktop
             {
                 currentXyStatusMarlin = "Idle";
                 currentPumpStatusMarlin = "Idle";
+                statusT.Interrupt();
                 MarlinStatusWrapperSendStatus();
                 UpdateXYPositionMarlin();
                 if (stopCoatFlag)
@@ -771,6 +805,7 @@ namespace QosainESSDesktop
                     applyStatusArgs(F("coat end"));
                 stopCoatFlag = false;
                 pauseCoatFlag = false;
+                currentProgressMarlin = 0; // progress is continuously sent in other updates, so make it 0
             }
         }
         public override string waitForResponse(string com, int timeOut)

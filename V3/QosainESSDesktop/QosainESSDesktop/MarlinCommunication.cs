@@ -1,6 +1,6 @@
-﻿using System;
+﻿using RJCP.IO.Ports;
+using System;
 using System.Collections.Generic;
-using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +12,7 @@ namespace QosainESSDesktop
         public static List<string> Flushed { get; private set; } = new List<string>();
         public static bool InGetResponse { get; private set; }
         public static List<KeyValuePair<string, string>> Responses { get; private set; } = new List<KeyValuePair<string, string>>();
-        public static string[] GetResponse(SerialPort sp, string com, int timeOut = 1000)
+        public static string[] GetResponse(SerialPortStream sp, string com, int timeOut = 1000)
         {
             InGetResponse = true;
             var st = DateTime.Now;
@@ -61,7 +61,13 @@ namespace QosainESSDesktop
                         // already done!
                         break;
                 }
-                catch()
+                catch (ArgumentOutOfRangeException)
+                {
+                    Flushed.AddRange(resp);
+                    InGetResponse = false;
+                    Responses.Add(new KeyValuePair<string, string>(com, "NO_RESPONSE"));
+                    return new string[0];
+                }
                 catch (TimeoutException)
                 {
                     Flushed.AddRange(resp);

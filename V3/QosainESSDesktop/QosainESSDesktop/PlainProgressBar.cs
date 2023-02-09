@@ -7,19 +7,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace QosainESSDesktop
 {
     public partial class PlainProgressBar : UserControl
     {
+        DateTime started = new DateTime();
+        DateTime updated = new DateTime();
+
+        double speed = .00000001;
+        List<double> estimates = new List<double>();
+        double valueAtUpdate = 0;
+        object pausedAt;
+        TimeSpan timeInPauses = new TimeSpan();
         public PlainProgressBar()
         {
             InitializeComponent();
         }
-        DateTime started = new DateTime();
-        DateTime updated = new DateTime();
         public void Started()
         {
+            Reset();
             timeInPauses = new TimeSpan();
             pausedAt = null;
             Visible = true;
@@ -32,10 +40,8 @@ namespace QosainESSDesktop
             progressL.Visible = true;
             percentL.Visible = true;
             valueAtUpdate = 0;
-
-
+            this.timer1.Enabled = true;
         }
-        double valueAtUpdate = 0;
         public double Value
         {
             set
@@ -44,31 +50,39 @@ namespace QosainESSDesktop
                 {
                     if (progressBar1.Value == value)
                         return;
+                    if (!timer1.Enabled)
+                        return;
+                    if (value == 0) // its a reset
+                        progressBar1.Value = 0;
                     var elapsed = DateTime.Now - started;
                     speed = value / elapsed.TotalSeconds;
                     valueAtUpdate = value;
                     updated = DateTime.Now;
+                    if (value >= 100)
+                        ;
                 }
                 catch { }
             }
         }
 
         public void Ended()
-        { Visible = false; }
+        {
+            Visible = false;
+            this.timer1.Enabled = false;
+        }
         private void PlainProgressBar_Load(object sender, EventArgs e)
         {
 
         }
-
-        double speed = .00000001;
-        List<double> estimates = new List<double>();
         public void Reset()
         {
+            started = new DateTime();
+            updated = new DateTime();
+            speed = .00000001;
             timeInPauses = new TimeSpan();
             pausedAt = null;
             estimates.Clear();
             Value = 0;
-            speed = .000001;
             valueAtUpdate = 0;
         }
         public void ForceTimeEstimate(double time)
@@ -77,13 +91,11 @@ namespace QosainESSDesktop
             speed = 100 / time;
             valueAtUpdate = 0;
         }
-        object pausedAt;
         public void Pause()
         {
             if (pausedAt == null)
                 pausedAt = DateTime.Now;
         }
-        TimeSpan timeInPauses = new TimeSpan();
         public void Resume()
         {
             if (pausedAt == null)
@@ -95,14 +107,14 @@ namespace QosainESSDesktop
         {
             if (speed == 0)
                 speed = .0000001;
-            if (pausedAt != null) // extract the time and reset counter
-            {
-                timeInPauses += DateTime.Now - (DateTime)pausedAt;
-                pausedAt = DateTime.Now;
-            }
-            var elapsed = DateTime.Now - started - timeInPauses;
-            double projectedValue = valueAtUpdate + speed * (DateTime.Now - updated).TotalSeconds;
+            if (pausedAt != null) 
+                return;
+            var now = DateTime.Now;
+            var elapsed = now - started - timeInPauses;
+            double projectedValue = valueAtUpdate + speed * (now - updated).TotalSeconds;
             double secondsRemaining = (100 - projectedValue) / speed;
+            if (this.Visible)
+                ;
             if (secondsRemaining <= 0)
             {
                 elapsedL.Text = "--";

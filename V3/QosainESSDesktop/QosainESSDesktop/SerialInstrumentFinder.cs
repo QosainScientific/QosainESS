@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
-using System.IO.Ports;
+using RJCP.IO.Ports;
 
 namespace QosainESSDesktop
 {
@@ -40,7 +40,7 @@ namespace QosainESSDesktop
             public bool HasMarlin { get; private set; } = false;
 
             Thread nameFinder;
-            public SerialPort SerialPort { get; private set; }
+            public SerialPortStream SerialPort { get; private set; }
             public bool DoneFinding = false;
             public bool ClosePortAfterChecking { get; set; }
 
@@ -49,7 +49,7 @@ namespace QosainESSDesktop
                 nameFinder = new Thread(() =>
                 {
                     BaudRate = 250000;
-                    SerialPort = new SerialPort(ComPortName, BaudRate);
+                    SerialPort = new SerialPortStream(ComPortName, BaudRate);
                     SerialPort.DtrEnable = DTR;
                     SerialPort.Encoding = new UTF8Encoding();
                     for (int mainRetries = 0; mainRetries < 10 && InstrumentName == ""; mainRetries++)
@@ -92,7 +92,7 @@ namespace QosainESSDesktop
                 nameFinder = new Thread(() =>
                 {
                     BaudRate = 115200;
-                    SerialPort = new SerialPort(ComPortName, BaudRate);
+                    SerialPort = new SerialPortStream(ComPortName, BaudRate);
                     SerialPort.DtrEnable = DTR;
                     SerialPort.Encoding = new UTF8Encoding();
                     for (int mainRetries = 0; mainRetries < 10 && InstrumentName == ""; mainRetries++)
@@ -203,7 +203,7 @@ namespace QosainESSDesktop
                         if (property.GetPropertyValue("Name").ToString().Contains("COM"))
                         {
                             var fullName = property.GetPropertyValue("Name").ToString();
-                            foreach (var port in SerialPort.GetPortNames())
+                            foreach (var port in SerialPortStream.GetPortNames())
                             {
                                 if (fullName.ToLower().Contains(port.ToLower()))
                                 {
