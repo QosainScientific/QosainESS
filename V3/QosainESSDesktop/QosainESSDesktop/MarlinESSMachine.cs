@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Schema;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace QosainESSDesktop
 {
@@ -663,6 +664,8 @@ namespace QosainESSDesktop
             float eMovePerStep = (Q * 1000/*original is in mm/ms*/) * (coatStepY / coatSpeed) /*t*/;
             float currentTime = 0;
 
+            float bkpX = currentPositions[0];
+            float bkpY = currentPositions[1];
             if (!simulateOnly)
             {
                 currentXyStatusMarlin = "Coating";
@@ -705,6 +708,7 @@ namespace QosainESSDesktop
             });
             if (!simulateOnly)
                 statusT.Start();
+
             for (int ci = 0; ci < timesToCoat 
                 && currentTime <= timeToPumpOrCoat
                 && !stopCoatFlag; ci++)
@@ -794,6 +798,10 @@ namespace QosainESSDesktop
             }
             if (!simulateOnly)
             {
+                // lets go to starting point for sure. pauses/abort may have messed up with soft positioning
+                MarlinCommunication.GetResponse(Channel, "G90");
+                G1Blocking(new G1Move(bkpX, bkpY, 0, 0, maxFeedRatesMarlin[1] * 60));
+
                 currentXyStatusMarlin = "Idle";
                 currentPumpStatusMarlin = "Idle";
                 statusT.Interrupt();
