@@ -10,10 +10,12 @@ namespace QosainESSDesktop
     public class MarlinCommunication
     {
         public static List<string> Flushed { get; private set; } = new List<string>();
+        public static string TemperatureUpdate = "";
         public static bool InGetResponse { get; private set; }
         public static List<KeyValuePair<string, string>> Responses { get; private set; } = new List<KeyValuePair<string, string>>();
         public static string[] GetResponse(SerialPortStream sp, string com, int timeOut = 1000)
         {
+            int flushedAtStart = Flushed.Count;
             InGetResponse = true;
             var st = DateTime.Now;
             sp.Encoding = new UTF8Encoding();
@@ -31,6 +33,11 @@ namespace QosainESSDesktop
                         var error = Flushed.Last();
                         ESSMachine.ThrowMachineError(error);
                     }
+                    else if (Flushed.Last().Trim().StartsWith("T:")) // temp update
+                    {
+                        TemperatureUpdate = Flushed.Last();
+                        Flushed.Remove(Flushed.Last());
+                    }
                 }
                 catch
                 {
@@ -42,24 +49,35 @@ namespace QosainESSDesktop
                 }
             }
             sp.ReadTimeout = timeOut;
+            if (string.IsNullOrEmpty(com)) // empty com will just flush everything
+            {
+                InGetResponse = false;
+                return new string[0];
+            }
             sp.WriteLine(com);
             var resp = new List<string>();
             while (true)
             {
                 try
                 {
-                    resp.Add(sp.ReadLine());
-                    var str = resp.Last().Trim();
-                    if (str.StartsWith("ok") && str != "ok")
+                    var str = sp.ReadLine().Trim();
+                    if (str.StartsWith("T:")) // temp update
+                        TemperatureUpdate = str;
+                    else if (str == "ok")
                     {
-                        resp.RemoveAt(resp.Count - 1);
+                        resp.Add("ok");
+                        break;
+                    }
+                    else if (str.StartsWith("ok")) // but str != "ok"
+                    {
                         resp.Add(str.Substring(2).Trim());
                         resp.Add("ok");
                         break;
                     }
-                    if (str == "ok")
-                        // already done!
-                        break;
+                    else if (str == "echo:busy: processing")
+                        Flushed.Add(str);
+                    else
+                        resp.Add(str);
                 }
                 catch (ArgumentOutOfRangeException)
                 {
@@ -73,9 +91,10 @@ namespace QosainESSDesktop
                     Flushed.AddRange(resp);
                     InGetResponse = false;
                     Responses.Add(new KeyValuePair<string, string>(com, "NO_RESPONSE"));
+                    if (com == "M114")
+                        ;
                     return new string[0];
                 }
-
             }
             InGetResponse = false;
             Responses.Add(new KeyValuePair<string, string>(com, string.Join(";", resp)));

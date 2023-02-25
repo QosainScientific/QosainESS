@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -214,34 +215,31 @@ namespace QosainESSDesktop
         DateTime systemStartAt = DateTime.Now;
         bool stopCoatFlag = false;
         bool pauseCoatFlag = false;
-        bool tempAcquireEnabled = false;
+        bool tempAcquireEnabled = true;
         public MarlinESSMachine(SerialPortStream sp) : base(sp)
         {
             new Thread(() =>
             {
                 Thread.Sleep(1000);
+                var m155 = MarlinCommunication.GetResponse(Channel, "M155 S1");
                 MarlinStatusWrapperSendStatus();
                 while (sp.IsOpen)
                 {
                     Thread.Sleep(1000);
                     if (tempAcquireEnabled)
                     {
-                        if (!MarlinCommunication.InGetResponse) // we can skip getting a temp resp if there is other stuff that needs to be done
+                        if (!MarlinCommunication.InGetResponse) // if in M400, we don't need to parse the buffer data.
+                            MarlinCommunication.GetResponse(Channel, "", 100); // empty response will clear up the existing 155 responses
+
+                        if (MarlinCommunication.TemperatureUpdate != "")
                         {
-                            var resp = MarlinCommunication.GetResponse(Channel, "M105", 100); // get temp
-                            if (resp.Length > 1)
-                            {
-                                currentTemp = resp[0].Split(new string[] { "T:" }, StringSplitOptions.RemoveEmptyEntries)[0].Split('/')[0];
-                                MarlinStatusWrapperSendStatus();
-                            }
+                            currentTemp = MarlinCommunication.TemperatureUpdate.Trim().Split(new string[] { "T:" }, StringSplitOptions.RemoveEmptyEntries)[0].Split('/')[0];
+                            MarlinStatusWrapperSendStatus();
+                            MarlinCommunication.TemperatureUpdate = "";
                         }
                     }
                 }
             }).Start();
-        }
-        long millis()
-        { 
-            return (long)((DateTime.Now - systemStartAt).TotalMilliseconds);
         }
         void UpdateXYPositionMarlin()
         {
@@ -279,22 +277,31 @@ namespace QosainESSDesktop
             //        maxFeedRatesMarlin[2] = float.Parse(line[3].Substring(1));
             //    }
             //}
-            var m211 = MarlinCommunication.GetResponse(Channel, "M211");
-            if (m211.Length > 0)
+            if (limits == null)
             {
-                foreach (var line in m211)
+                var m211 = MarlinCommunication.GetResponse(Channel, "M211");
+                if (m211.Length > 0)
                 {
-                    if (line.Contains("Max:"))
+                    foreach (var line in m211)
                     {
-                        var ff = line.Split(new string[] { "Max:" }, StringSplitOptions.RemoveEmptyEntries);
-                        var pairs2 = line.Split(new string[] { "Max:" }, StringSplitOptions.RemoveEmptyEntries)[1].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                        limits = new float[3];
-                        for (int i = 0; i < 3; i++)
-                            limits[i] = float.Parse(pairs2[i].Substring(1));
+                        if (line.Contains("Max:"))
+                        {
+                            var ff = line.Split(new string[] { "Max:" }, StringSplitOptions.RemoveEmptyEntries);
+                            var pairs2 = line.Split(new string[] { "Max:" }, StringSplitOptions.RemoveEmptyEntries)[1].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            limits = new float[3];
+                            for (int i = 0; i < 3; i++)
+                                limits[i] = float.Parse(pairs2[i].Substring(1));
+                        }
                     }
                 }
             }
-            var pos = MarlinCommunication.GetResponse(Channel, "M114");
+            var pos = new string[0];
+            for (int i = 0; i < 3; i++)
+            {
+                pos = MarlinCommunication.GetResponse(Channel, "M114");
+                if (pos.Length == 2)
+                    break;
+            }
             if (pos.Length != 2)
                 return;
             var pairs = pos[0].Split(' ');
@@ -377,6 +384,7 @@ namespace QosainESSDesktop
         bool simulateOnly = false;
         float totalTimeInG1s = 0;
         float totalTravelInG1s = 0;
+        bool PseudoBlockingG1PositionUpdate = false;
 
         void G1Blocking(G1Move move)
         {
@@ -390,8 +398,40 @@ namespace QosainESSDesktop
                 if (timeMs < 200)
                     timeMs = 200;
                 MarlinCommunication.GetResponse(Channel, $"G1 X{move.X} Y{move.Y} Z{move.Z} E{move.E} F{move.Feed}", 1000);
+                //While this M4 is going on, send some pseudo update.
+                var st = DateTime.Now;
+                float startX = currentPositions[0];
+                float startY = currentPositions[1];
+                var t = new Thread(() =>
+                {
+                    try
+                    {
+                        while (true)
+                        {
+                            Thread.Sleep(30);
+                            if (!PseudoBlockingG1PositionUpdate) // abort or pause called
+                                return;
+                            var dt = (DateTime.Now - st).TotalMilliseconds;
+                            var frac = dt / timeMs;
+                            if (frac >= 1)
+                                return;
+                            currentPositions[0] = (float)Math.Round((startX + move.X * frac), 1);
+                            currentPositions[1] = (float)Math.Round((startY + move.Y * frac));
+                            MarlinStatusWrapperSendStatus();
+                        }
+                    }
+                    catch (ThreadInterruptedException)
+                    {
+                    }
+                });
+                if (PseudoBlockingG1PositionUpdate)
+                    t.Start();
                 var resp = MarlinCommunication.GetResponse(Channel, "M400", (int)(timeMs * 1.4));
-                UpdateXYPositionMarlin();
+                if (PseudoBlockingG1PositionUpdate)
+                    if (t.IsAlive)
+                        t.Interrupt();
+                if (!stopCoatFlag)
+                    UpdateXYPositionMarlin();
             }
         }
         public static List<string> Coms { get; private set; } = new List<string>();
@@ -466,6 +506,7 @@ namespace QosainESSDesktop
             else if (command.StartsWith("pause coat"))
             {
                 pauseCoatFlag = true;
+                PseudoBlockingG1PositionUpdate = false;
                 MarlinCommunication.GetResponse(Channel, "M410", 1000);
                 while (MarlinCommunication.InGetResponse)
                     Thread.Sleep(30);
@@ -476,6 +517,7 @@ namespace QosainESSDesktop
             }
             else if (command.StartsWith("abort"))
             {
+                PseudoBlockingG1PositionUpdate = false;
                 MarlinCommunication.GetResponse(Channel, "M410", 1000);
                 stopCoatFlag = true;
                 pauseCoatFlag = false;
@@ -673,6 +715,8 @@ namespace QosainESSDesktop
                 currentProgressMarlin = 0;
                 MarlinCommunication.GetResponse(Channel, "G91");
                 MarlinCommunication.GetResponse(Channel, "M83");
+                if (!simulateOnly)
+                    PseudoBlockingG1PositionUpdate = true;
                 MarlinStatusWrapperSendStatus();
                 UpdateXYPositionMarlin();
             }
@@ -694,6 +738,8 @@ namespace QosainESSDesktop
                             continue;
                         }
                         Thread.Sleep(100);
+                        if (stopCoatFlag)
+                            return;
                         var dt = (DateTime.Now - st).TotalSeconds - timeInPause;
                         var ds = dt * coatSpeed;
                         currentProgressMarlin = (float)(ds / totalLengthToCoat * 100);
@@ -727,6 +773,7 @@ namespace QosainESSDesktop
                         if (!simulateOnly)
                             MarlinStatusWrapperSendStatus();
                         while (pauseCoatFlag) Thread.Sleep(30);
+                        PseudoBlockingG1PositionUpdate = true;
                         timeInPause += (DateTime.Now - pausedAt).TotalSeconds;
                         currentXyStatusMarlin = bkpCurrentXyStatusMarlin;
                         currentPumpStatusMarlin = bkpCurrentPumpStatusMarlin;
@@ -797,6 +844,8 @@ namespace QosainESSDesktop
                 }
             }
             if (!simulateOnly)
+                PseudoBlockingG1PositionUpdate = false;
+            if (!simulateOnly)
             {
                 // lets go to starting point for sure. pauses/abort may have messed up with soft positioning
                 MarlinCommunication.GetResponse(Channel, "G90");
@@ -805,8 +854,9 @@ namespace QosainESSDesktop
                 currentXyStatusMarlin = "Idle";
                 currentPumpStatusMarlin = "Idle";
                 statusT.Interrupt();
-                MarlinStatusWrapperSendStatus();
+                Thread.Sleep(500);
                 UpdateXYPositionMarlin();
+                MarlinStatusWrapperSendStatus();
                 if (stopCoatFlag)
                     respMarlin.Add(F("abort resp: answer = stopped"));
                 else

@@ -125,7 +125,7 @@ namespace QosainESSDesktop
                 percentL.Visible = false;
                 return;
             }
-            else if (secondsRemaining > 24 * 60 * 60)
+            else if (secondsRemaining > 24 * 60 * 60 * 2)
             {
                 elapsedL.Text = "--";
                 remainingL.Text = "estimating time remaining...";

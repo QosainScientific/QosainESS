@@ -191,7 +191,7 @@ namespace QosainESSDesktop
                                     var tq = new Quantity(v, new Units.celsius(), false);
                                     actualTempL.Text = tq.As(setTempTB.Value.CurrentUnit);
                                 }
-                                catch { actualTempL.Text = "--"; }
+                                catch { actualTempL.Text = ">" + args["temp"]; }
                             }
                             if (args["pump"] != "{last}")
                                 pumpStatusL.Text = args["pump"];
@@ -426,7 +426,8 @@ namespace QosainESSDesktop
             if (id < 0 || id > 8)
                 return;
             string[] comTable = { "y+", "y++", "y-", "y--", "x-", "x--", "x+", "x++" };
-            Machine.SendCom(comTable[id]);
+            if (id >= 0 && id < comTable.Length)
+                Machine.SendCom(comTable[id]);
         }
 
         private void label2_Click(object sender, EventArgs e)
