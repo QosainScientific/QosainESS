@@ -56,7 +56,8 @@ namespace QosainESSDesktop
             ConnectedDevice = SerialInstrumentFinder.GetDevice("Qosain ESS");
             if (ConnectedDevice == null) // user closed our machine selector
             {
-                Close();
+                // Comment this to allow using the SW without the hardware
+                // Close();
             }
             else
             {
@@ -506,6 +507,18 @@ namespace QosainESSDesktop
                     if (rasterSpeedTB.Value.StandardValue <= 0)
                         throw new Exception("Travel speed can only be a valid positive number.");
                 }
+                if (cylinderEnabledCB.Checked)
+                {
+                    var valRPM = float.Parse(cylinderSpeedTB.Value.As(new Units.revpermin()));
+                    float minRPM = 0.01F;
+                    float maxRPM = 100;
+                    if (valRPM < minRPM || valRPM > maxRPM)
+                        throw new Exception("Please enter a target cylinder speed within the range [" +
+                            new Quantity(minRPM, new Units.revpermin(), false).As(cylinderSpeedTB.Value.CurrentUnit) +
+                            cylinderSpeedTB.Value.CurrentUnit.Suffix + ", " +
+                            new Quantity(maxRPM, new Units.revpermin(), false).As(cylinderSpeedTB.Value.CurrentUnit) +
+                            cylinderSpeedTB.Value.CurrentUnit.Suffix + "]");
+                }
                 double mxd = Convert.ToDouble(syringeVolumeLimitTB.Value.As(new Units.ml())) * 1000 / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.mm())) / 2, 2) * (float)Math.PI);
                 double q = Convert.ToSingle(syringeFlowRateTB.Value.As(new Units.mlPerMinute())) * 1000 / 60.0F / (Math.Pow(Convert.ToSingle(syringeDiaTB.Value.As(new Units.mm())) / 2, 2) * (float)Math.PI);
 
@@ -770,7 +783,17 @@ namespace QosainESSDesktop
 
         private void setTempB_Click(object sender, EventArgs e)
         {
-            Machine.SendCom("heat " + setTempTB.Value.As(new Units.celsius()));
+            var valC = float.Parse(setTempTB.Value.As(new Units.celsius()));
+            float minC = 20;
+            float maxC = 200;
+            if (valC < minC || valC > maxC)
+                MessageBox.Show("Please enter a target temperature within the range [" +
+                    new Quantity(minC, new Units.celsius(), false).As(setTempTB.Value.CurrentUnit) +
+                    setTempTB.Value.CurrentUnit.Suffix + ", " +
+                    new Quantity(maxC, new Units.celsius(), false).As(setTempTB.Value.CurrentUnit) +
+                    setTempTB.Value.CurrentUnit.Suffix + "]");
+            else
+                Machine.SendCom("heat " + setTempTB.Value.As(new Units.celsius()));
         }
 
         private void setCylenderSpeedB_Click(object sender, EventArgs e)
