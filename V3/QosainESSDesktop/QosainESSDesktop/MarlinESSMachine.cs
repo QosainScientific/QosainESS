@@ -386,7 +386,7 @@ namespace QosainESSDesktop
         float totalTravelInG1s = 0;
         bool PseudoBlockingG1PositionUpdate = false;
 
-        void G1Blocking(G1Move move)
+        void G1Blocking(G1Move move, bool moveX, bool moveY, bool moveZ, bool moveE)
         {
             var dist = Math.Sqrt(move.X * move.X + move.Y * move.Y);
             var timeMin = dist / move.Feed;
@@ -397,7 +397,13 @@ namespace QosainESSDesktop
             {
                 if (timeMs < 200)
                     timeMs = 200;
-                MarlinCommunication.GetResponse(Channel, $"G1 X{move.X} Y{move.Y} Z{move.Z} E{move.E} F{move.Feed}", 1000);
+                MarlinCommunication.GetResponse(Channel,
+                    (moveX ? $"G1 X{move.X}" : "") +
+                    (moveY ? $"G1 Y{move.Y}" : "") +
+                    (moveZ ? $"G1 Z{move.Z}" : "") +
+                    (moveE ? $"G1 E{move.E}" : "") +
+                    ($"F{move.Feed}"),
+                    1000);
                 //While this M4 is going on, send some pseudo update.
                 var st = DateTime.Now;
                 float startX = currentPositions[0];
@@ -785,7 +791,7 @@ namespace QosainESSDesktop
                 {
                     waitIfPaused();
                     // move left
-                    G1Blocking(new G1Move(coatWidth, 0, eMovePerWidth, 0, coatSpeed * 60 /*Feed is in mm/min*/));
+                    G1Blocking(new G1Move(coatWidth, 0, eMovePerWidth, 0, coatSpeed * 60 /*Feed is in mm/min*/), true, false, true, false);
                     if (statusT.ThreadState == ThreadState.Running) statusT.Interrupt();
                     currentProgressMarlin = totalTravelInG1s / totalLengthToCoat * 100;
                     if (!simulateOnly)
@@ -798,9 +804,9 @@ namespace QosainESSDesktop
                     if (currentY + coatStepY <= coatHeight && currentTime + (coatWidth + coatStepY) / coatSpeed <= timeToPumpOrCoat && !stopCoatFlag) // safe to move up
                     {
                         // move Up and left
-                        G1Blocking(new G1Move(0, coatStepY, eMovePerStep, 0, coatSpeed * 60 /*Feed is in mm/min*/));
+                        G1Blocking(new G1Move(0, coatStepY, eMovePerStep, 0, coatSpeed * 60 /*Feed is in mm/min*/), true, true, true, false);
                         currentProgressMarlin = totalTravelInG1s / totalLengthToCoat * 100;
-                        G1Blocking(new G1Move(-coatWidth, 0, eMovePerWidth, 0, coatSpeed * 60 /*Feed is in mm/min*/));
+                        G1Blocking(new G1Move(-coatWidth, 0, eMovePerWidth, 0, coatSpeed * 60 /*Feed is in mm/min*/), true, true, true, false);
                         currentProgressMarlin = totalTravelInG1s / totalLengthToCoat * 100;
                         if (!simulateOnly)
                             MarlinStatusWrapperSendStatus();
@@ -816,7 +822,7 @@ namespace QosainESSDesktop
                     if (currentY + coatStepY <= coatHeight && currentTime + coatStepY / coatSpeed <= timeToPumpOrCoat && !stopCoatFlag) // safe to move up
                     {
                         // move Up 
-                        G1Blocking(new G1Move(0, coatStepY, eMovePerStep, 0, coatSpeed * 60 /*Feed is in mm/min*/));
+                        G1Blocking(new G1Move(0, coatStepY, eMovePerStep, 0, coatSpeed * 60 /*Feed is in mm/min*/), true, true, true, false);
                         currentProgressMarlin = totalTravelInG1s / totalLengthToCoat * 100;
                         if (!simulateOnly)
                         MarlinStatusWrapperSendStatus();
@@ -831,7 +837,7 @@ namespace QosainESSDesktop
                 {
                     waitIfPaused();
                     // move Left
-                    G1Blocking(new G1Move(-currentX, 0, 0, 0, maxFeedRatesMarlin[0] * 60));
+                    G1Blocking(new G1Move(-currentX, 0, 0, 0, maxFeedRatesMarlin[0] * 60), true, true, false, false);
                     currentX = 0;
                 }
                 // we are at the top left. Need to go down
@@ -839,7 +845,7 @@ namespace QosainESSDesktop
                 {
                     waitIfPaused();
                     // move Down
-                    G1Blocking(new G1Move(0, -currentY, 0, 0, maxFeedRatesMarlin[1] * 60));
+                    G1Blocking(new G1Move(0, -currentY, 0, 0, maxFeedRatesMarlin[1] * 60), true, true, false, false);
                     currentX = 0;
                 }
             }
@@ -849,7 +855,7 @@ namespace QosainESSDesktop
             {
                 // lets go to starting point for sure. pauses/abort may have messed up with soft positioning
                 MarlinCommunication.GetResponse(Channel, "G90");
-                G1Blocking(new G1Move(bkpX, bkpY, 0, 0, maxFeedRatesMarlin[1] * 60));
+                G1Blocking(new G1Move(bkpX, bkpY, 0, 0, maxFeedRatesMarlin[1] * 60), true, true, false, false);
 
                 currentXyStatusMarlin = "Idle";
                 currentPumpStatusMarlin = "Idle";
